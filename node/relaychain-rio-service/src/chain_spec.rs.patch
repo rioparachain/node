@@ -1,0 +1,34 @@
+--- node/relaychain-rio-service/src/chain_spec.rs.tmp
++++ node/relaychain-rio-service/src/chain_spec.rs
+@@ -142,6 +142,7 @@
+ 	}
+ }
+ 
++/*
+ pub fn polkadot_config() -> Result<PolkadotChainSpec, String> {
+ 	PolkadotChainSpec::from_json_bytes(&include_bytes!("../res/polkadot.json")[..])
+ }
+@@ -162,6 +163,7 @@
+ pub fn wococo_config() -> Result<RococoChainSpec, String> {
+ 	RococoChainSpec::from_json_bytes(&include_bytes!("../res/wococo.json")[..])
+ }
++*/
+ 
+ /// The default parachains host configuration.
+ #[cfg(any(
+@@ -385,6 +387,7 @@
+ 			config: default_parachains_host_configuration(),
+ 		},
+ 		paras: Default::default(),
++		sudo: polkadot::SudoConfig { key: Some(endowed_accounts[0].clone()) },
+ 		xcm_pallet: Default::default(),
+ 	}
+ }
+@@ -1384,6 +1387,7 @@
+ 			config: default_parachains_host_configuration(),
+ 		},
+ 		paras: Default::default(),
++		sudo: polkadot::SudoConfig { key: Some(endowed_accounts[0].clone()) },
+ 		xcm_pallet: Default::default(),
+ 	}
+ }

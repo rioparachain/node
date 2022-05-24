@@ -13,6 +13,37 @@
 # The cache for docker container dependency
 /.cargo/config
 
+# Submodules dir
+submodules
+
+# Some tmp files
+**/*.swp
+tmp
+
+docker1/.chainspec
+**/node_modules
+
+# Folders with patches
+
+cumulus/client
+cumulus/primitives
+
+node/relaychain-rio-cli/**/*.tmp
+node/relaychain-rio-cli/**/*.toml
+node/relaychain-rio-cli/**/*.rs
+
+node/relaychain-rio-service/**/*.tmp
+node/relaychain-rio-service/**/*.toml
+node/relaychain-rio-service/**/*.rs
+
+node/relaychain-rio-client/**/*.tmp
+node/relaychain-rio-client/**/*.toml
+node/relaychain-rio-client/**/*.rs
+
+runtime/relaychain-rio/**/*.tmp
+runtime/relaychain-rio/**/*.toml
+runtime/relaychain-rio/**/*.rs
+
 .DS_Store
 .idea
 .vscode

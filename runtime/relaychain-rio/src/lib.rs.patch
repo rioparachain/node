@@ -1,0 +1,71 @@
+--- runtime/relaychain-rio/src/lib.rs.tmp
++++ runtime/relaychain-rio/src/lib.rs
+@@ -25,6 +25,7 @@
+ 	auctions, claims, crowdloan, impl_runtime_weights, impls::DealWithFees, paras_registrar,
+ 	prod_or_fast, slots, BlockHashCount, BlockLength, CurrencyToVote, SlowAdjustingFeeUpdate,
+ };
++use runtime_common::{assigned_slots, paras_sudo_wrapper};
+ 
+ use runtime_parachains::{
+ 	configuration as parachains_configuration, disputes as parachains_disputes,
+@@ -182,6 +183,9 @@
+ 			Call::Auctions(_) |
+ 			Call::Crowdloan(_) |
+ 			Call::BagsList(_) |
++            Call::ParasSudoWrapper(_) |
++            Call::AssignedSlots(_) |
++            Call::Sudo(_) |
+ 			Call::XcmPallet(_) => true,
+ 			// All pallets are allowed, but exhaustive match is defensive
+ 			// in the case of adding new pallets.
+@@ -1277,6 +1281,27 @@
+ 	type WeightInfo = weights::runtime_parachains_disputes::WeightInfo<Runtime>;
+ }
+ 
++impl paras_sudo_wrapper::Config for Runtime {}
++
++parameter_types! {
++    pub const PermanentSlotLeasePeriodLength: u32 = 365;
++    pub const TemporarySlotLeasePeriodLength: u32 = 3;
++    pub const MaxPermanentSlots: u32 = 25;
++    pub const MaxTemporarySlots: u32 = 20;
++    pub const MaxTemporarySlotPerLeasePeriod: u32 = 5;
++}
++
++impl assigned_slots::Config for Runtime {
++    type Event = Event;
++    type AssignSlotOrigin = EnsureRoot<AccountId>;
++    type Leaser = Slots;
++    type PermanentSlotLeasePeriodLength = PermanentSlotLeasePeriodLength;
++    type TemporarySlotLeasePeriodLength = TemporarySlotLeasePeriodLength;
++    type MaxPermanentSlots = MaxPermanentSlots;
++    type MaxTemporarySlots = MaxTemporarySlots;
++    type MaxTemporarySlotPerLeasePeriod = MaxTemporarySlotPerLeasePeriod;
++}
++
+ parameter_types! {
+ 	// Mostly arbitrary deposit price, but should provide an adequate incentive not to spam reserve
+ 	// `ParaId`s.
+@@ -1339,6 +1364,11 @@
+ 	type WeightInfo = weights::runtime_common_crowdloan::WeightInfo<Runtime>;
+ }
+ 
++impl pallet_sudo::Config for Runtime {
++    type Event = Event;
++    type Call = Call;
++}
++
+ parameter_types! {
+ 	// The average auction is 7 days long, so this will be 70% for ending period.
+ 	// 5 Days = 72000 Blocks @ 6 sec per block
+@@ -1453,6 +1483,10 @@
+ 		Auctions: auctions::{Pallet, Call, Storage, Event<T>} = 72,
+ 		Crowdloan: crowdloan::{Pallet, Call, Storage, Event<T>} = 73,
+ 
++        ParasSudoWrapper: paras_sudo_wrapper::{Pallet, Call} = 96,
++        AssignedSlots: assigned_slots::{Pallet, Call, Storage, Event<T>} = 97,
++        Sudo: pallet_sudo = 98,
++
+ 		// Pallet for sending XCM.
+ 		XcmPallet: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 99,
+ 	}

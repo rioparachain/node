@@ -1,0 +1,18 @@
+--- node/relaychain-rio-client/Cargo.toml.tmp
++++ node/relaychain-rio-client/Cargo.toml
+@@ -1,5 +1,5 @@
+ [package]
+-name = "polkadot-client"
++name = "relaychain-rio-client"
+ version = "0.9.22"
+ authors = ["Parity Technologies <admin@parity.io>"]
+ edition = "2021"
+@@ -38,7 +38,7 @@
+ beefy-primitives = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22" }
+ 
+ # Polkadot Runtimes
+-polkadot-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.22", optional = true }
++polkadot-runtime = { package = "relaychain-rio-runtime", path = "../../runtime/relaychain-rio", optional = true }
+ kusama-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.22", optional = true }
+ westend-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.22", optional = true }
+ rococo-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.22", optional = true }

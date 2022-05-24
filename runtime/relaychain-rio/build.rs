@@ -1,0 +1,1 @@
+../../submodules/polkadot/runtime/polkadot/build.rs

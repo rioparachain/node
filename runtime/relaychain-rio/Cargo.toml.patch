@@ -1,0 +1,29 @@
+--- runtime/relaychain-rio/Cargo.toml.tmp
++++ runtime/relaychain-rio/Cargo.toml
+@@ -1,5 +1,5 @@
+ [package]
+-name = "polkadot-runtime"
++name = "relaychain-rio-runtime"
+ version = "0.9.22"
+ authors = ["Parity Technologies <admin@parity.io>"]
+ edition = "2021"
+@@ -63,9 +63,10 @@
+ frame-support = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.22" }
+ pallet-staking = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.22" }
+ pallet-staking-reward-curve = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22" }
++pallet-sudo = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.22" }
+ frame-system = {git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.22" }
+ frame-system-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.22" }
+-polkadot-runtime-constants = { package = "polkadot-runtime-constants", path = "./constants", default-features = false }
++polkadot-runtime-constants = { package = "relaychain-rio-runtime-constants", path = "./constants", default-features = false }
+ pallet-timestamp = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.22" }
+ pallet-tips = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.22" }
+ pallet-treasury = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.22" }
+@@ -148,6 +149,7 @@
+ 	"pallet-scheduler/std",
+ 	"pallet-session/std",
+ 	"pallet-staking/std",
++	"pallet-sudo/std",
+ 	"pallet-timestamp/std",
+ 	"pallet-treasury/std",
+ 	"pallet-tips/std",

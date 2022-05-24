@@ -1,0 +1,48 @@
+version: '3.7'
+
+services:
+
+  fetch-polkadot:
+    image: polkadot
+
+    build:
+      context: .
+      dockerfile: ./docker1/polkadot.Dockerfile
+      args:
+        NIX_VERSION: 2.3.12
+        NIX_TAG: d9bb3b85b846eb0b6c5204e0d76639dff72c7871fb68f5d4edcfbb727f8a5653
+
+    working_dir: /tmp
+    entrypoint: nix-shell /shell.nix --run /entrypoint.sh
+    volumes:
+      - ./.git:/bare_git
+      - tmp:/tmp
+      - ./docker1/scripts/git.sh:/entrypoint.sh
+    environment:
+      DIR: riochain
+      REPOSITORY: /bare_git
+      BRANCH: mainnet-relaychain-and-parachain-04
+
+  build-polkadot:
+    depends_on:
+      fetch-polkadot:
+        condition: service_completed_successfully
+    image: polkadot
+
+    build:
+      context: .
+      dockerfile: ./docker1/polkadot.Dockerfile
+      args:
+        NIX_VERSION: 2.3.12
+        NIX_TAG: d9bb3b85b846eb0b6c5204e0d76639dff72c7871fb68f5d4edcfbb727f8a5653
+
+    entrypoint: /entrypoint.sh
+    working_dir: /tmp/riochain
+    volumes:
+      - cargo:/root/.cargo
+      - tmp:/tmp
+      - ./docker1/scripts/build_polkadot.sh:/entrypoint.sh
+
+volumes:
+  tmp:
+  cargo:
