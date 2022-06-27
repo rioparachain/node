@@ -1,0 +1,28 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "s3:*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::rio-artifacts-us-east-1/*",
+        "arn:aws:s3:::rio-artifacts-us-east-1"
+      ],
+      "Effect": "Allow"
+    },
+    {
+      "Action": [
+        "kms:DescribeKey*",
+        "kms:Encrypt",
+        "kms:GenerateDataKey*",
+        "kms:ReEncrypt*",
+        "kms:Decrypt"
+      ],
+      "Resource": [
+        "arn:aws:kms:us-east-1:061416964074:key/76b00609-4add-4c06-8aac-d8c129e8d229"
+      ],
+      "Effect": "Allow"
+    }
+  ]
+}

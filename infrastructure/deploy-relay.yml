@@ -1,0 +1,355 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy a service on AWS Fargate using ECS task sets, hosted in a public subnet, and accessible via a public load balancer.
+
+Parameters:
+  Vpc:
+    Type: AWS::EC2::VPC::Id
+  PrivateSubnets:
+    Type: List<AWS::EC2::Subnet::Id>
+  PublicSubnets:
+    Type: List<AWS::EC2::Subnet::Id>
+  SecurityGroups:
+    Type: List<AWS::EC2::SecurityGroup::Id>
+  ImageURI:
+    Type: String
+  Stage:
+    Type: String
+    Default: relay
+  Env:
+    Type: String
+    Default: dev
+  AppName:
+    Type: String
+    Default: rio-testnet
+  HostedZone:
+    Type: String
+    Default: riocorenetwork.com
+  DesiredCount:
+    Type: String
+    Default: 1
+
+#Conditions:
+#  IsProduction: !Equals
+#    - !Ref "AWS::AccountId"
+#    - "<prod_prj_id>"
+
+Resources:
+  # ECS resources
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Cpu: "1024"
+      ExecutionRoleArn: !GetAtt ServiceTaskExecutionRole.Arn
+      Family: !Sub ${AppName}-${Stage}
+      Memory: "8192"
+      EphemeralStorage:
+        SizeInGiB: 50
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      TaskRoleArn: !GetAtt ServiceTaskRole.Arn
+      ContainerDefinitions:
+        - Name: !Sub ${AppName}-${Stage}
+          Essential: true
+          Image: !Sub "${ImageURI}"
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref RelayLogGroup
+              awslogs-stream-prefix: !Sub ${AppName}-${Stage}
+              awslogs-region: !Ref "AWS::Region"
+          PortMappings:
+            - ContainerPort: 80
+              Protocol: tcp
+            - ContainerPort: 30333
+              Protocol: tcp
+            - ContainerPort: 9944
+              Protocol: tcp
+          Command:
+            - /rio/start_relay.sh
+          EntryPoint:
+            - "sh"
+            - "-c"
+#          Secrets:
+#            - Name: SECRET_KEY
+#              ValueFrom: !Sub "secret-value"
+          Environment:
+            - Name: WS_PORT
+              Value: 80
+            - Name: RPC_PORT
+              Value: 9944
+            - Name: STAGE
+              Value: !Sub ${Env}
+            - Name: RELAY_RAW
+              Value: /rio/chainspec/polkadot-raw.json
+
+      Tags:
+        - Key: Name
+          Value: !Sub ${AppName}-${Stage}
+        - Key: ENVIRONMENT
+          Value: !Ref Stage
+
+  Service:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub ${AppName}-${Stage}-service
+      Cluster: rio-node-cluster
+      DesiredCount: !Ref DesiredCount
+      DeploymentController:
+        Type: EXTERNAL
+      Tags:
+        - Key: Name
+          Value: !Sub ${AppName}-${Stage}-service
+        - Key: ENVIRONMENT
+          Value: !Ref Stage
+    DependsOn:
+      - ServiceTargetGroup
+      - HTTPSListener
+
+  TaskSet:
+    Type: AWS::ECS::TaskSet
+    Properties:
+      Cluster: rio-node-cluster
+      Service: !Ref Service
+      Scale:
+        Unit: PERCENT
+        Value: 70
+      TaskDefinition: !Ref TaskDefinition
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: !Sub ${AppName}-${Stage}
+          ContainerPort: 80
+          TargetGroupArn: !Ref ServiceTargetGroup
+      NetworkConfiguration:
+        AwsVpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups: !Ref SecurityGroups
+          Subnets: !Ref PrivateSubnets
+
+  PrimaryTaskSet:
+    Type: AWS::ECS::PrimaryTaskSet
+    Properties:
+      Cluster: rio-node-cluster
+      Service: !Ref Service
+      TaskSetId: !GetAtt TaskSet.Id
+
+  # Logs resources
+  RelayLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/ecs/${AppName}-${Stage}
+
+  # Load balancer resources
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub ${AppName}-${Stage}-lb
+      Scheme: internet-facing # internet-facing || internal
+      SecurityGroups: !Ref SecurityGroups
+      Subnets: !Ref PublicSubnets # PublicSubnets for internet-facing || PrivateSubnets for internal
+      Type: application
+
+  ServiceTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub ${AppName}-${Stage}-tg
+      #HealthCheckEnabled: false # Health check enabled must be true for target groups with target type 'ip'
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckPort: 9944
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+      HealthCheckTimeoutSeconds: 30
+      Matcher:
+        HttpCode: '405'
+      TargetGroupAttributes:
+        - Key: 'deregistration_delay.timeout_seconds'
+          Value: 300
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId: !Ref Vpc
+
+  HTTPSListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      Certificates:
+        - CertificateArn: !Ref DomainCertificate
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn:
+            Ref: ServiceTargetGroup
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 443
+      Protocol: HTTPS
+
+  DomainCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Sub ${AppName}-${Stage}.${HostedZone}
+      DomainValidationOptions:
+        - DomainName: !Sub ${AppName}-${Stage}.${HostedZone}
+          ValidationDomain: !Sub ${AppName}-${Stage}.${HostedZone}
+      ValidationMethod: DNS
+
+  # Manual step:
+  # to create record navigate to
+  # AWS Certificate Manager > Certificates > [record_guid]
+  # and press "Create Records in Route 53"
+  Route53:
+    Type: AWS::Route53::RecordSet
+    DependsOn: LoadBalancer
+    Properties:
+      Comment: 'Manual approval required on first deployment in region'
+      HostedZoneName: !Sub ${HostedZone}.
+      Name: !Sub ${AppName}-${Stage}.${HostedZone}
+      Type: CNAME
+      TTL: '60'
+      ResourceRecords:
+        - !GetAtt LoadBalancer.DNSName
+
+  # Application AutoScaling
+  ScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: TaskSet
+    Properties:
+      RoleARN: !GetAtt AutoScalingRole.Arn
+      ResourceId: !Sub service/rio-node-cluster/${AppName}-${Stage}-service
+      ServiceNamespace: ecs
+      ScalableDimension: ecs:service:DesiredCount
+      MinCapacity: !Ref DesiredCount
+      MaxCapacity: 14
+
+  ScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: !Sub ${AppName}-${Stage}-service-auto-scaling-policy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref ScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 75.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+
+  AutoScalingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AppName}-${Stage}-service-auto-scaling-role
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service: application-autoscaling.amazonaws.com
+      Policies:
+        - PolicyName: !Sub ${AppName}-${Stage}-service-auto-scaling-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecs:DescribeServices
+                  - ecs:UpdateService
+                  - cloudwatch:PutMetricAlarm
+                  - cloudwatch:DescribeAlarms
+                  - cloudwatch:DeleteAlarms
+                Resource:
+                  - "*"
+
+  # Alarms
+  # Alarm on unhealthy hosts and HTTP 500s at the target group level
+  UnhealthyHostsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${AWS::StackName}-UnhealthyHosts
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 2
+      Dimensions:
+        - Name: TargetGroup
+          Value: !GetAtt ServiceTargetGroup.TargetGroupFullName
+        - Name: LoadBalancer
+          Value: !GetAtt LoadBalancer.LoadBalancerFullName
+      MetricName: UnHealthyHostCount
+      Namespace: AWS/ApplicationELB
+      Period: 300
+      Statistic: Average
+      Threshold: 2
+
+  Http5xxAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${AWS::StackName}-Http5xx
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      Dimensions:
+        - Name: TargetGroup
+          Value: !GetAtt ServiceTargetGroup.TargetGroupFullName
+        - Name: LoadBalancer
+          Value: !GetAtt LoadBalancer.LoadBalancerFullName
+      MetricName: HTTPCode_Target_5XX_Count
+      Namespace: AWS/ApplicationELB
+      Period: 300
+      Statistic: Sum
+      Threshold: 1
+
+  ServiceTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AppName}-${Stage}-task-role
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: "2012-10-17"
+
+  ServiceTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AppName}-${Stage}-execution-role
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: "2012-10-17"
+      Policies:
+        - PolicyName: !Sub ${AppName}-${Stage}-execution-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                Effect: Allow
+                Resource: !Sub arn:aws:ecr:us-east-1:061416964074:repository/rio-node
+              - Action: ecr:GetAuthorizationToken
+                Effect: Allow
+                Resource: "*"
+              - Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Effect: Allow
+                Resource:
+                  - !GetAtt RelayLogGroup.Arn
+              - Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - secretsmanager:GetSecretValue
+                  - kms:Decrypt
+                Effect: Allow
+                Resource: "*"
+
+Outputs:
+  ServiceURL:
+    Value: !Join
+      - ""
+      - - http://
+        - !GetAtt LoadBalancer.DNSName

@@ -1,0 +1,21 @@
+# this file should be deployed separately to each region
+
+AWSTemplateFormatVersion: "2010-09-09"
+#Conditions:
+#  IsProduction: !Equals
+#    - !Ref "AWS::AccountId"
+#    - "<prod_prj_id>"
+Resources:
+  ECSCluster:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterName: rio-node-cluster
+      CapacityProviders:
+        - FARGATE
+        - FARGATE_SPOT
+      Tags:
+        - Key: Name
+          Value: rio-node-cluster
+        - Key: ENVIRONMENT
+          #Value: !If [ IsProduction,'prod','non-prod' ] # needed only for tags
+          Value: 'non-prod' # needed only for tags

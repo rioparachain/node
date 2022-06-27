@@ -1,0 +1,70 @@
+variables:
+  #AWS_REGION: eu-central-1
+  AWS_REGION: us-east-1
+  PUBLISH_TARGET: rio-node-build
+  CICD_TARGET: polkadot
+  BIN_TARGET: rio-node-bin
+  CHAINSPEC_TARGET: rio-node-chainspec
+  PUBLIC_REGISTRY: public.ecr.aws/e6s7r2u6/rio-node-public
+  PRIVATE_REGISTRY: 061416964074.dkr.ecr.${AWS_REGION}.amazonaws.com/rio-node
+  DOCKER_HOST: "unix:///var/run/docker.sock"
+
+
+stages:
+  - build
+  - publish
+
+build:
+  except:
+    - develop
+  stage: build
+  timeout: 40 minutes
+  image:
+    name: amazon/aws-cli
+    entrypoint: [""]
+  services:
+    - docker:dind
+  before_script:
+    - amazon-linux-extras install docker
+    - curl -L https://github.com/docker/compose/releases/download/1.22.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+    - chmod +x /usr/local/bin/docker-compose
+    - docker-compose version
+  script:
+    - docker-compose -f ./docker-compose-build.yml build --no-cache
+    #- docker-compose -f ./docker-compose-build.yml build
+    # todo !!! this is working solution to pass volumes !!!
+    #- docker-compose -v ./docker:/rio/src/docker -f ./docker-compose-build.yml build chainspec
+    - docker images
+
+publish:
+  except:
+    - develop
+  stage: publish
+  timeout: 20 minutes
+  image:
+    name: amazon/aws-cli
+    entrypoint: [""]
+  services:
+    - docker:dind
+  before_script:
+    - amazon-linux-extras install docker
+  script:
+    # aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 061416964074.dkr.ecr.us-east-1.amazonaws.com/rio-node
+    - aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin $PRIVATE_REGISTRY
+    - docker tag runner $PRIVATE_REGISTRY:parachain
+    # todo remove all remote images with the same name
+    #- aws ecr batch-delete-image --region ${AWS_REGION} --repository-name rio-node --image-ids imageTag=parachain || true
+    - docker push $PRIVATE_REGISTRY:parachain
+    - aws ecr list-images --repository-name rio-node
+
+.clean:
+  stage: deploy
+  timeout: 10 minutes
+  image: ubuntu:latest
+  services:
+    - docker:dind
+  script:
+    #- docker system prune --all
+    - docker rmi binaries
+    - docker rmi chainspec
+    - docker rmi runner

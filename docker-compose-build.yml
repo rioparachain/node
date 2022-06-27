@@ -2,47 +2,58 @@ version: '3.7'
 
 services:
 
-  fetch-polkadot:
-    image: polkadot
-
+  binaries:
+    image: binaries
     build:
       context: .
-      dockerfile: ./docker1/polkadot.Dockerfile
+      dockerfile: ./docker/polkadot.Dockerfile
       args:
         NIX_VERSION: 2.3.12
         NIX_TAG: d9bb3b85b846eb0b6c5204e0d76639dff72c7871fb68f5d4edcfbb727f8a5653
+        POLKADOT_VERSION: v0.9.22
 
-    working_dir: /tmp
-    entrypoint: nix-shell /shell.nix --run /entrypoint.sh
-    volumes:
-      - ./.git:/bare_git
-      - tmp:/tmp
-      - ./docker1/scripts/git.sh:/entrypoint.sh
-    environment:
-      DIR: riochain
-      REPOSITORY: /bare_git
-      BRANCH: mainnet-relaychain-and-parachain-04
-
-  build-polkadot:
+  chainspec:
+    image: chainspec
     depends_on:
-      fetch-polkadot:
-        condition: service_completed_successfully
-    image: polkadot
-
+      - binaries
     build:
       context: .
-      dockerfile: ./docker1/polkadot.Dockerfile
+      dockerfile: ./docker/chainspec.Dockerfile
       args:
-        NIX_VERSION: 2.3.12
-        NIX_TAG: d9bb3b85b846eb0b6c5204e0d76639dff72c7871fb68f5d4edcfbb727f8a5653
-
-    entrypoint: /entrypoint.sh
-    working_dir: /tmp/riochain
+        FROM_IMAGE: binaries
+        MNEMONIC: chronic scene situate genuine advice gospel lady obvious blood palace economy marble
+        RELAY_FILE_FROM: /rio/chainspec/polkadot-plain.json
+        RELAY_FILE_TO: /rio/chainspec/polkadot-custom.json
+        RELAY_RAW: /rio/chainspec/polkadot-raw.json
+        PARA_FILE_FROM: /rio/chainspec/parachain-plain.json
+        PARA_FILE_TO: /rio/chainspec/parachain-custom.json
+        PARA_RAW: /rio/chainspec/parachain-raw.json
+        PARA_WASM: /rio/chainspec/para-2000-wasm
+        PARA_GENESIS: /rio/chainspec/para-2000-genesis
+    entrypoint: /rio/src/docker/scripts/build_chainspec.sh
     volumes:
-      - cargo:/root/.cargo
-      - tmp:/tmp
-      - ./docker1/scripts/build_polkadot.sh:/entrypoint.sh
+      - .chainspec:/rio/chainspec
+      - .keys:/rio/keys
+      - ./docker:/rio/src/docker
+    environment:
+      FROM_IMAGE: binaries
+      MNEMONIC: chronic scene situate genuine advice gospel lady obvious blood palace economy marble
+      RELAY_FILE_FROM: /rio/chainspec/polkadot-plain.json
+      RELAY_FILE_TO: /rio/chainspec/polkadot-custom.json
+      RELAY_RAW: /rio/chainspec/polkadot-raw.json
+      PARA_FILE_FROM: /rio/chainspec/parachain-plain.json
+      PARA_FILE_TO: /rio/chainspec/parachain-custom.json
+      PARA_RAW: /rio/chainspec/parachain-raw.json
+      PARA_WASM: /rio/chainspec/para-2000-wasm
+      PARA_GENESIS: /rio/chainspec/para-2000-genesis
 
-volumes:
-  tmp:
-  cargo:
+  runner:
+    image: runner
+    depends_on:
+      - chainspec
+    build:
+      context: .
+      dockerfile: ./docker/runner.Dockerfile
+      args:
+        FROM_IMAGE: chainspec
+        NIX_LIB: /nix/store/z56jcx3j1gfyk4sv7g8iaan0ssbdkhz1-glibc-2.33-56

@@ -20,7 +20,7 @@ submodules
 **/*.swp
 tmp
 
-docker1/.chainspec
+docker/.chainspec
 **/node_modules
 
 # Folders with patches

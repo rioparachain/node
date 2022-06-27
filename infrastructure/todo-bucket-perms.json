@@ -1,0 +1,18 @@
+{
+  "Version": "2008-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam::061416964074:root"
+        ]
+      },
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::rio-artifacts-us-east-1/*",
+        "arn:aws:s3:::rio-artifacts-us-east-1"
+      ]
+    }
+  ]
+}

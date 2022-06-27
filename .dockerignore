@@ -1,9 +1,17 @@
-.git
+!.git
+!.gitmodules
 **/target/
+**/tmp/
+**/node_modules/
 **/*.txt
 **/*.md
-/docker/
-!/target/release/polkadot-collator
+#/docker/
+#!/target/release/polkadot-collator
 
 # dotfiles in the repo root
-/.*
+#/.*
+.idea
+.cumulus
+.submodules
+.keys*
+.chainspec*

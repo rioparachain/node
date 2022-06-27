@@ -1,0 +1,360 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Mappings:
+  General:
+    VpcId:
+      nonprod: vpc-028174fc08fa36def
+    Subnet:
+      nonprod: subnet-007c59b68581951d6
+    SecurityGroupId:
+      nonprod: sg-03a6280ffaf8904d1
+    ArtifactAccessPolicy:
+      nonprod: arn:aws:iam::061416964074:policy/non-prod-artifact-access-policy
+    Repository:
+      name: rio-node
+      branch: develop
+    Account:
+      nonprod: 061416964074
+
+Resources:
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: rio-node-pipeline
+      RoleArn: arn:aws:iam::061416964074:role/rio-node-pipeline-role
+      ArtifactStores:
+        - ArtifactStore:
+            Type: S3
+            Location: rio-artifacts-us-east-1
+            EncryptionKey:
+              Type: 'KMS'
+              Id: 'arn:aws:kms:us-east-1:061416964074:key/76b00609-4add-4c06-8aac-d8c129e8d229'
+          Region: us-east-1
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: RioNodeSource
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeCommit
+                Version: '1'
+              RunOrder: 1
+              Configuration:
+                #BranchName: !FindInMap [General, Repository, branch]
+                BranchName: develop
+                PollForSourceChanges: 'false'
+                #RepositoryName: !FindInMap [General, Repository, name]
+                RepositoryName: rio-node
+                # Source action can only use output artifact format CODEBUILD_CLONE_REF when artifact is used by CodeBuild
+                #OutputArtifactFormat: "CODEBUILD_CLONE_REF"
+              OutputArtifacts:
+                - Name: SourceArtifact
+              InputArtifacts: []
+              Region: us-east-1
+        - Name: BuildSource
+          Actions:
+            - Name: Build
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              RunOrder: 1
+              Configuration:
+                ProjectName: RioNodeNonProd
+              OutputArtifacts:
+                - Name: BuildArtifact
+              InputArtifacts:
+                - Name: SourceArtifact
+              Region: us-east-1
+#        - Name: DeployRelayDev
+#          Actions:
+#              - Name: RelayDev
+#                ActionTypeId:
+#                    Category: Deploy
+#                    Owner: AWS
+#                    Version: 1
+#                    Provider: CloudFormation
+#                InputArtifacts:
+#                    - Name: SourceArtifact
+#                    - Name: BuildArtifact
+#                Configuration:
+#                    ActionMode: CREATE_UPDATE
+#                    Capabilities: "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND"
+#                    ParameterOverrides: !Sub |
+#                        {
+#                          "ImageURI" : { "Fn::GetParam" : ["BuildArtifact", "imageDetails.json", "ImageURI"] },
+#                          "AppName": "rio-node",
+#                          "Stage": "relay-dev",
+#                          "Env": "dev",
+#                          "Vpc": "vpc-028174fc08fa36def",
+#                          "PublicSubnets": "subnet-01ed013ef6306fd8c,subnet-0bbc65e29bf4a42d7",
+#                          "PrivateSubnets": "subnet-007c59b68581951d6,subnet-018291861b87cf9b0",
+#                          "SecurityGroups": "sg-03a6280ffaf8904d1",
+#                          "HostedZone": "riocorenetwork.com",
+#                          "DesiredCount": "5"
+#                        }
+#                    StackName: rio-node-relay-dev
+#                    TemplatePath: SourceArtifact::infrastructure/deploy-relay.yml
+#                    RoleArn:  arn:aws:iam::061416964074:role/rio-node-pipeline-role
+#                RunOrder: 1
+#
+#              - Name: CollatorDev
+#                ActionTypeId:
+#                    Category: Deploy
+#                    Owner: AWS
+#                    Version: 1
+#                    Provider: CloudFormation
+#                InputArtifacts:
+#                    -   Name: SourceArtifact
+#                    -   Name: BuildArtifact
+#                Configuration:
+#                    ActionMode: CREATE_UPDATE
+#                    Capabilities: "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND"
+#                    ParameterOverrides: !Sub |
+#                        {
+#                            "ImageURI" : { "Fn::GetParam" : ["BuildArtifact", "imageDetails.json", "ImageURI"] },
+#                            "AppName": "rio-node",
+#                            "Stage": "collator-dev",
+#                            "Env": "dev",
+#                            "Vpc": "vpc-028174fc08fa36def",
+#                            "PublicSubnets": "subnet-01ed013ef6306fd8c,subnet-0bbc65e29bf4a42d7",
+#                            "PrivateSubnets": "subnet-007c59b68581951d6,subnet-018291861b87cf9b0",
+#                            "SecurityGroups": "sg-03a6280ffaf8904d1",
+#                            "HostedZone": "riocorenetwork.com",
+#                            "DesiredCount": "3"
+#                        }
+#                    StackName: rio-node-collator-dev
+#                    TemplatePath: SourceArtifact::infrastructure/deploy-collator.yml
+#                    RoleArn: arn:aws:iam::061416964074:role/rio-node-pipeline-role
+#                RunOrder: 1
+#                Region: us-east-1
+#        - Name: ReleaseTestnet
+#          Actions:
+#              - Name: ManualApproval
+#                ActionTypeId:
+#                    Category: Approval
+#                    Owner: AWS
+#                    Provider: Manual
+#                    Version: '1'
+#                RunOrder: 1
+#                Configuration: { }
+#                OutputArtifacts: [ ]
+#                InputArtifacts: [ ]
+#                Region: us-east-1
+        - Name: DeployTestnet
+          Actions:
+            - Name: RelayTestnet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              InputArtifacts:
+                - Name: SourceArtifact
+                - Name: BuildArtifact
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                Capabilities: "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND"
+                ParameterOverrides: !Sub |
+                  {
+                    "ImageURI" : { "Fn::GetParam" : ["BuildArtifact", "imageDetails.json", "ImageURI"] },
+                    "AppName": "rio-testnet",
+                    "Stage": "relay",
+                    "Env": "stg",
+                    "Vpc": "vpc-028174fc08fa36def",
+                    "PublicSubnets": "subnet-01ed013ef6306fd8c,subnet-0bbc65e29bf4a42d7",
+                    "PrivateSubnets": "subnet-007c59b68581951d6,subnet-018291861b87cf9b0",
+                    "SecurityGroups": "sg-03a6280ffaf8904d1",
+                    "HostedZone": "riocorenetwork.com",
+                    "DesiredCount": "8"
+                  }
+                StackName: rio-testnet-relay
+                TemplatePath: SourceArtifact::infrastructure/deploy-relay.yml
+                RoleArn:  arn:aws:iam::061416964074:role/rio-node-pipeline-role
+              RunOrder: 1
+            - Name: CollatorTestnet
+              ActionTypeId:
+                  Category: Deploy
+                  Owner: AWS
+                  Version: 1
+                  Provider: CloudFormation
+              InputArtifacts:
+                  - Name: SourceArtifact
+                  - Name: BuildArtifact
+              Configuration:
+                  ActionMode: CREATE_UPDATE
+                  Capabilities: "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND"
+                  ParameterOverrides: !Sub |
+                      {
+                          "ImageURI": { "Fn::GetParam" : ["BuildArtifact", "imageDetails.json", "ImageURI"] },
+                          "AppName": "rio-testnet",
+                          "Stage": "collator",
+                          "Env": "stg",
+                          "Vpc": "vpc-028174fc08fa36def",
+                          "PublicSubnets": "subnet-01ed013ef6306fd8c,subnet-0bbc65e29bf4a42d7",
+                          "PrivateSubnets": "subnet-007c59b68581951d6,subnet-018291861b87cf9b0",
+                          "SecurityGroups": "sg-03a6280ffaf8904d1",
+                          "HostedZone": "riocorenetwork.com",
+                          "DesiredCount": "8"
+                      }
+                  StackName: rio-testnet-collator
+                  TemplatePath: SourceArtifact::infrastructure/deploy-collator.yml
+                  RoleArn: arn:aws:iam::061416964074:role/rio-node-pipeline-role
+              RunOrder: 1
+              Region: us-east-1
+
+  DeployTestnet:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: RioNodeNonProd
+      Artifacts:
+        Type: CODEPIPELINE
+      VpcConfig:
+        VpcId: !FindInMap [General, VpcId, nonprod]
+        Subnets:
+          - !FindInMap [General, Subnet, nonprod]
+        SecurityGroupIds:
+          - !FindInMap [General, SecurityGroupId, nonprod]
+      Environment:
+        ComputeType: BUILD_GENERAL1_2XLARGE
+        #ComputeType: BUILD_GENERAL1_MEDIUM
+        #ComputeType: BUILD_GENERAL1_LARGE
+        Image: aws/codebuild/standard:5.0
+        Type: LINUX_CONTAINER
+        PrivilegedMode: true
+        EnvironmentVariables:
+          - Name: REPOSITORY_NAME
+            Type: PLAINTEXT
+            Value: !FindInMap [General, Repository, name]
+          - Name: REPOSITORY_BRANCH
+            Type: PLAINTEXT
+            Value: !FindInMap [General, Repository, branch]
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: infrastructure/buildspec.yml
+      Cache:
+        Type: S3
+        Location: rio-artifacts-us-east-1/rio-node-codebuild-cache
+        Modes:
+          - LOCAL_CUSTOM_CACHE
+          - LOCAL_DOCKER_LAYER_CACHE
+          #- LOCAL_SOURCE_CACHE
+      TimeoutInMinutes: 60
+
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: rio-node-pipeline-CodeBuildRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+      Policies:
+        - PolicyName: RioCodeBuildPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                    - 'codecommit:GitPull'
+                Resource:
+                    #- !Sub arn:aws:codecommit:us-east-1:061416964074:rio-node
+                    #- !Join [ '', [ 'arn:aws:codecommit:us-east-1:061416964074:', !FindInMap [General, Repository, name] ] ]
+                    - !Join [ '', [ 'arn:aws:codecommit:us-east-1:', !FindInMap [General, Account, nonprod], ':', !FindInMap [General, Repository, name] ] ]
+              - Effect: "Allow"
+                Action:
+                  - logs:*
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeDhcpOptions
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeSecurityGroups
+                  - ec2:DescribeVpcs
+                  - ec2:CreateNetworkInterfacePermission
+                  - codecommit:GitPull
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:GetParameterByPath
+                  - cloudformation:*
+                  - s3:*
+                  - iam:*
+                  - lambda:*
+                  - acm:*
+                  - route53:*
+                  - apigateway:*
+                  - waf:*
+                  - sqs:*
+                  - dynamodb:*
+                  - kinesisanalytics:*
+                  - kinesis:*
+                  - sns:*
+                  - events:*
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:CompleteLayerUpload
+                  - ecr:GetAuthorizationToken
+                  - ecr:InitiateLayerUpload
+                  - ecr:PutImage
+                  - ecr:UploadLayerPart
+                  - ecs:*
+                Resource: '*'
+      ManagedPolicyArns:
+        - !FindInMap [General, ArtifactAccessPolicy, nonprod]
+
+  AmazonCloudWatchEventRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        -
+          Effect: Allow
+          Principal:
+            Service:
+            - events.amazonaws.com
+          Action: sts:AssumeRole
+      Path: /
+      Policies:
+      -
+        PolicyName: cwe-pipeline-execution
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          -
+            Effect: Allow
+            Action: codepipeline:StartPipelineExecution
+            Resource: !Join [ '', [ 'arn:aws:codepipeline:', !Ref 'AWS::Region', ':', !Ref 'AWS::AccountId', ':', !Ref Pipeline ] ]
+
+
+  AmazonCloudWatchEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      EventPattern:
+        source:
+        - aws.codecommit
+        detail-type:
+        - 'CodeCommit Repository State Change'
+        resources:
+        #- !Join [ '', [ 'arn:aws:codecommit:', !Ref 'AWS::Region', ':', !Ref 'AWS::AccountId', ':', !FindInMap [General, Repository, Name] ] ]
+        - !Join [ '', [ 'arn:aws:codecommit:', !Ref 'AWS::Region', ':', !Ref 'AWS::AccountId', ':', !FindInMap [General, Repository, name] ] ]
+        detail:
+          event:
+          - referenceCreated
+          - referenceUpdated
+          referenceType:
+          - branch
+          referenceName:
+          - !FindInMap [General, Repository, branch]
+      Targets:
+      -
+        Arn:
+          !Join [ '', [ 'arn:aws:codepipeline:', !Ref 'AWS::Region', ':', !Ref 'AWS::AccountId', ':', !Ref Pipeline ] ]
+        RoleArn: !GetAtt AmazonCloudWatchEventRole.Arn
+        Id: codepipeline-Pipeline

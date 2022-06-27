@@ -1,224 +1,129 @@
 version: '3.7'
 
+x-relay-node: &relay-node
+  image: runner
+  working_dir: /rio/src
+  entrypoint: /rio/start_relay.sh
+  networks:
+    - polkadot-local
+  volumes:
+    #- .chainspec:/rio/chainspec
+    #- .keys:/rio/keys
+    - ./docker/scripts/start_collator_local.sh:/rio/start_collator.sh
+    - ./docker/scripts/start_relay_local.sh:/rio/start_relay.sh
+
+x-collator: &collator
+  <<: *relay-node
+  entrypoint: /rio/start_collator.sh
+
 services:
 
-#  prometeus:
-#    image: prom/prometheus
-
-#  grafana:
-#    image: grafana/grafana-oss
-
-  build-chainspec:
-    image: polkadot
-    working_dir: /tmp/riochain/target/release/
-    #entrypoint: tail -f /dev/null
-    entrypoint: /tmp/entrypoint.sh
-    volumes:
-            #- /tmp/debug:/debug
-      - tmp:/tmp
-      - ./docker1/scripts/build_chainspec.sh:/tmp/entrypoint.sh
-      - ./docker1:/tmp/docker1
-    environment:
-      FILE_ACCOUNTS: /tmp/accounts.json
-      MNEMONIC: 'chronic scene situate genuine advice gospel lady obvious blood palace economy marble'
-
-#  tmp:
-#    depends_on:
-#      build-chainspec:
-#        condition: service_completed_successfully
-#    image: polkadot
-#    working_dir: /tmp/polkadot/target/release/
-#    entrypoint: tail -f /dev/null
-#    networks:
-#      - polkadot-local
-#    volumes:
-#      - tmp:/tmp
-#      - ./docker1/scripts/start_polkadot.sh:/tmp/entrypoint.sh
-#      - ./docker1/.chainspec:/tmp/chainspec
-#      - ./docker1:/docker
-
   relay-node-01:
-    image: polkadot
-    working_dir: /tmp/riochain/target/release/
+    <<: *relay-node
+    # to attach and debug
     #entrypoint: tail -f /dev/null
-    entrypoint: /tmp/entrypoint.sh
-    networks:
-      - polkadot-local
-    volumes:
-      # - /tmp/debug2:/debug
-      - tmp:/tmp
-      - ./docker1/scripts/start_polkadot.sh:/tmp/entrypoint.sh
-      - ./docker1:/tmp/docker1
     ports:
+      - "443:9944"
       - "41001:9944"
-      - "42001:9615"
+      - "42001:9433"
     environment:
       ACCOUNT: 1
-      NODE_KEY: '0400000000000000000000000000000000000000000000000000000000000001'
-      CHAINSPEC_RAW: /tmp/docker1/.chainspec/polkadot-custom-2-raw.json
-      #CHAINSPEC_RAW: /tmp/docker1/.chainspec/rococo-custom-2-raw.json
-      BASE_PATH: /tmp/node-01
+      WS_PORT: 9944
+      RPC_PORT: 9933
+      BASE_PATH: /rio/keys/relay-01
+      RELAY_RAW: /rio/chainspec/polkadot-raw.json
 
   relay-node-02:
-    image: polkadot
-    working_dir: /tmp/riochain/target/release/
-    entrypoint: /tmp/entrypoint.sh
-    networks:
-      - polkadot-local
-    volumes:
-      - tmp:/tmp
-      - ./docker1/scripts/start_polkadot.sh:/tmp/entrypoint.sh
-      - ./docker1:/tmp/docker1
+    <<: *relay-node
     ports:
       - "41002:9944"
-      - "42002:9615"
+      - "42002:9433"
     environment:
+      WS_PORT: 9944
+      RPC_PORT: 9933
       ACCOUNT: 2
-      NODE_KEY: '0400000000000000000000000000000000000000000000000000000000000002'
-      CHAINSPEC_RAW: /tmp/docker1/.chainspec/polkadot-custom-2-raw.json
-      #CHAINSPEC_RAW: /tmp/docker1/.chainspec/rococo-custom-2-raw.json
-      BASE_PATH: /tmp/node-02
+      BASE_PATH: /rio/keys/relay-02
+      RELAY_RAW: /rio/chainspec/polkadot-raw.json
 
   relay-node-03:
-    image: polkadot
-    working_dir: /tmp/riochain/target/release/
-    entrypoint: /tmp/entrypoint.sh
-    networks:
-      - polkadot-local
-    volumes:
-      - tmp:/tmp
-      - ./docker1/scripts/start_polkadot.sh:/tmp/entrypoint.sh
-      - ./docker1:/tmp/docker1
+    <<: *relay-node
     ports:
       - "41003:9944"
-      - "42003:9615"
+      - "42003:9433"
     environment:
+      WS_PORT: 9944
+      RPC_PORT: 9933
       ACCOUNT: 3
-      NODE_KEY: '0400000000000000000000000000000000000000000000000000000000000003'
-      CHAINSPEC_RAW: /tmp/docker1/.chainspec/polkadot-custom-2-raw.json
-      #CHAINSPEC_RAW: /tmp/docker1/.chainspec/rococo-custom-2-raw.json
-      BASE_PATH: /tmp/node-03
+      RELAY_RAW: /rio/chainspec/polkadot-raw.json
 
   relay-node-04:
-    image: polkadot
-    working_dir: /tmp/riochain/target/release/
-    entrypoint: /tmp/entrypoint.sh
-    networks:
-      - polkadot-local
-    volumes:
-      - tmp:/tmp
-      - ./docker1/scripts/start_polkadot.sh:/tmp/entrypoint.sh
-      - ./docker1:/tmp/docker1
+    <<: *relay-node
     ports:
       - "41004:9944"
-      - "42004:9615"
+      - "42004:9433"
     environment:
+      WS_PORT: 9944
+      RPC_PORT: 9933
       ACCOUNT: 4
-      NODE_KEY: '0400000000000000000000000000000000000000000000000000000000000004'
-      CHAINSPEC_RAW: /tmp/docker1/.chainspec/polkadot-custom-2-raw.json
-      #CHAINSPEC_RAW: /tmp/docker1/.chainspec/rococo-custom-2-raw.json
-      BASE_PATH: /tmp/node-04
+      RELAY_RAW: /rio/chainspec/polkadot-raw.json
 
   relay-node-05:
-    image: polkadot
-    working_dir: /tmp/riochain/target/release/
-    entrypoint: /tmp/entrypoint.sh
-    networks:
-      - polkadot-local
-    volumes:
-      - tmp:/tmp
-      - ./docker1/scripts/start_polkadot.sh:/tmp/entrypoint.sh
-      - ./docker1:/tmp/docker1
+    <<: *relay-node
     ports:
       - "41005:9944"
-      - "42005:9615"
+      - "42005:9433"
     environment:
+      WS_PORT: 9944
+      RPC_PORT: 9933
       ACCOUNT: 5
-      NODE_KEY: '0400000000000000000000000000000000000000000000000000000000000005'
-      CHAINSPEC_RAW: /tmp/docker1/.chainspec/polkadot-custom-2-raw.json
-      BASE_PATH: /tmp/node-05
+      RELAY_RAW: /rio/chainspec/polkadot-raw.json
 
   relay-node-06:
-    image: polkadot
-    working_dir: /tmp/riochain/target/release/
-    entrypoint: /tmp/entrypoint.sh
-    networks:
-      - polkadot-local
-    volumes:
-      - tmp:/tmp
-      - ./docker1/scripts/start_polkadot.sh:/tmp/entrypoint.sh
-      - ./docker1:/tmp/docker1
+    <<: *relay-node
     ports:
       - "41006:9944"
-      - "42006:9615"
+      - "42006:9433"
     environment:
+      WS_PORT: 9944
+      RPC_PORT: 9933
       ACCOUNT: 6
-      NODE_KEY: '0400000000000000000000000000000000000000000000000000000000000006'
-      CHAINSPEC_RAW: /tmp/docker1/.chainspec/polkadot-custom-2-raw.json
-      BASE_PATH: /tmp/node-06
+      RELAY_RAW: /rio/chainspec/polkadot-raw.json
 
   collator-node-01:
-    image: polkadot
-    working_dir: /tmp/riochain/target/release/
-    entrypoint: /tmp/entrypoint.sh
-    networks:
-      - polkadot-local
-    volumes:
-      - tmp:/tmp
-      - ./docker1/scripts/start_collator.sh:/tmp/entrypoint.sh
-      - ./docker1:/tmp/docker1
+    <<: *collator
     ports:
       - "43001:9944"
-      - "44001:9615"
+      - "44001:9433"
     environment:
-      ACCOUNT: 7
-      NODE_KEY: '0500000000000000000000000000000000000000000000000000000000000001'
-      CHAINSPEC_RAW: /tmp/docker1/.chainspec/polkadot-custom-2-raw.json
-      PARA_CHAINSPEC_RAW: /tmp/docker1/.chainspec/parachain-rio-custom-raw.json
-      BASE_PATH: /tmp/node-07
+      WS_PORT: 9944
+      RPC_PORT: 9933
+      ACCOUNT: 1
+      RELAY_RAW: /rio/chainspec/polkadot-raw.json
+      PARA_RAW: /rio/chainspec/parachain-raw.json
 
   collator-node-02:
-    image: polkadot
-    working_dir: /tmp/riochain/target/release/
-    entrypoint: /tmp/entrypoint.sh
-    networks:
-      - polkadot-local
-    volumes:
-      - tmp:/tmp
-      - ./docker1/scripts/start_collator.sh:/tmp/entrypoint.sh
-      - ./docker1:/tmp/docker1
+    <<: *collator
     ports:
       - "43002:9944"
-      - "44002:9615"
+      - "44002:9433"
     environment:
-      ACCOUNT: 8
-      NODE_KEY: '0500000000000000000000000000000000000000000000000000000000000002'
-      CHAINSPEC_RAW: /tmp/docker1/.chainspec/polkadot-custom-2-raw.json
-      PARA_CHAINSPEC_RAW: /tmp/docker1/.chainspec/parachain-rio-custom-raw.json
-      BASE_PATH: /tmp/node-08
+      WS_PORT: 9944
+      RPC_PORT: 9933
+      ACCOUNT: 2
+      RELAY_RAW: /rio/chainspec/polkadot-raw.json
+      PARA_RAW: /rio/chainspec/parachain-raw.json
 
   collator-node-03:
-    image: polkadot
-    working_dir: /tmp/riochain/target/release/
-    entrypoint: /tmp/entrypoint.sh
-    networks:
-      - polkadot-local
-    volumes:
-      - tmp:/tmp
-      - ./docker1/scripts/start_collator.sh:/tmp/entrypoint.sh
-      - ./docker1:/tmp/docker1
+    <<: *collator
     ports:
       - "43003:9944"
-      - "44003:9615"
+      - "44003:9433"
     environment:
-      ACCOUNT: 9
-      NODE_KEY: '0500000000000000000000000000000000000000000000000000000000000003'
-      CHAINSPEC_RAW: /tmp/docker1/.chainspec/polkadot-custom-2-raw.json
-      PARA_CHAINSPEC_RAW: /tmp/docker1/.chainspec/parachain-rio-custom-raw.json
-      BASE_PATH: /tmp/node-09
+      WS_PORT: 9944
+      RPC_PORT: 9933
+      ACCOUNT: 3
+      RELAY_RAW: /rio/chainspec/polkadot-raw.json
+      PARA_RAW: /rio/chainspec/parachain-raw.json
 
 networks:
   polkadot-local:
-
-volumes:
-  tmp:
