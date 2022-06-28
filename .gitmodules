@@ -4,3 +4,9 @@
 [submodule "submodules/cumulus"]
 	path = submodules/cumulus
 	url = https://github.com/paritytech/cumulus
+[submodule "submodules/substrate"]
+	path = submodules/substrate
+	url = https://github.com/paritytech/substrate
+[submodule "submodules/open-runtime-module-library"]
+	path = submodules/open-runtime-module-library
+	url = https://github.com/open-web3-stack/open-runtime-module-library

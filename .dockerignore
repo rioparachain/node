@@ -1,17 +1,19 @@
-!.git
-!.gitmodules
-**/target/
-**/tmp/
-**/node_modules/
-**/*.txt
-**/*.md
-#/docker/
-#!/target/release/polkadot-collator
+# Forbid all.
+*
 
-# dotfiles in the repo root
-#/.*
-.idea
-.cumulus
-.submodules
-.keys*
-.chainspec*
+# Allow what is needed inside Dockerfile, that it is not rust source code.
+!docker
+!patches_cmds
+!patches_top_config.sh
+!symlink_aws_fix.sh
+
+# Allow needed rust code related files.
+!.cargo
+!Cargo.lock
+!Cargo.toml
+!.rustfmt*.toml
+!cumulus
+!node
+!pallets
+!runtime
+

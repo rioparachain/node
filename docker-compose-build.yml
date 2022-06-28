@@ -11,6 +11,7 @@ services:
         NIX_VERSION: 2.3.12
         NIX_TAG: d9bb3b85b846eb0b6c5204e0d76639dff72c7871fb68f5d4edcfbb727f8a5653
         POLKADOT_VERSION: v0.9.22
+        ORML_REV: 27e3272d322dcdd915f0fc2002032e8d53a46523
 
   chainspec:
     image: chainspec
