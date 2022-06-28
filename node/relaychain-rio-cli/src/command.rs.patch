@@ -39,3 +39,11 @@
  			#[cfg(feature = "rococo-native")]
  			"wococo-dev" => Box::new(service::chain_spec::wococo_development_config()?),
  			#[cfg(feature = "rococo-native")]
+@@ -492,6 +487,7 @@
+ 			let runner = cli.create_runner(cmd)?;
+ 			let chain_spec = &runner.config().chain_spec;
+ 
++			#[allow(clippy::complexity)]
+ 			match cmd {
+ 				BenchmarkCmd::Storage(cmd) => runner.sync_run(|mut config| {
+ 					let (client, backend, _, _) = service::new_chain_ops(&mut config, None)?;

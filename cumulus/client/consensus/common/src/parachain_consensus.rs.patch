@@ -1,0 +1,10 @@
+--- parachain_consensus.rs
++++ parachain_consensus.rs.patched
+@@ -266,6 +266,7 @@
+ 		unset_best_header.hash()
+ 	};
+
++	#[allow(clippy::correctness)]
+ 	match parachain.block_status(&BlockId::Hash(unset_hash)) {
+ 		Ok(BlockStatus::InChainWithState) => {
+ 			drop(unset_best_header);

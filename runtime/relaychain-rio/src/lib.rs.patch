@@ -1,71 +1,108 @@
 --- runtime/relaychain-rio/src/lib.rs.tmp
 +++ runtime/relaychain-rio/src/lib.rs
-@@ -25,6 +25,7 @@
- 	auctions, claims, crowdloan, impl_runtime_weights, impls::DealWithFees, paras_registrar,
+@@ -26,6 +26,9 @@
  	prod_or_fast, slots, BlockHashCount, BlockLength, CurrencyToVote, SlowAdjustingFeeUpdate,
  };
-+use runtime_common::{assigned_slots, paras_sudo_wrapper};
  
++#[cfg(feature = "rio-testnet")]
++use runtime_common::{assigned_slots, paras_sudo_wrapper};
++
  use runtime_parachains::{
  	configuration as parachains_configuration, disputes as parachains_disputes,
-@@ -182,6 +183,9 @@
- 			Call::Auctions(_) |
- 			Call::Crowdloan(_) |
- 			Call::BagsList(_) |
-+            Call::ParasSudoWrapper(_) |
-+            Call::AssignedSlots(_) |
-+            Call::Sudo(_) |
- 			Call::XcmPallet(_) => true,
- 			// All pallets are allowed, but exhaustive match is defensive
- 			// in the case of adding new pallets.
-@@ -1277,6 +1281,27 @@
+ 	dmp as parachains_dmp, hrmp as parachains_hrmp, inclusion as parachains_inclusion,
+@@ -139,6 +142,8 @@
+ 	fn contains(call: &Call) -> bool {
+ 		match call {
+ 			// These modules are all allowed to be called by transactions:
++			#[cfg(feature = "rio-testnet")]
++			Call::ParasSudoWrapper(_) | Call::AssignedSlots(_) | Call::Sudo(_) => return true,
+ 			Call::Democracy(_) |
+ 			Call::Council(_) |
+ 			Call::TechnicalCommittee(_) |
+@@ -1300,6 +1305,30 @@
  	type WeightInfo = weights::runtime_parachains_disputes::WeightInfo<Runtime>;
  }
  
++#[cfg(feature = "rio-testnet")]
 +impl paras_sudo_wrapper::Config for Runtime {}
 +
++#[cfg(feature = "rio-testnet")]
 +parameter_types! {
-+    pub const PermanentSlotLeasePeriodLength: u32 = 365;
-+    pub const TemporarySlotLeasePeriodLength: u32 = 3;
-+    pub const MaxPermanentSlots: u32 = 25;
-+    pub const MaxTemporarySlots: u32 = 20;
-+    pub const MaxTemporarySlotPerLeasePeriod: u32 = 5;
++	pub const PermanentSlotLeasePeriodLength: u32 = 365;
++	pub const TemporarySlotLeasePeriodLength: u32 = 3;
++	pub const MaxPermanentSlots: u32 = 25;
++	pub const MaxTemporarySlots: u32 = 20;
++	pub const MaxTemporarySlotPerLeasePeriod: u32 = 5;
 +}
 +
++#[cfg(feature = "rio-testnet")]
 +impl assigned_slots::Config for Runtime {
-+    type Event = Event;
-+    type AssignSlotOrigin = EnsureRoot<AccountId>;
-+    type Leaser = Slots;
-+    type PermanentSlotLeasePeriodLength = PermanentSlotLeasePeriodLength;
-+    type TemporarySlotLeasePeriodLength = TemporarySlotLeasePeriodLength;
-+    type MaxPermanentSlots = MaxPermanentSlots;
-+    type MaxTemporarySlots = MaxTemporarySlots;
-+    type MaxTemporarySlotPerLeasePeriod = MaxTemporarySlotPerLeasePeriod;
++	type Event = Event;
++	type AssignSlotOrigin = EnsureRoot<AccountId>;
++	type Leaser = Slots;
++	type PermanentSlotLeasePeriodLength = PermanentSlotLeasePeriodLength;
++	type TemporarySlotLeasePeriodLength = TemporarySlotLeasePeriodLength;
++	type MaxPermanentSlots = MaxPermanentSlots;
++	type MaxTemporarySlots = MaxTemporarySlots;
++	type MaxTemporarySlotPerLeasePeriod = MaxTemporarySlotPerLeasePeriod;
 +}
 +
  parameter_types! {
  	// Mostly arbitrary deposit price, but should provide an adequate incentive not to spam reserve
  	// `ParaId`s.
-@@ -1339,6 +1364,11 @@
+@@ -1362,6 +1391,12 @@
  	type WeightInfo = weights::runtime_common_crowdloan::WeightInfo<Runtime>;
  }
  
++#[cfg(feature = "rio-testnet")]
 +impl pallet_sudo::Config for Runtime {
-+    type Event = Event;
-+    type Call = Call;
++	type Event = Event;
++	type Call = Call;
 +}
 +
  parameter_types! {
  	// The average auction is 7 days long, so this will be 70% for ending period.
  	// 5 Days = 72000 Blocks @ 6 sec per block
-@@ -1453,6 +1483,10 @@
+@@ -1386,11 +1421,25 @@
+ 	type WeightInfo = weights::runtime_common_auctions::WeightInfo<Runtime>;
+ }
+ 
+-construct_runtime! {
++#[cfg(not(feature = "rio-testnet"))]
++macro_rules! rio_runtime {
++ ( [ $($a:tt)* ], { $($b:tt)* }, RioTestnet: { $($c:tt)* }, { $($d:tt)* } )
++	 => { construct_runtime! { $($a)* { $($b)* $($d)* } } }
++}
++
++#[cfg(feature = "rio-testnet")]
++macro_rules! rio_runtime {
++ ( [ $($a:tt)* ], { $($b:tt)* }, RioTestnet: { $($c:tt)* }, { $($d:tt)* } )
++	 => { construct_runtime! { $($a)* { $($b)* $($c)* $($d)* } } }
++}
++
++rio_runtime! {
++	[
+ 	pub enum Runtime where
+ 		Block = Block,
+ 		NodeBlock = primitives::v2::Block,
+ 		UncheckedExtrinsic = UncheckedExtrinsic
++	],
+ 	{
+ 		// Basic stuff; balances is uncallable initially.
+ 		System: frame_system::{Pallet, Call, Storage, Config, Event<T>} = 0,
+@@ -1475,7 +1524,15 @@
+ 		Slots: slots::{Pallet, Call, Storage, Event<T>} = 71,
  		Auctions: auctions::{Pallet, Call, Storage, Event<T>} = 72,
  		Crowdloan: crowdloan::{Pallet, Call, Storage, Event<T>} = 73,
++	},
  
-+        ParasSudoWrapper: paras_sudo_wrapper::{Pallet, Call} = 96,
-+        AssignedSlots: assigned_slots::{Pallet, Call, Storage, Event<T>} = 97,
-+        Sudo: pallet_sudo = 98,
++	RioTestnet: {
++		ParasSudoWrapper: paras_sudo_wrapper::{Pallet, Call} = 96,
++		AssignedSlots: assigned_slots::{Pallet, Call, Storage, Event<T>} = 97,
++		Sudo: pallet_sudo = 98,
++	},
 +
++	{
  		// Pallet for sending XCM.
  		XcmPallet: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 99,
  	}

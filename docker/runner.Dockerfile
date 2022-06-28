@@ -19,6 +19,6 @@ COPY --from=CHAINSPEC /rio/src/target/release/relaychain-rio ./release/relaychai
 COPY --from=CHAINSPEC /rio/chainspec ./chainspec
 COPY --from=CHAINSPEC /rio/keys ./keys
 
-COPY --from=CHAINSPEC /rio/src/docker1/scripts/start_collator.sh ./start_collator.sh
-COPY --from=CHAINSPEC /rio/src/docker1/scripts/start_relay.sh ./start_relay.sh
+COPY --from=CHAINSPEC /rio/src/docker/scripts/start_collator.sh ./start_collator.sh
+COPY --from=CHAINSPEC /rio/src/docker/scripts/start_relay.sh ./start_relay.sh
 

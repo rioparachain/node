@@ -11,5 +11,6 @@ service/Cargo.toml
 
 rs_list='
 src/chain_spec.rs
+src/tests.rs
 '
 
