@@ -1,6 +1,6 @@
 [package]
 name = "relaychain-rio"
-version = "0.9.22"
+version = "0.9.24"
 authors = ["RioDefi"]
 description = "Rio Relay-chain Client Node Bin"
 edition = "2021"
@@ -13,6 +13,7 @@ color-eyre = { version = "0.6.1", default-features = false }
 runtime-benchmarks= [ "polkadot-cli/runtime-benchmarks" ]
 try-runtime = [ "polkadot-cli/try-runtime" ]
 fast-runtime = [ "polkadot-cli/fast-runtime" ]
+rio-testnet = ["polkadot-cli/rio-testnet"]
 runtime-metrics = [ "polkadot-cli/runtime-metrics" ]
 pyroscope = ["polkadot-cli/pyroscope"]
 staging-client = ["polkadot-cli/staging-client"]

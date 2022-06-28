@@ -9,7 +9,6 @@ ln -sf ../../../submodules/polkadot/node/service/src/relay_chain_selection.rs no
 ln -sf ../../../submodules/polkadot/node/service/src/parachains_db node/relaychain-rio-service/src/parachains_db
 ln -sf ../../../submodules/polkadot/node/service/src/lib.rs node/relaychain-rio-service/src/lib.rs
 ln -sf ../../../submodules/polkadot/node/service/src/overseer.rs node/relaychain-rio-service/src/overseer.rs
-ln -sf ../../../submodules/polkadot/node/service/src/tests.rs node/relaychain-rio-service/src/tests.rs
 ln -sf ../../../submodules/polkadot/node/service/src/grandpa_support.rs node/relaychain-rio-service/src/grandpa_support.rs
 ln -sf ../../../submodules/polkadot/src/main.rs node/relaychain-rio/src/main.rs
 ln -sf ../../../../submodules/polkadot/runtime/polkadot/constants/src/weights runtime/relaychain-rio/constants/src/weights

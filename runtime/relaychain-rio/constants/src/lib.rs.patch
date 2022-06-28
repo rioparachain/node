@@ -4,7 +4,7 @@
  	use runtime_common::prod_or_fast;
  	pub const MILLISECS_PER_BLOCK: Moment = 6000;
  	pub const SLOT_DURATION: Moment = MILLISECS_PER_BLOCK;
-+    // FIXME
++	// FIXME
  	pub const EPOCH_DURATION_IN_SLOTS: BlockNumber = prod_or_fast!(4 * HOURS, 1 * MINUTES);
  
  	// These time units are defined in number of blocks.

@@ -52,7 +52,7 @@ RUN nix-shell /shell.nix --run "./symlink_aws_fix.sh"
 RUN nix-shell /shell.nix --run "./patches_cmds/apply.sh all"
 RUN nix-shell /shell.nix --run "./patches_cmds/cumulus_gen.sh"
 
-RUN nix-shell /shell.nix --run 'cargo build --release --features fast-runtime'
+RUN nix-shell /shell.nix --run 'cargo build --release --features fast-runtime --features rio-testnet'
 
 # Make hardlink to use as tool, and also create combo archive.
 RUN mv target/release/parachain-rio .; rm -Rf target; rm -Rf submodules

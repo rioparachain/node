@@ -4,6 +4,6 @@
  [package]
 -name = "polkadot-runtime-constants"
 +name = "relaychain-rio-runtime-constants"
- version = "0.9.22"
+ version = "0.9.24"
  authors = ["Parity Technologies <admin@parity.io>"]
  edition = "2021"

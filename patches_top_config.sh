@@ -1,6 +1,6 @@
 if [ "$USE_PATCHES_CONFIG" != "1" ]; then exit 0; fi
 
-polkadot_version="v0.9.22"
+polkadot_version="v0.9.24"
 polkadot_version_old_regex="v0\.9\.22"
 
 submodules_list="polkadot cumulus substrate orml"
