@@ -1,5 +1,5 @@
 --- node/relaychain-rio-service/Cargo.toml.tmp
-+++ node/relaychain-rio-service/Cargo.toml
++++ node/relaychain-rio-service/Cargo.toml.tmp.migrate
 @@ -1,5 +1,5 @@
  [package]
 -name = "polkadot-service"

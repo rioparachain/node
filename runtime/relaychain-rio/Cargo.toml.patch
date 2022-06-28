@@ -1,5 +1,5 @@
 --- runtime/relaychain-rio/Cargo.toml.tmp
-+++ runtime/relaychain-rio/Cargo.toml
++++ runtime/relaychain-rio/Cargo.toml.tmp.migrate
 @@ -1,5 +1,5 @@
  [package]
 -name = "polkadot-runtime"

@@ -1,5 +1,5 @@
 --- runtime/relaychain-rio/constants/Cargo.toml.tmp
-+++ runtime/relaychain-rio/constants/Cargo.toml
++++ runtime/relaychain-rio/constants/Cargo.toml.tmp.migrate
 @@ -1,5 +1,5 @@
  [package]
 -name = "polkadot-runtime-constants"

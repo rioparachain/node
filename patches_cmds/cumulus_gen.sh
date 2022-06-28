@@ -1,5 +1,8 @@
 #!/bin/sh -e
 
+USE_PATCHES_CONFIG=1
+. ./patches_top_config.sh
+
 dirs="
 client/cli
 client/collator
@@ -15,8 +18,8 @@ client/relay-chain-rpc-interface
 primitives/parachain-inherent
 "
 
-polkadot_pat="git = \"https://github.com/paritytech/polkadot\". branch = \"release-v0.9.22\""
-cumulus_fill="git = \"https://github.com/paritytech/cumulus\"@COM@ branch = \"polkadot-v0.9.22\""
+polkadot_pat="git = \"https://github.com/paritytech/polkadot\". branch = \"release-$polkadot_version\""
+cumulus_fill="git = \"https://github.com/paritytech/cumulus\"@COM@ branch = \"polkadot-$polkadot_version\""
 
 rewrite() {
   sed "s,$2 = { $polkadot_pat },$2 = { package = \"$3\"@COM@ path = \"${1}${3}\" },g"
@@ -40,8 +43,14 @@ do
   src=submodules/$dst
   back=`echo $dir | sed 's,[^/]*,..,g'`
   mkdir -p $dst
-  ln -rsf $src/* $dst/
+  #ln -rsf $src/* $dst/
+  cp -Rp $src/* $dst/
   rm -f $dst/Cargo.toml
   cat $src/Cargo.toml | rewrites $back/../ > $dst/Cargo.toml
+  ln -rsf submodules/cumulus/.rustfmt.toml $dst/
+  for pfile in `find $dst -name "*.patch"`
+  do
+    sh -ec "cd `dirname $pfile`; patch" < $pfile
+  done
 done
 

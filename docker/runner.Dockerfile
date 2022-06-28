@@ -21,10 +21,10 @@ ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 SHELL ["/bin/sh", "-xe", "-c"]
 
 # We create a nix expression for the rust build environment, where fixed variables are used.
-COPY ./docker/scripts/nix/pkgs.nix /pkgs.nix
+COPY ./docker/nix/pkgs.nix /pkgs.nix
 
 # Making a nix expression for the side environment containing dependencies and env variables.
-COPY ./docker/scripts/nix/shell.nix /shell.nix
+COPY ./docker/nix/shell.nix /shell.nix
 
 RUN nix-env -i curl nodejs nfs-utils gnused gawk
 
