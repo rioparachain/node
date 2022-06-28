@@ -19,7 +19,7 @@ fi
 BASE_PATH=/rio/keys/collator-`printf "%02d" $ACCOUNT`
 
 # todo - change to more secure random string - get it from AWS secret store
-NODE_KEY=`echo "seed Uf2IucQ3Fgm86//collator//$ACCOUNT" | sha256sum | sed 's,^.,0,;s, *-,,'`
+NODE_KEY=`echo "seed ${SEED_PREFIX}//collator//$ACCOUNT" | sha256sum | sed 's,^.,0,;s, *-,,'`
 ACCOUNT_PUBLIC_KEY=`echo -n ${NODE_KEY} | /rio/release/parachain-rio key inspect-node-key --file /dev/stdin | tail -n 1`
 curl "http://44.202.25.232:3000/collator/${ACCOUNT}?stage=${STAGE}" -H "content-type: application/json"  -d "{\"key\": \"${ACCOUNT_PUBLIC_KEY}\", \"ip\": \"${IP_LOCAL}\"}" -o bootnodes.json
 cat bootnodes.json
