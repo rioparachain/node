@@ -64,7 +64,8 @@ try-runtime-cli = { git = "https://github.com/paritytech/substrate", branch = "p
 
 # Polkadot
 #polkadot-cli = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.22" }
-polkadot-cli = { package = "relaychain-rio-cli", path = "relaychain-rio-cli", default-features = false }
+#polkadot-cli = { package = "relaychain-rio-cli", path = "relaychain-rio-cli", default-features = false }
+polkadot-cli = { package = "relaychain-rio-cli", path = "relaychain-rio-cli", features = [ "kusama-native", "westend-native", "rococo-native" ] }
 polkadot-parachain = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.22" }
 polkadot-primitives = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.22" }
 #polkadot-service = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.22" }
@@ -90,9 +91,14 @@ substrate-build-script-utils = { git = "https://github.com/paritytech/substrate"
 [features]
 default = []
 runtime-benchmarks = [
-	"parachain-template-runtime/runtime-benchmarks",
-	"polkadot-cli/runtime-benchmarks",
+    "parachain-template-runtime/runtime-benchmarks",
+    "polkadot-cli/runtime-benchmarks",
 ]
-try-runtime = ["parachain-template-runtime/try-runtime"]
+try-runtime = ["parachain-template-runtime/try-runtime", "polkadot-cli/try-runtime" ]
 
-fast-runtime = [ "parachain-template-runtime/fast-runtime" ]
+fast-runtime = [ "parachain-template-runtime/fast-runtime", "polkadot-cli/fast-runtime" ]
+
+runtime-metrics = [ "polkadot-cli/runtime-metrics" ]
+pyroscope = ["polkadot-cli/pyroscope"]
+staging-client = ["polkadot-cli/staging-client"]
+

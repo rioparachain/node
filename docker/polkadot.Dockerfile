@@ -53,3 +53,28 @@ RUN nix-shell /shell.nix --run "./patches_cmds/apply.sh all"
 RUN nix-shell /shell.nix --run "./patches_cmds/cumulus_gen.sh"
 
 RUN nix-shell /shell.nix --run 'cargo build --release --features fast-runtime'
+
+# Make hardlink to use as tool, and also create combo archive.
+RUN mv target/release/parachain-rio .; rm -Rf target; rm -Rf submodules
+RUN mkdir -p target/release; mv parachain-rio target/release
+RUN cd target/release; ln -f parachain-rio relaychain-rio
+
+# Extract lib deps and copy store paths to `/export`.
+RUN nix-shell /shell.nix --run "ldd target/release/parachain-rio" \
+      | awk -F '/nix/store/' '{ print $2 }' | awk '{ print $1 }' \
+      | sort | uniq > nix_store_paths.txt; \
+    for path in `cat nix_store_paths.txt`; do \
+      mkdir -p `dirname /export/nix/store/$path`; \
+      cp -Lp /nix/store/$path /export/nix/store/$path; \
+    done; \
+    rm nix_store_paths.txt
+
+# Final stage is compact.
+FROM NIX AS FINAL
+
+COPY --from=BUILD /export /export
+COPY --from=BUILD /export/nix/store /nix/store
+COPY --from=BUILD /rio/src /rio/src
+
+WORKDIR /rio/src
+

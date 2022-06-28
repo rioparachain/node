@@ -9,6 +9,15 @@ mod cli;
 mod command;
 mod rpc;
 
+use std::env;
+
 fn main() -> sc_cli::Result<()> {
-	command::run()
+	let path = env::args().nth(0).unwrap();
+	let name = path.split('/').last().unwrap();
+	if name == "relaychain-rio" {
+		polkadot_cli::run().unwrap();
+		Ok(())
+	} else {
+		command::run()
+	}
 }

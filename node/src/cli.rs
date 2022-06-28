@@ -42,9 +42,9 @@ pub enum Subcommand {
 	/// Try some testing command against a specified runtime state.
 	TryRuntime(try_runtime_cli::TryRuntimeCmd),
 
-    /// Key management CLI utilities
-    #[clap(subcommand)]
-    Key(sc_cli::KeySubcommand),
+	/// Key management CLI utilities
+	#[clap(subcommand)]
+	Key(sc_cli::KeySubcommand),
 }
 
 /// Command for exporting the genesis state of the parachain
