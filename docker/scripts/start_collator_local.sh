@@ -1,7 +1,8 @@
 #!/bin/sh -xe
 
-NODE_KEY=`echo "seed Uf2IucQ3Fgm86//collator//$ACCOUNT" | sha256sum | sed 's,^.,0,;s, *-,,'`
-BASE_PATH=/rio/keys/collator-`printf "%02d" $ACCOUNT`
+SEED_PREFIX=Uf2IucQ3Fgm86
+NODE_KEY=`echo "seed ${SEED_PREFIX}//collator//${ACCOUNT}" | sha256sum | sed 's,^.,0,;s, *-,,'`
+BASE_PATH=/rio/keys/collator-`printf "%02d" ${ACCOUNT}`
 
 /rio/release/parachain-rio \
     --base-path ${BASE_PATH} \

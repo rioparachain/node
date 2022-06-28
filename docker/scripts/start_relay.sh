@@ -15,7 +15,7 @@ ACCOUNT=$(cat cur_account.txt)
 BASE_PATH=/rio/keys/relay-`printf "%02d" $ACCOUNT`
 
 # todo - change to more secure random string - get it from AWS secret store
-NODE_KEY=`echo "seed Uf2IucQ3Fgm86//relay//$ACCOUNT" | sha256sum | sed 's,^.,0,;s, *-,,'`
+NODE_KEY=`echo "seed ${SEED_PREFIX}//relay//$ACCOUNT" | sha256sum | sed 's,^.,0,;s, *-,,'`
 ACCOUNT_PUBLIC_KEY=`echo -n ${NODE_KEY} | /rio/release/relaychain-rio key inspect-node-key --file /dev/stdin | tail -n 1`
 curl "http://44.202.25.232:3000/relay/${ACCOUNT}?stage=${STAGE}" -H "content-type: application/json"  -d "{\"key\": \"${ACCOUNT_PUBLIC_KEY}\", \"ip\": \"${IP_LOCAL}\"}" -o bootnodes.json
 BOOTNODE_IP=`node -e "console.log(JSON.parse(require('fs').readFileSync('bootnodes.json'))[0].ip)"`

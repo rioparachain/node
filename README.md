@@ -1,5 +1,6 @@
 # BUILD
-> docker-compose -f ./docker-compose-build.yml build
+> export MNEMONIC="..."
+> docker-compose -f ./docker-compose-build.yml build --no-cache --build-arg "MNEMONIC=${MNEMONIC}"
 >
 > docker-compose -f ./docker-compose-build.yml up chainspec
 

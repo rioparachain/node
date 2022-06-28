@@ -70,9 +70,9 @@ Resources:
           EntryPoint:
             - "sh"
             - "-c"
-#          Secrets:
-#            - Name: SECRET_KEY
-#              ValueFrom: !Sub "secret-value"
+          Secrets:
+            - Name: SEED_PREFIX
+              ValueFrom: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/rio-node/testnet/seed-prefix"
           Environment:
             - Name: WS_PORT
               Value: 80

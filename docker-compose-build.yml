@@ -22,7 +22,7 @@ services:
       dockerfile: ./docker/chainspec.Dockerfile
       args:
         FROM_IMAGE: binaries
-        MNEMONIC: chronic scene situate genuine advice gospel lady obvious blood palace economy marble
+        MNEMONIC: ${MNEMONIC}
         RELAY_FILE_FROM: /rio/chainspec/polkadot-plain.json
         RELAY_FILE_TO: /rio/chainspec/polkadot-custom.json
         RELAY_RAW: /rio/chainspec/polkadot-raw.json
@@ -38,7 +38,7 @@ services:
       - ./docker:/rio/src/docker
     environment:
       FROM_IMAGE: binaries
-      MNEMONIC: chronic scene situate genuine advice gospel lady obvious blood palace economy marble
+      MNEMONIC: ${MNEMONIC}
       RELAY_FILE_FROM: /rio/chainspec/polkadot-plain.json
       RELAY_FILE_TO: /rio/chainspec/polkadot-custom.json
       RELAY_RAW: /rio/chainspec/polkadot-raw.json

@@ -304,6 +304,7 @@ Resources:
                   - ecr:PutImage
                   - ecr:UploadLayerPart
                   - ecs:*
+                  - secretsmanager:GetSecretValue
                 Resource: '*'
       ManagedPolicyArns:
         - !FindInMap [General, ArtifactAccessPolicy, nonprod]

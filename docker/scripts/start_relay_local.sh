@@ -1,7 +1,8 @@
 #!/bin/sh -xe
 
-NODE_KEY=`echo "seed Uf2IucQ3Fgm86//relay//$ACCOUNT" | sha256sum | sed 's,^.,0,;s, *-,,'`
-BASE_PATH=/rio/keys/relay-`printf "%02d" $ACCOUNT`
+SEED_PREFIX=Uf2IucQ3Fgm86
+NODE_KEY=`echo "seed ${SEED_PREFIX}//relay//${ACCOUNT}" | sha256sum | sed 's,^.,0,;s, *-,,'`
+BASE_PATH=/rio/keys/relay-`printf "%02d" ${ACCOUNT}`
 
 /rio/release/relaychain-rio \
     --base-path ${BASE_PATH} \
