@@ -1,4 +1,4 @@
-//! Substrate Parachain Node Template CLI
+//! Substrate Parachain Rio Node CLI
 
 #![warn(missing_docs)]
 

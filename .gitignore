@@ -44,6 +44,14 @@ runtime/relaychain-rio/**/*.tmp
 runtime/relaychain-rio/**/*.toml
 runtime/relaychain-rio/**/*.rs
 
+pallets/transaction-payment/**/*.tmp
+pallets/transaction-payment/**/*.toml
+pallets/transaction-payment/**/*.rs
+
+pallets/assets/**/*.tmp
+pallets/assets/**/*.toml
+pallets/assets/**/*.rs
+
 .DS_Store
 .idea
 .vscode

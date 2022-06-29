@@ -9,7 +9,11 @@ members = [
 	"node/relaychain-rio-client",
 	"node/relaychain-rio-service",
 	"runtime",
+	"runtime/common-rio",
 	"runtime/relaychain-rio",
+    "proc-macro",
+    "pallets/assets",
+    "pallets/assets-ext",
 
         "cumulus/client/cli",
         "cumulus/client/collator",

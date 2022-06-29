@@ -1,0 +1,397 @@
+--- pallets/assets/src/lib.rs.tmp
++++ pallets/assets/src/lib.rs
+@@ -62,7 +62,7 @@
+ 	},
+ 	ArithmeticError, DispatchError, DispatchResult, RuntimeDebug,
+ };
+-use sp_std::{cmp, convert::Infallible, marker, prelude::*, vec::Vec};
++use sp_std::{cmp, convert::Infallible, marker, prelude::*, result, vec::Vec};
+ 
+ use orml_traits::{
+ 	arithmetic::{self, Signed},
+@@ -71,17 +71,25 @@
+ 	MultiReservableCurrency, NamedMultiReservableCurrency, OnDust,
+ };
+ 
++use rp_support::info;
++
+ mod imbalances;
+ mod impls;
++/*
+ mod mock;
+ mod tests;
+ mod tests_currency_adapter;
+ mod tests_events;
+ mod tests_fungibles;
+ mod tests_multicurrency;
++*/
+ 
+ mod weights;
+ 
++pub mod types;
++use sp_std::collections::btree_map::BTreeMap;
++pub use types::{AssetInfo, Chain, Restriction, Restrictions, TotalAssetInfo};
++
+ pub use impls::*;
+ pub use weights::WeightInfo;
+ 
+@@ -235,6 +243,10 @@
+ 		// The whitelist of accounts that will not be reaped even if its total
+ 		// is zero or below ED.
+ 		type DustRemovalWhitelist: Contains<Self::AccountId>;
++
++		/// The maximum length of a name or symbol stored on-chain.
++		#[pallet::constant]
++		type StringLimit: Get<u32>;
+ 	}
+ 
+ 	#[pallet::error]
+@@ -255,6 +267,18 @@
+ 		DeadAccount,
+ 		// Number of named reserves exceed `T::MaxReserves`
+ 		TooManyReserves,
++		/// Asset already exist
++		ExistedAsset,
++		/// Asset not exist
++		NotExistedAsset,
++		/// Invalid asset
++		InvalidAsset,
++		/// Invalid asset info when create asset
++		InvalidAssetInfo,
++		/// The asset is restricted by this action.
++		RestrictedAction,
++		/// Symbol, Name or Desc too long
++		TextTooLong,
+ 	}
+ 
+ 	#[pallet::event]
+@@ -345,6 +369,15 @@
+ 			currency_id: T::CurrencyId,
+ 			who: T::AccountId,
+ 		},
++		/// Asset created (currency_id, creator, asset_options).
++		Created { currency_id: T::CurrencyId },
++		/// Update asset restrictions
++		UpdateAssetRestriction {
++			currency_id: T::CurrencyId,
++			restrictions: Restrictions,
++		},
++		/// Asset is offline
++		Revoke { currency_id: T::CurrencyId },
+ 	}
+ 
+ 	/// The total issuance of a token type.
+@@ -397,35 +430,56 @@
+ 		ValueQuery,
+ 	>;
+ 
++	/// Restrictions means this asset can't do something
++	#[pallet::storage]
++	#[pallet::getter(fn asset_restrictions)]
++	pub type AssetRestrictions<T: Config> = StorageMap<_, Twox64Concat, T::CurrencyId, Restrictions, ValueQuery>;
++
++	/// "Symbols" can only keep Vec<u8>, and utf8 safety is totally on the
++	/// client side
++	#[pallet::storage]
++	#[pallet::getter(fn asset_info_of)]
++	pub type AssetInfos<T: Config> =
++		StorageMap<_, Twox64Concat, T::CurrencyId, AssetInfo<BoundedVec<u8, T::StringLimit>>>;
++
++	#[pallet::storage]
++	#[pallet::getter(fn online)]
++	pub type Online<T: Config> = StorageMap<_, Twox64Concat, T::CurrencyId, bool, ValueQuery>;
++
+ 	#[pallet::genesis_config]
+ 	pub struct GenesisConfig<T: Config> {
+-		pub balances: Vec<(T::AccountId, T::CurrencyId, T::Balance)>,
++		pub init: Vec<(
++			T::CurrencyId,
++			AssetInfo<BoundedVec<u8, T::StringLimit>>,
++			Restrictions,
++			Vec<(T::AccountId, T::Balance)>,
++		)>,
+ 	}
+ 
+ 	#[cfg(feature = "std")]
+ 	impl<T: Config> Default for GenesisConfig<T> {
+ 		fn default() -> Self {
+-			GenesisConfig { balances: vec![] }
++			GenesisConfig { init: vec![] }
+ 		}
+ 	}
+ 
+ 	#[pallet::genesis_build]
+ 	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+ 		fn build(&self) {
+-			// ensure no duplicates exist.
+-			let unique_endowed_accounts = self
+-				.balances
+-				.iter()
+-				.map(|(account_id, currency_id, _)| (account_id, currency_id))
+-				.collect::<std::collections::BTreeSet<_>>();
+-			assert!(
+-				unique_endowed_accounts.len() == self.balances.len(),
+-				"duplicate endowed accounts in genesis."
+-			);
++			for (currency_id, info, restrictions, balances) in self.init.iter() {
++				// create asset
++				<Pallet<T>>::create_asset(*currency_id, info.clone()).expect("create_asset must success in genesis");
++				// restriction
++				AssetRestrictions::<T>::insert(currency_id, restrictions);
++
++				// ensure no duplicates exist.
++				let unique = balances
++					.iter()
++					.map(|(acc, _)| acc)
++					.collect::<std::collections::BTreeSet<_>>();
++				assert!(unique.len() == balances.len(), "duplicate endowed accounts in genesis.");
+ 
+-			self.balances
+-				.iter()
+-				.for_each(|(account_id, currency_id, initial_balance)| {
++				for (account_id, initial_balance) in balances.iter() {
+ 					assert!(
+ 						*initial_balance >= T::ExistentialDeposits::get(currency_id),
+ 						"the balance of any account should always be more than existential deposit.",
+@@ -438,7 +492,8 @@
+ 							.checked_add(initial_balance)
+ 							.expect("total issuance cannot overflow when building genesis")
+ 					});
+-				});
++				}
++			}
+ 		}
+ 	}
+ 
+@@ -557,6 +612,8 @@
+ 			Self::do_transfer(currency_id, &from, &to, amount, ExistenceRequirement::AllowDeath)
+ 		}
+ 
++		#[rustfmt::skip]
++		/*
+ 		/// Set the balances of a given account.
+ 		///
+ 		/// This will alter `FreeBalance` and `ReservedBalance` in storage. it
+@@ -614,6 +671,139 @@
+ 				Ok(())
+ 			})
+ 		}
++		*/
++
++		/// create a new asset with full permissions granted to whoever make the
++		/// call *sudo or proposal approved only*
++		#[pallet::weight(T::WeightInfo::create())]
++		pub fn create(
++			origin: OriginFor<T>,
++			currency_id: T::CurrencyId,
++			asset_info: AssetInfo<BoundedVec<u8, T::StringLimit>>,
++		) -> DispatchResult {
++			ensure_root(origin)?;
++
++			Self::create_asset(currency_id, asset_info)?;
++
++			Ok(())
++		}
++
++		#[pallet::weight(T::WeightInfo::update_asset_info())]
++		pub fn update_asset_info(
++			origin: OriginFor<T>,
++			currency_id: T::CurrencyId,
++			asset_info: AssetInfo<BoundedVec<u8, T::StringLimit>>,
++		) -> DispatchResult {
++			ensure_root(origin)?;
++			ensure!(Self::asset_info_of(currency_id).is_some(), Error::<T>::NotExistedAsset);
++			AssetInfos::<T>::insert(currency_id, asset_info);
++			Ok(())
++		}
++
++		#[pallet::weight(T::WeightInfo::update_restriction())]
++		pub fn update_restriction(
++			origin: OriginFor<T>,
++			currency_id: T::CurrencyId,
++			restrictions: Restrictions,
++		) -> DispatchResult {
++			ensure_root(origin)?;
++			<AssetRestrictions<T>>::insert(currency_id, restrictions);
++			Self::deposit_event(Event::UpdateAssetRestriction {
++				currency_id,
++				restrictions,
++			});
++			Ok(())
++		}
++
++		#[pallet::weight(T::WeightInfo::offline_asset())]
++		pub fn offline_asset(origin: OriginFor<T>, currency_id: T::CurrencyId) -> DispatchResult {
++			ensure_root(origin)?;
++			Online::<T>::remove(currency_id);
++			Self::deposit_event(Event::Revoke { currency_id });
++			Ok(())
++		}
++
++		#[pallet::weight(T::WeightInfo::online_asset())]
++		pub fn online_asset(origin: OriginFor<T>, currency_id: T::CurrencyId) -> DispatchResult {
++			ensure_root(origin)?;
++			ensure!(Self::asset_info_of(currency_id).is_some(), Error::<T>::NotExistedAsset);
++			Online::<T>::insert(currency_id, true);
++			Self::deposit_event(Event::Created { currency_id });
++			Ok(())
++		}
++	}
++}
++
++impl<T: Config> Pallet<T> {
++	/// check the currency_id is existed
++	#[inline]
++	pub fn get_asset(
++		currency_id: &T::CurrencyId,
++	) -> result::Result<AssetInfo<BoundedVec<u8, T::StringLimit>>, DispatchError> {
++		if let Some(asset) = Self::asset_info_of(currency_id) {
++			if Self::online(currency_id) {
++				Ok(asset)
++			} else {
++				Err(Error::<T>::InvalidAsset)?
++			}
++		} else {
++			Err(Error::<T>::NotExistedAsset)?
++		}
++	}
++
++	/// Creates an asset.
++	///
++	/// # Arguments
++	/// * `currency_id`: An ID of a reserved asset.
++	pub fn create_asset(
++		currency_id: T::CurrencyId,
++		asset_info: AssetInfo<BoundedVec<u8, T::StringLimit>>,
++	) -> DispatchResult {
++		// make sure the asset id is not exist
++		ensure!(Self::asset_info_of(&currency_id).is_none(), Error::<T>::ExistedAsset);
++
++		ensure!(
++			asset_info.symbol.len() <= rp_protocol::ASSET_SYMBOL_LEN,
++			Error::<T>::InvalidAssetInfo
++		);
++		ensure!(
++			asset_info.name.len() <= rp_protocol::ASSET_NAME_LEN,
++			Error::<T>::InvalidAssetInfo
++		);
++		ensure!(
++			asset_info.desc.len() <= rp_protocol::ASSET_DESC_LEN,
++			Error::<T>::InvalidAssetInfo
++		);
++		ensure!(asset_info.decimals != 0, Error::<T>::InvalidAssetInfo);
++
++		info!(
++			"[create_asset]|currency_id:{:?}, symbol:{:?}",
++			currency_id, asset_info.symbol
++		);
++
++		<AssetInfos<T>>::insert(currency_id, asset_info);
++		Online::<T>::insert(currency_id, true);
++
++		Self::deposit_event(Event::Created { currency_id });
++
++		Ok(())
++	}
++
++	pub fn total_asset_infos(
++	) -> BTreeMap<T::CurrencyId, TotalAssetInfo<AssetInfo<BoundedVec<u8, T::StringLimit>>, T::Balance>> {
++		AssetInfos::<T>::iter()
++			.map(|(id, info)| {
++				(
++					id,
++					TotalAssetInfo {
++						info,
++						balance: Self::total_issuance(id),
++						is_online: Self::online(id),
++						restrictions: Self::asset_restrictions(id),
++					},
++				)
++			})
++			.collect()
+ 	}
+ }
+ 
+@@ -703,6 +893,9 @@
+ 		who: &T::AccountId,
+ 		amount: T::Balance,
+ 	) -> DispatchResult {
++		let _ = Self::get_asset(&currency_id)?;
++		Self::can_do(&currency_id, Restriction::Withdrawable)?;
++
+ 		if amount.is_zero() {
+ 			return Ok(());
+ 		}
+@@ -890,6 +1083,9 @@
+ 		amount: T::Balance,
+ 		existence_requirement: ExistenceRequirement,
+ 	) -> DispatchResult {
++		let _ = Self::get_asset(&currency_id)?;
++		Self::can_do(&currency_id, Restriction::Transferable)?;
++
+ 		if amount.is_zero() || from == to {
+ 			return Ok(());
+ 		}
+@@ -957,6 +1153,9 @@
+ 		existence_requirement: ExistenceRequirement,
+ 		change_total_issuance: bool,
+ 	) -> DispatchResult {
++		let _ = Self::get_asset(&currency_id)?;
++		Self::can_do(&currency_id, Restriction::Withdrawable)?;
++
+ 		if amount.is_zero() {
+ 			return Ok(());
+ 		}
+@@ -1015,6 +1214,9 @@
+ 		require_existed: bool,
+ 		change_total_issuance: bool,
+ 	) -> DispatchResult {
++		let _ = Self::get_asset(&currency_id)?;
++		Self::can_do(&currency_id, Restriction::Depositable)?;
++
+ 		if amount.is_zero() {
+ 			return Ok(());
+ 		}
+@@ -1096,6 +1298,10 @@
+ 
+ 	// Check if `value` amount of free balance can be slashed from `who`.
+ 	fn can_slash(currency_id: Self::CurrencyId, who: &T::AccountId, value: Self::Balance) -> bool {
++		if Self::get_asset(&currency_id).is_err() || Self::can_do(&currency_id, Restriction::Slashable).is_err() {
++			return false;
++		}
++
+ 		if value.is_zero() {
+ 			return true;
+ 		}
+@@ -1265,6 +1471,10 @@
+ 	///
+ 	/// Always `true` if value to be reserved is zero.
+ 	fn can_reserve(currency_id: Self::CurrencyId, who: &T::AccountId, value: Self::Balance) -> bool {
++		if Self::get_asset(&currency_id).is_err() || Self::can_do(&currency_id, Restriction::Reservable).is_err() {
++			return false;
++		}
++
+ 		if value.is_zero() {
+ 			return true;
+ 		}
+@@ -1306,6 +1516,9 @@
+ 	///
+ 	/// Is a no-op if value to be reserved is zero.
+ 	fn reserve(currency_id: Self::CurrencyId, who: &T::AccountId, value: Self::Balance) -> DispatchResult {
++		let _ = Self::get_asset(&currency_id)?;
++		Self::can_do(&currency_id, Restriction::Reservable)?;
++
+ 		if value.is_zero() {
+ 			return Ok(());
+ 		}
+@@ -1329,6 +1542,10 @@
+ 	///
+ 	/// Is a no-op if the value to be unreserved is zero.
+ 	fn unreserve(currency_id: Self::CurrencyId, who: &T::AccountId, value: Self::Balance) -> Self::Balance {
++		if Self::get_asset(&currency_id).is_err() || Self::can_do(&currency_id, Restriction::Unreservable).is_err() {
++			return Zero::zero();
++		}
++
+ 		if value.is_zero() {
+ 			return value;
+ 		}
