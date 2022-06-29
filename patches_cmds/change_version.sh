@@ -7,11 +7,10 @@
 #   you can edit patch and do `apply.sh patch_file`, and after this do update.sh to optimize patch
 # Please change orml commit rev manually
 
-old='0\.9\.22'
+old='0\.9\.23'
 new='0.9.24'
 
-#list=`find -H node pallets runtime primitives proc-macro -name "Cargo.toml" -exec grep -l $old {} \;`
-list=`find -H node pallets runtime -name "Cargo.toml" -exec grep -l $old {} \;`
+list=`find -H node pallets runtime primitives proc-macro -name "Cargo.toml" -exec grep -l $old {} \;`
 for i in $list
 do
   echo $i

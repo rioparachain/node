@@ -1,0 +1,32 @@
+--- pallets/assets/Cargo.toml.tmp
++++ pallets/assets/Cargo.toml.tmp.migrate
+@@ -1,5 +1,5 @@
+ [package]
+-name = "orml-tokens"
++name = "rpallet-assets"
+ description = "Fungible tokens module that implements `MultiCurrency` trait."
+ repository = "https://github.com/open-web3-stack/open-runtime-module-library/tree/master/tokens"
+ license = "Apache-2.0"
+@@ -19,6 +19,11 @@
+ 
+ orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "27e3272d322dcdd915f0fc2002032e8d53a46523", version = "0.4.1-dev", default-features = false }
+ 
++bitmask = { version = "0.5.0", default-features = false }
++rp-base = { path = "../../primitives/base", default-features = false }
++rp-protocol = { path = "../../primitives/protocol", default-features = false }
++rp-support = { path = "../../primitives/support", default-features = false }
++
+ [dev-dependencies]
+ sp-io = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
+ sp-core = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
+@@ -36,6 +41,10 @@
+ 	"frame-support/std",
+ 	"frame-system/std",
+ 	"orml-traits/std",
++	"bitmask/std",
++	"rp-base/std",
++	"rp-protocol/std",
++	"rp-support/std",
+ ]
+ runtime-benchmarks = [
+ 	"frame-support/runtime-benchmarks",

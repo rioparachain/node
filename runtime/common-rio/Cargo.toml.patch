@@ -1,0 +1,20 @@
+--- runtime/common-rio/Cargo.toml.tmp
++++ runtime/common-rio/Cargo.toml.tmp.migrate
+@@ -1,6 +1,6 @@
+ [package]
+-name = "polkadot-runtime-common"
+-version = "0.9.24"
++name = "rio-runtime-common"
++version = "0.9.23"
+ authors = ["Parity Technologies <admin@parity.io>"]
+ edition = "2021"
+ 
+@@ -34,7 +34,7 @@
+ frame-system = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
+ pallet-timestamp = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
+ pallet-vesting = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
+-pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
++pallet-transaction-payment = { package = "rpallet-transaction-payment", path = "../../pallets/transaction-payment", default-features = false }
+ pallet-treasury = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
+ pallet-election-provider-multi-phase = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
+ pallet-beefy-mmr = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }

@@ -1,0 +1,1 @@
+../../../submodules/open-runtime-module-library/tokens/src/tests_currency_adapter.rs

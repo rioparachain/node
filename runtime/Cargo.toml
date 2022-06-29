@@ -1,5 +1,5 @@
 [package]
-name = "parachain-template-runtime"
+name = "parachain-rio-runtime"
 version = "0.1.0"
 authors = ["Anonymous"]
 description = "A new Cumulus FRAME-based Substrate Runtime, ready for hacking together a parachain."
@@ -18,12 +18,9 @@ substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", bran
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive"] }
 hex-literal = { version = "0.3.4", optional = true }
 log = { version = "0.4.17", default-features = false }
-scale-info = { version = "2.1.1", default-features = false, features = ["derive"] }
-serde = { version = "1.0.137", optional = true, features = ["derive"] }
+scale-info = { version = "2.1.2", default-features = false, features = ["derive"] }
+serde = { version = "1.0.136", optional = true, features = ["derive"] }
 smallvec = "1.6.1"
-
-# Local
-pallet-template = { path = "../pallets/template", default-features = false }
 
 # Substrate
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true, branch = "polkadot-v0.9.24" }
@@ -39,8 +36,8 @@ pallet-balances = { git = "https://github.com/paritytech/substrate", default-fea
 pallet-session = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
 pallet-sudo = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
 pallet-timestamp = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
-pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
-pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
+pallet-transaction-payment = { package = "rpallet-transaction-payment", path = "../pallets/transaction-payment", default-features = false }
+pallet-transaction-payment-rpc-runtime-api = { package = "rpallet-transaction-payment-rpc-runtime-api", path = "../pallets/transaction-payment/rpc/runtime-api", default-features = false }
 sp-api = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
 sp-block-builder = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
 sp-consensus-aura = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
@@ -57,7 +54,7 @@ sp-version = { git = "https://github.com/paritytech/substrate", default-features
 # Polkadot
 pallet-xcm = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.24" }
 polkadot-parachain = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.24" }
-polkadot-runtime-common = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.24" }
+polkadot-runtime-common = { package = "rio-runtime-common", path = "common-rio", default-features = false }
 xcm = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.24" }
 xcm-builder = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.24" }
 xcm-executor = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.24" }
@@ -74,6 +71,14 @@ cumulus-primitives-timestamp = { git = "https://github.com/paritytech/cumulus", 
 cumulus-primitives-utility = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.24" }
 pallet-collator-selection = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.24" }
 parachain-info = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.24" }
+
+# Orml
+orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "27e3272d322dcdd915f0fc2002032e8d53a46523", version = "0.4.1-dev", default-features = false }
+
+# Rio
+rpallet-assets = { path = "../pallets/assets", default-features = false }
+rpallet-assets-ext = { path = "../pallets/assets-ext", default-features = false }
+rp-base = { path = "../primitives/base", default-features = false }
 
 [features]
 default = [
@@ -102,7 +107,6 @@ std = [
 	"pallet-collator-selection/std",
 	"pallet-session/std",
 	"pallet-sudo/std",
-	"pallet-template/std",
 	"pallet-timestamp/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",
@@ -125,6 +129,10 @@ std = [
 	"xcm-builder/std",
 	"xcm-executor/std",
 	"xcm/std",
+    "orml-traits/std",
+    "rpallet-assets/std",
+    "rpallet-assets-ext/std",
+    "rp-base/std",
 ]
 
 runtime-benchmarks = [
@@ -135,7 +143,6 @@ runtime-benchmarks = [
 	"frame-system/runtime-benchmarks",
 	"pallet-balances/runtime-benchmarks",
 	"pallet-collator-selection/runtime-benchmarks",
-	"pallet-template/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
 	"pallet-xcm/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",

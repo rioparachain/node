@@ -14,9 +14,9 @@ use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
-	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, Verify},
+	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT},
 	transaction_validity::{TransactionSource, TransactionValidity},
-	ApplyExtrinsicResult, MultiSignature,
+	ApplyExtrinsicResult,
 };
 
 use sp_std::prelude::*;
@@ -31,7 +31,7 @@ use frame_support::{
 		constants::WEIGHT_PER_SECOND, ConstantMultiplier, DispatchClass, Weight,
 		WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
 	},
-	PalletId,
+	BoundedVec, PalletId,
 };
 use frame_system::{
 	limits::{BlockLength, BlockWeights},
@@ -53,8 +53,16 @@ use weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight};
 use xcm::latest::prelude::BodyId;
 use xcm_executor::XcmExecutor;
 
-/// Import the template pallet.
-pub use pallet_template;
+use orml_traits::parameter_type_with_key;
+use sp_runtime::traits::AccountIdConversion;
+
+pub use rp_base::{AccountId, Amount, Balance, BlockNumber, CurrencyId, Hash, Index, Signature};
+
+pub type Block = rp_base::Block<Call, Runtime>;
+pub type UncheckedExtrinsic = rp_base::UncheckedExtrinsic<Call, Runtime>;
+
+#[rustfmt::skip]
+/*
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
@@ -108,6 +116,8 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signatu
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 
+*/
+
 /// Executive: handles dispatch to the various modules.
 pub type Executive = frame_executive::Executive<
 	Runtime,
@@ -132,7 +142,7 @@ impl WeightToFeePolynomial for WeightToFee {
 	type Balance = Balance;
 	fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
 		// in Rococo, extrinsic base weight (smallest non-zero weight) is mapped to 1 MILLIUNIT:
-		// in our template, we map to 1/10 of that, or 1/10 MILLIUNIT
+		// in our parachain rio, we map to 1/10 of that, or 1/10 MILLIUNIT
 		let p = MILLIUNIT / 10;
 		let q = 100 * Balance::from(ExtrinsicBaseWeight::get());
 		smallvec![WeightToFeeCoefficient {
@@ -169,8 +179,8 @@ impl_opaque_keys! {
 
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("template-parachain"),
-	impl_name: create_runtime_str!("template-parachain"),
+	spec_name: create_runtime_str!("parachain-rio"),
+	impl_name: create_runtime_str!("parachain-rio"),
 	authoring_version: 1,
 	spec_version: 1,
 	impl_version: 0,
@@ -452,10 +462,50 @@ impl pallet_collator_selection::Config for Runtime {
 	type WeightInfo = ();
 }
 
-/// Configure the pallet template in pallets/template.
-impl pallet_template::Config for Runtime {
-	type Event = Event;
+pub struct DustRemovalWhitelist;
+impl frame_support::traits::Contains<AccountId> for DustRemovalWhitelist {
+	fn contains(a: &AccountId) -> bool {
+		*a == DustReceiver::get()
+	}
 }
+
+parameter_type_with_key! {
+		pub ExistentialDeposits: |currency_id: CurrencyId| -> Balance {
+				#[allow(clippy::match_ref_pats)] // false positive
+				match currency_id {
+						//&BTC => 1,
+						//&DOT => 2,
+						_ => 0,
+				}
+		};
+}
+
+parameter_types! {
+		pub DustReceiver: AccountId = PalletId(*b"rioc/dst").into_account_truncating();
+		pub StringLimit: u32 = 128;
+}
+
+pub type Text = BoundedVec<u8, StringLimit>;
+pub type AssetInfo = rpallet_assets::AssetInfo<Text>;
+
+impl rpallet_assets::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type Amount = Amount;
+	type CurrencyId = CurrencyId;
+	type WeightInfo = ();
+	type ExistentialDeposits = ExistentialDeposits;
+	type OnDust = rpallet_assets::TransferDust<Runtime, DustReceiver>;
+	type OnNewTokenAccount = ();
+	type OnKilledTokenAccount = ();
+	type MaxLocks = frame_support::traits::ConstU32<2>;
+	type MaxReserves = frame_support::traits::ConstU32<2>;
+	type ReserveIdentifier = [u8; 8];
+	type DustRemovalWhitelist = DustRemovalWhitelist;
+	type StringLimit = StringLimit;
+}
+
+impl rpallet_assets_ext::Config for Runtime {}
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -489,8 +539,8 @@ construct_runtime!(
 		CumulusXcm: cumulus_pallet_xcm::{Pallet, Event<T>, Origin} = 32,
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 33,
 
-		// Template
-		TemplatePallet: pallet_template::{Pallet, Call, Storage, Event<T>}  = 40,
+		RioAssets: rpallet_assets::{Pallet, Call, Storage, Config<T>, Event<T>} = 40,
+		RioAssetsExt: rpallet_assets_ext::{Pallet, Call} = 41,
 	}
 );
 
@@ -620,7 +670,7 @@ impl_runtime_apis! {
 	#[cfg(feature = "try-runtime")]
 	impl frame_try_runtime::TryRuntime<Block> for Runtime {
 		fn on_runtime_upgrade() -> (Weight, Weight) {
-			log::info!("try-runtime::on_runtime_upgrade parachain-template.");
+			log::info!("try-runtime::on_runtime_upgrade parachain-rio.");
 			let weight = Executive::try_runtime_upgrade().unwrap();
 			(weight, RuntimeBlockWeights::get().max_block)
 		}

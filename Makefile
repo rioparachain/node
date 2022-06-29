@@ -22,7 +22,7 @@ clippy:
 	$(NIX_SHELL) 'SKIP_WASM_BUILD=1 env -u RUSTFLAGS cargo clippy --all-targets $(FLAGS)'
 
 test:
-	$(NIX_SHELL) 'SKIP_WASM_BUILD=1; cargo test $(FLAGS)'
+	$(NIX_SHELL) 'cargo test $(FLAGS)'
 
 pr-checks: check-fmt clippy test
 

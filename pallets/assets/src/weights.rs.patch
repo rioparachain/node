@@ -1,0 +1,44 @@
+--- pallets/assets/src/weights.rs.tmp
++++ pallets/assets/src/weights.rs
+@@ -34,6 +34,11 @@
+ 	fn transfer_keep_alive() -> Weight;
+ 	fn force_transfer() -> Weight;
+ 	fn set_balance() -> Weight;
++	fn create() -> Weight;
++	fn update_asset_info() -> Weight;
++	fn update_restriction() -> Weight;
++	fn offline_asset() -> Weight;
++	fn online_asset() -> Weight;
+ }
+ 
+ /// Default weights.
+@@ -63,4 +68,29 @@
+ 			.saturating_add(RocksDbWeight::get().reads(3 as Weight))
+ 			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
+ 	}
++	fn create() -> Weight {
++		(69_000_000 as Weight)
++			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
++			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
++	}
++	fn update_asset_info() -> Weight {
++		(69_000_000 as Weight)
++			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
++			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
++	}
++	fn update_restriction() -> Weight {
++		(69_000_000 as Weight)
++			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
++			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
++	}
++	fn offline_asset() -> Weight {
++		(69_000_000 as Weight)
++			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
++			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
++	}
++	fn online_asset() -> Weight {
++		(69_000_000 as Weight)
++			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
++			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
++	}
+ }
