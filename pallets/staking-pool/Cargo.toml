@@ -1,0 +1,53 @@
+[package]
+name = 'rpallet-staking-pool'
+version = '0.1.0'
+authors = ["Rio Team<dev@riodefi.com>"]
+edition = '2018'
+repository = 'https://github.com/RioDefi/riochain'
+description = 'RIO staking pool.'
+
+[package.metadata.docs.rs]
+targets = ['x86_64-unknown-linux-gnu']
+
+[dependencies]
+codec = { default-features = false, package = 'parity-scale-codec', version = '3.0.0', features = ["derive", "max-encoded-len"] }
+frame-benchmarking = { default-features = false, optional = true, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
+frame-support = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
+frame-system = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
+orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "27e3272d322dcdd915f0fc2002032e8d53a46523", default-features = false }
+orml-utilities = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "27e3272d322dcdd915f0fc2002032e8d53a46523", default-features = false }
+pallet-timestamp = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
+rio-proc-macro = { default-features = false, path = "../../proc-macro" }
+rp-base = { default-features = false, path = "../../primitives/base" }
+scale-info = { default-features = false, features = ['derive'], version = '2.0.0' }
+sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
+sp-std = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
+# [dependencies]
+# macro_rules_attribute = { version = "..." }
+# [dev-dependencies.rio-root]
+# default-features = false
+# path = "../../riodefi/rio/root"
+
+[dev-dependencies]
+pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
+rp-protocol = { default-features = false, path = "../../primitives/protocol" }
+rpallet-assets = { default-features = false, path = "../assets" }
+sp-core = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
+sp-io = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
+sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
+
+[features]
+default = ['std']
+runtime-benchmarks = ['frame-benchmarking']
+std = [
+  'codec/std',
+  'scale-info/std',
+  'frame-support/std',
+  'frame-system/std',
+  'pallet-timestamp/std',
+  'frame-benchmarking/std',
+  'sp-runtime/std',
+  'rp-base/std',
+  # 'rio-root/std',
+]
+try-runtime = ['frame-support/try-runtime']
