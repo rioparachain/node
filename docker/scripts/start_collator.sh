@@ -47,6 +47,7 @@ if [ "$ACCOUNT" = "1" ]; then
         --force-authoring \
         --ws-port ${WS_PORT} \
         --rpc-port ${RPC_PORT} \
+        --telemetry-url 'ws://3.89.91.186:8001/submit 0' \
         -- \
         --execution wasm \
         --chain ${RELAY_RAW} \
@@ -67,6 +68,7 @@ else
         --force-authoring \
         --ws-port ${WS_PORT} \
         --rpc-port ${RPC_PORT} \
+        --telemetry-url 'ws://3.89.91.186:8001/submit 0' \
         --bootnodes /ip4/${BOOTNODE_IP}/tcp/30333/p2p/${BOOTNODE_KEY} \
         -- \
         --execution wasm \
