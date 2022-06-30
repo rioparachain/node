@@ -3,37 +3,28 @@ panic = "unwind"
 
 [workspace]
 members = [
-	"node",
-#	"node/relaychain-rio",
-	"node/relaychain-rio-cli",
-	"node/relaychain-rio-client",
-	"node/relaychain-rio-service",
-	"runtime",
-	"runtime/common-rio",
-	"runtime/relaychain-rio",
-    "proc-macro",
-    "pallets/assets",
-    "pallets/assets-ext",
-
-        "cumulus/client/cli",
-        "cumulus/client/collator",
-        "cumulus/client/consensus/aura",
-        "cumulus/client/consensus/common",
-        "cumulus/client/consensus/relay-chain",
-        "cumulus/client/network",
-        "cumulus/client/pov-recovery",
-        "cumulus/client/service",
-        "cumulus/client/relay-chain-interface",
-        "cumulus/client/relay-chain-inprocess-interface",
-        "cumulus/client/relay-chain-rpc-interface",
-        "cumulus/primitives/parachain-inherent",
-
-
+  "cumulus/client/cli",
+  "cumulus/client/collator",
+  "cumulus/client/consensus/aura",
+  "cumulus/client/consensus/common",
+  "cumulus/client/consensus/relay-chain",
+  "cumulus/client/network",
+  "cumulus/client/pov-recovery",
+  "cumulus/client/relay-chain-inprocess-interface",
+  "cumulus/client/relay-chain-interface",
+  "cumulus/client/relay-chain-rpc-interface",
+  "cumulus/client/service",
+  "cumulus/primitives/parachain-inherent",
+  "node",
+  #	"node/relaychain-rio",
+  "node/relaychain-rio-cli",
+  "node/relaychain-rio-client",
+  "node/relaychain-rio-service",
+  "pallets/assets",
+  "pallets/assets-ext",
+  "pallets/staking-pool",
+  "proc-macro",
+  "runtime",
+  "runtime/common-rio",
+  "runtime/relaychain-rio",
 ]
-
-#[patch.'https://github.com/paritytech/polkadot']
-#polkadot-cli = { package = "relaychain-rio-cli", path = "./node/relaychain-rio-cli" }
-#polkadot-client = { package = "relaychain-rio-client", path = "node/relaychain-rio-client" }
-#polkadot-service = { package = "relaychain-rio-service", path = "node/relaychain-rio-service" }
-#polkadot-runtime = { package = "relaychain-rio-runtime", path = "runtime/relaychain-rio" }
-

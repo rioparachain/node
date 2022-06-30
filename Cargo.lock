@@ -6828,8 +6828,10 @@ dependencies = [
  "polkadot-parachain",
  "rio-runtime-common",
  "rp-base",
+ "rp-protocol",
  "rpallet-assets",
  "rpallet-assets-ext",
+ "rpallet-staking-pool",
  "rpallet-transaction-payment",
  "rpallet-transaction-payment-rpc-runtime-api",
  "scale-info",
@@ -9725,6 +9727,29 @@ dependencies = [
  "rpallet-assets",
  "scale-info",
  "serde",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "rpallet-staking-pool"
+version = "0.1.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "orml-traits",
+ "orml-utilities",
+ "pallet-balances",
+ "pallet-timestamp",
+ "parity-scale-codec 3.1.2",
+ "rio-proc-macro",
+ "rp-base",
+ "rp-protocol",
+ "rpallet-assets",
+ "scale-info",
+ "sp-core",
+ "sp-io",
  "sp-runtime",
  "sp-std",
 ]

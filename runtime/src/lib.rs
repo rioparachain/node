@@ -507,6 +507,43 @@ impl rpallet_assets::Config for Runtime {
 
 impl rpallet_assets_ext::Config for Runtime {}
 
+use frame_support::traits::Get;
+use rp_base::Price;
+use rp_protocol::{RFUEL, STAKING_POOL_MARKER};
+use sp_runtime::traits::One;
+
+pub struct DefaultPrice;
+impl Get<Price> for DefaultPrice {
+	fn get() -> Price {
+		Price::one()
+	}
+}
+
+parameter_types! {
+	pub const MinimumStakeBalance: Balance = 10_u128;
+	pub const MaximumPerBlockReward: Balance = MinimumStakeBalance::get() * 188_u128;
+	//pub const DefaultPrice: Price = Price::one();
+	pub const Rfuel: CurrencyId = RFUEL;
+	pub const StakingPoolMarker: CurrencyId = STAKING_POOL_MARKER;
+}
+
+parameter_types! {
+				pub const RioStakingPoolPalletId: PalletId = PalletId(*b"py/riosp");
+}
+
+impl rpallet_staking_pool::Config for Runtime {
+	type DefaultPrice = DefaultPrice;
+	type Event = Event;
+	type MarkerCurrency = rpallet_assets::CurrencyAdapter<Runtime, StakingPoolMarker>;
+	type MaximumPerBlockReward = MaximumPerBlockReward;
+	type MinimumStakeBalance = MinimumStakeBalance;
+	type StakeCurrency = Balances;
+	// TO_DO: Change this.
+	type OwnerOrigin = EnsureRoot<AccountId>;
+	type PalletId = RioStakingPoolPalletId;
+	type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -541,6 +578,7 @@ construct_runtime!(
 
 		RioAssets: rpallet_assets::{Pallet, Call, Storage, Config<T>, Event<T>} = 40,
 		RioAssetsExt: rpallet_assets_ext::{Pallet, Call} = 41,
+		RioStakingPool: rpallet_staking_pool::{Pallet, Call, Storage, Event<T>} = 42,
 	}
 );
 

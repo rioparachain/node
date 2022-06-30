@@ -11,6 +11,6 @@ rp-base = { path = "../base", default-features = false }
 [features]
 default = ["std"]
 std = [
-    "frame-support/std",
-    "rp-base/std",
+  "frame-support/std",
+  "rp-base/std",
 ]
