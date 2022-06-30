@@ -35,7 +35,8 @@ if [ "$ACCOUNT" = "1" ]; then
         --rpc-methods Unsafe \
         --name ${ACCOUNT} \
         --ws-port ${WS_PORT} \
-        --rpc-port ${RPC_PORT}
+        --rpc-port ${RPC_PORT} \
+        --telemetry-url 'ws://3.89.91.186:8001/submit 0'
 else
     /rio/release/relaychain-rio \
             --base-path ${BASE_PATH} \
@@ -51,5 +52,6 @@ else
             --name ${ACCOUNT} \
             --ws-port ${WS_PORT} \
             --rpc-port ${RPC_PORT} \
+            --telemetry-url 'ws://3.89.91.186:8001/submit 0' \
             --bootnodes /ip4/${BOOTNODE_IP}/tcp/30333/p2p/${BOOTNODE_KEY}
 fi
