@@ -11,7 +11,6 @@ BASE_PATH=/rio/keys/collator-`printf "%02d" ${ACCOUNT}`
     --node-key ${NODE_KEY} \
     --unsafe-ws-external \
     --unsafe-rpc-external \
-    --no-telemetry \
     --no-prometheus \
     --rpc-cors all \
     --rpc-methods Unsafe \
@@ -19,6 +18,8 @@ BASE_PATH=/rio/keys/collator-`printf "%02d" ${ACCOUNT}`
     --force-authoring \
     --ws-port ${WS_PORT} \
     --rpc-port ${RPC_PORT} \
+    --telemetry-url 'ws://3.89.91.186:8001/submit 0' \
     -- \
     --execution wasm \
-    --chain ${RELAY_RAW}
+    --chain ${RELAY_RAW} \
+    --telemetry-url 'ws://3.89.91.186:8001/submit 0'

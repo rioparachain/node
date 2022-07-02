@@ -29,7 +29,6 @@ if [ "$ACCOUNT" = "1" ]; then
         --node-key ${NODE_KEY} \
         --unsafe-ws-external \
         --unsafe-rpc-external \
-        --no-telemetry \
         --no-prometheus \
         --rpc-cors all \
         --rpc-methods Unsafe \
@@ -45,7 +44,6 @@ else
             --node-key ${NODE_KEY} \
             --unsafe-ws-external \
             --unsafe-rpc-external \
-            --no-telemetry \
             --no-prometheus \
             --rpc-cors all \
             --rpc-methods Unsafe \

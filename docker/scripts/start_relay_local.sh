@@ -11,10 +11,10 @@ BASE_PATH=/rio/keys/relay-`printf "%02d" ${ACCOUNT}`
     --node-key ${NODE_KEY} \
     --unsafe-ws-external \
     --unsafe-rpc-external \
-    --no-telemetry \
     --no-prometheus \
     --rpc-cors all \
     --rpc-methods Unsafe \
     --name ${ACCOUNT} \
     --ws-port ${WS_PORT} \
-    --rpc-port ${RPC_PORT}
+    --rpc-port ${RPC_PORT} \
+    --telemetry-url 'ws://3.89.91.186:8001/submit 0'
