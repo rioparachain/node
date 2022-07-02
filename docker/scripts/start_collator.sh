@@ -39,7 +39,6 @@ if [ "$ACCOUNT" = "1" ]; then
         --node-key ${NODE_KEY} \
         --unsafe-ws-external \
         --unsafe-rpc-external \
-        --no-telemetry \
         --no-prometheus \
         --rpc-cors all \
         --rpc-methods Unsafe \
@@ -51,6 +50,7 @@ if [ "$ACCOUNT" = "1" ]; then
         -- \
         --execution wasm \
         --chain ${RELAY_RAW} \
+        --telemetry-url 'ws://3.89.91.186:8001/submit 0' \
         --bootnodes /ip4/${RELAY_BOOTNODE_IP}/tcp/30333/p2p/${RELAY_BOOTNODE_KEY}
 else
     /rio/release/parachain-rio \
@@ -60,7 +60,6 @@ else
         --node-key ${NODE_KEY} \
         --unsafe-ws-external \
         --unsafe-rpc-external \
-        --no-telemetry \
         --no-prometheus \
         --rpc-cors all \
         --rpc-methods Unsafe \
@@ -73,5 +72,6 @@ else
         -- \
         --execution wasm \
         --chain ${RELAY_RAW} \
+        --telemetry-url 'ws://3.89.91.186:8001/submit 0' \
         --bootnodes /ip4/${RELAY_BOOTNODE_IP}/tcp/30333/p2p/${RELAY_BOOTNODE_KEY}
 fi
