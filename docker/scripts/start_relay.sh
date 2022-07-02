@@ -32,7 +32,7 @@ if [ "$ACCOUNT" = "1" ]; then
         --no-prometheus \
         --rpc-cors all \
         --rpc-methods Unsafe \
-        --name ${ACCOUNT} \
+        --name relay-${ACCOUNT} \
         --ws-port ${WS_PORT} \
         --rpc-port ${RPC_PORT} \
         --telemetry-url 'ws://3.89.91.186:8001/submit 0'
@@ -47,7 +47,7 @@ else
             --no-prometheus \
             --rpc-cors all \
             --rpc-methods Unsafe \
-            --name ${ACCOUNT} \
+            --name relay-${ACCOUNT} \
             --ws-port ${WS_PORT} \
             --rpc-port ${RPC_PORT} \
             --telemetry-url 'ws://3.89.91.186:8001/submit 0' \

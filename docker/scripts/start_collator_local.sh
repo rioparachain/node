@@ -14,7 +14,7 @@ BASE_PATH=/rio/keys/collator-`printf "%02d" ${ACCOUNT}`
     --no-prometheus \
     --rpc-cors all \
     --rpc-methods Unsafe \
-    --name ${ACCOUNT} \
+    --name collator-${ACCOUNT} \
     --force-authoring \
     --ws-port ${WS_PORT} \
     --rpc-port ${RPC_PORT} \
@@ -22,4 +22,5 @@ BASE_PATH=/rio/keys/collator-`printf "%02d" ${ACCOUNT}`
     -- \
     --execution wasm \
     --chain ${RELAY_RAW} \
+    --name collator-side-${ACCOUNT} \
     --telemetry-url 'ws://3.89.91.186:8001/submit 0'
