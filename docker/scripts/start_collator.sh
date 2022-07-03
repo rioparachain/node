@@ -42,7 +42,7 @@ if [ "$ACCOUNT" = "1" ]; then
         --no-prometheus \
         --rpc-cors all \
         --rpc-methods Unsafe \
-        --name ${ACCOUNT} \
+        --name collator-${ACCOUNT} \
         --force-authoring \
         --ws-port ${WS_PORT} \
         --rpc-port ${RPC_PORT} \
@@ -51,6 +51,7 @@ if [ "$ACCOUNT" = "1" ]; then
         --execution wasm \
         --chain ${RELAY_RAW} \
         --telemetry-url 'ws://3.89.91.186:8001/submit 0' \
+        --name collator-side-${ACCOUNT} \
         --bootnodes /ip4/${RELAY_BOOTNODE_IP}/tcp/30333/p2p/${RELAY_BOOTNODE_KEY}
 else
     /rio/release/parachain-rio \
