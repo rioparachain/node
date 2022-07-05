@@ -55,12 +55,5 @@ RUN nix-shell /shell.nix --run "ldd target/release/parachain-rio" \
     done; \
     rm nix_store_paths.txt
 
-# Final stage is compact.
-FROM NIX AS FINAL
-
-COPY --from=BUILD /export /export
-COPY --from=BUILD /export/nix/store /nix/store
-COPY --from=BUILD /rio/src /rio/src
-
-WORKDIR /rio/src
+ENTRYPOINT ["nix-shell", "/shell.nix"]
 
