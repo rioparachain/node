@@ -26,14 +26,14 @@ fmt-dprint:
 	$(NIX_SHELL) 'dprint fmt'
 	set -xe; \
 	for dir in $(DPRINT_CARGO_TOML_FILES); \
-	do $(NIX_SHELL) "cd $$dir && cargo-sort"; done
+	do $(NIX_SHELL) "cd $$dir && cargo-sort -g"; done
 
 check-dprint: NIX_SHELL_FLAGS := -p dprint -p cargo-sort
 check-dprint:
 	$(NIX_SHELL) 'dprint check'
 	set -xe; \
 	for dir in $(DPRINT_CARGO_TOML_FILES); \
-	do $(NIX_SHELL) "cd $$dir && cargo-sort -c"; done
+	do $(NIX_SHELL) "cd $$dir && cargo-sort -g -c"; done
 
 clippy:
 	$(NIX_SHELL) 'SKIP_WASM_BUILD=1 env -u RUSTFLAGS cargo clippy --all-targets $(FLAGS)'

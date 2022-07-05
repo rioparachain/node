@@ -1,5 +1,5 @@
---- node/relaychain-rio-client/Cargo.toml.tmp
-+++ node/relaychain-rio-client/Cargo.toml.tmp.migrate
+--- node/relaychain-rio-client/.tmp/original/Cargo.toml
++++ node/relaychain-rio-client/.tmp/migrate/Cargo.toml
 @@ -1,5 +1,5 @@
  [package]
 -name = "polkadot-client"
@@ -7,15 +7,15 @@
  version = "0.9.24"
  authors = ["Parity Technologies <admin@parity.io>"]
  edition = "2021"
-@@ -38,7 +38,7 @@
- beefy-primitives = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
+@@ -39,7 +39,7 @@
  
  # Polkadot Runtimes
+ kusama-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
 -polkadot-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
 +polkadot-runtime = { package = "relaychain-rio-runtime", path = "../../runtime/relaychain-rio", optional = true }
- kusama-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
- westend-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
  rococo-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
+ westend-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
+ 
 @@ -54,6 +54,8 @@
  kusama = ["kusama-runtime"]
  rococo = ["rococo-runtime"]
@@ -23,5 +23,5 @@
 +fast-runtime = ["polkadot-runtime/fast-runtime"]
 +rio-testnet = ["polkadot-runtime/rio-testnet"]
  runtime-metrics = [
-     "rococo-runtime/runtime-metrics",
-     "kusama-runtime/runtime-metrics",
+   "rococo-runtime/runtime-metrics",
+   "kusama-runtime/runtime-metrics",

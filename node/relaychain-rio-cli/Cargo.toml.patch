@@ -1,25 +1,27 @@
---- node/relaychain-rio-cli/Cargo.toml.tmp
-+++ node/relaychain-rio-cli/Cargo.toml.tmp.migrate
+--- node/relaychain-rio-cli/.tmp/original/Cargo.toml
++++ node/relaychain-rio-cli/.tmp/migrate/Cargo.toml
 @@ -1,5 +1,5 @@
  [package]
 -name = "polkadot-cli"
 +name = "relaychain-rio-cli"
  version = "0.9.24"
  authors = ["Parity Technologies <admin@parity.io>"]
- description = "Polkadot Relay-chain Client Node"
-@@ -20,8 +20,10 @@
- futures = "0.3.21"
+ edition = "2021"
+@@ -20,10 +20,12 @@
  pyro = { package = "pyroscope", version = "0.3.1", optional = true }
+ thiserror = "1.0.31"
  
--service = { package = "polkadot-service", git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", default-features = false, optional = true }
 -polkadot-client = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
-+service = { package = "relaychain-rio-service", path = "../relaychain-rio-service", default-features = false, optional = true }
-+#service = { package = "polkadot-service", git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", default-features = false, optional = true }
++# service = { package = "polkadot-service", git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", default-features = false, optional = true }
 +polkadot-client = { package = "relaychain-rio-client", path = "../relaychain-rio-client", optional = true }
-+#polkadot-client = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
++# polkadot-client = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
  polkadot-node-core-pvf = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
  polkadot-performance-test = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
+-service = { package = "polkadot-service", git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", default-features = false, optional = true }
++service = { package = "relaychain-rio-service", path = "../relaychain-rio-service", default-features = false, optional = true }
  
+ frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate", optional = true, branch = "polkadot-v0.9.24" }
+ polkadot-node-metrics = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24" }
 @@ -61,6 +63,7 @@
  full-node = ["service/full-node"]
  try-runtime = ["service/try-runtime"]

@@ -1,15 +1,15 @@
---- pallets/transaction-payment/rpc/Cargo.toml.tmp
-+++ pallets/transaction-payment/rpc/Cargo.toml.tmp.migrate
+--- pallets/transaction-payment/rpc/.tmp/original/Cargo.toml
++++ pallets/transaction-payment/rpc/.tmp/migrate/Cargo.toml
 @@ -1,7 +1,7 @@
  [package]
 -name = "pallet-transaction-payment-rpc"
 +name = "rpallet-transaction-payment-rpc"
  version = "4.0.0-dev"
 -authors = ["Parity Technologies <admin@parity.io>"]
-+authors = ["Parity Technologies <admin@parity.io>","Rio Team<dev@riodefi.com>"]
++authors = ["Parity Technologies <admin@parity.io>", "Rio Team<dev@riodefi.com>"]
  edition = "2021"
- license = "Apache-2.0"
  homepage = "https://substrate.io"
+ license = "Apache-2.0"
 @@ -15,7 +15,7 @@
  [dependencies]
  codec = { package = "parity-scale-codec", version = "3.0.0" }

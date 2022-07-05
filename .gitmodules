@@ -10,3 +10,9 @@
 [submodule "submodules/open-runtime-module-library"]
 	path = submodules/open-runtime-module-library
 	url = https://github.com/open-web3-stack/open-runtime-module-library
+[submodule "submodules/frontier"]
+	path = submodules/frontier
+	url = https://github.com/paritytech/frontier
+[submodule "submodules/ptemplate"]
+	path = submodules/ptemplate
+	url = https://github.com/substrate-developer-hub/substrate-parachain-template

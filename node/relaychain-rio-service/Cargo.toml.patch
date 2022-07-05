@@ -1,5 +1,5 @@
---- node/relaychain-rio-service/Cargo.toml.tmp
-+++ node/relaychain-rio-service/Cargo.toml.tmp.migrate
+--- node/relaychain-rio-service/.tmp/original/Cargo.toml
++++ node/relaychain-rio-service/.tmp/migrate/Cargo.toml
 @@ -1,5 +1,5 @@
  [package]
 -name = "polkadot-service"
@@ -7,34 +7,34 @@
  version = "0.9.24"
  authors = ["Parity Technologies <admin@parity.io>"]
  edition = "2021"
-@@ -76,7 +76,7 @@
+@@ -74,7 +74,7 @@
+ thiserror = "1.0.31"
+ 
  # Polkadot
- polkadot-node-core-parachains-inherent = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24" }
- polkadot-overseer = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24" }
 -polkadot-client = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", default-features = false, optional = true }
 +polkadot-client = { package = "relaychain-rio-client", path = "../relaychain-rio-client", default-features = false, optional = true }
- polkadot-parachain = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24" }
- polkadot-primitives = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24" }
- polkadot-node-primitives = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24" }
-@@ -88,13 +88,13 @@
+ polkadot-node-core-parachains-inherent = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24" }
  polkadot-node-network-protocol = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24" }
+ polkadot-node-primitives = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24" }
+@@ -89,13 +89,13 @@
  
  # Polkadot Runtime Constants
+ kusama-runtime-constants = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
 -polkadot-runtime-constants = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
 +polkadot-runtime-constants = { package = "relaychain-rio-runtime-constants", path = "../../runtime/relaychain-rio/constants", optional = true }
- kusama-runtime-constants = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
  rococo-runtime-constants = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
  westend-runtime-constants = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
  
  # Polkadot Runtimes
+ kusama-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
 -polkadot-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
 +polkadot-runtime = { package = "relaychain-rio-runtime", path = "../../runtime/relaychain-rio", optional = true }
- kusama-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
- westend-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
  rococo-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
+ westend-runtime = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", optional = true }
+ 
 @@ -189,6 +189,7 @@
- 	"westend-runtime/fast-runtime",
- 	"rococo-runtime/fast-runtime",
+   "westend-runtime/fast-runtime",
+   "rococo-runtime/fast-runtime",
  ]
 +rio-testnet = ["polkadot-runtime/rio-testnet"]
  
