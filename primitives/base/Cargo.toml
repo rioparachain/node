@@ -20,6 +20,8 @@ sp-core = { git = "https://github.com/paritytech/substrate", branch = "polkadot-
 sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 
+fp-self-contained = { path = "../../frontier/primitives/self-contained", default-features = false }
+
 [features]
 default = ["std"]
 std = [
@@ -31,4 +33,5 @@ std = [
   "sp-runtime/std",
   "sp-std/std",
   "frame-system/std",
+  "fp-self-contained/std",
 ]

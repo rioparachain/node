@@ -9,12 +9,20 @@ $load_fun
 for toml in $toml_list
 do
   dst_toml="$workdir/$toml"
+  dst_toml_tmp=`dirname $dst_toml`/.tmp
+  dst_toml_name=`basename $dst_toml`
   if [ \( "$1" = "all" -o "$1" = "$dst_toml.patch" \) -a -f $dst_toml.patch ]; then
+    if [ -f $dst_toml -a $dst_toml.patch -ot $dst_toml ]; then
+      continue
+    fi
+    mkdir -p $dst_toml_tmp/original $dst_toml_tmp/migrate
     get_original $prefix/$toml \
       | rewrite_path \
-      > $dst_toml.tmp
-    patch $dst_toml.tmp $dst_toml.patch
-    mv $dst_toml.tmp $dst_toml
+      > $dst_toml_tmp/original/$dst_toml_name
+    format_toml $dst_toml_tmp/original
+    patch $dst_toml_tmp/original/$dst_toml_name $dst_toml.patch
+    mv $dst_toml_tmp/original/$dst_toml_name $dst_toml
+    rm -Rf $dst_toml_tmp
   fi
 done
 

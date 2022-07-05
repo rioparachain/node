@@ -1,5 +1,5 @@
---- runtime/common-rio/Cargo.toml.tmp
-+++ runtime/common-rio/Cargo.toml.tmp.migrate
+--- runtime/common-rio/.tmp/original/Cargo.toml
++++ runtime/common-rio/.tmp/migrate/Cargo.toml
 @@ -1,6 +1,6 @@
  [package]
 -name = "polkadot-runtime-common"
@@ -9,12 +9,12 @@
  authors = ["Parity Technologies <admin@parity.io>"]
  edition = "2021"
  
-@@ -34,7 +34,7 @@
- frame-system = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
- pallet-timestamp = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
- pallet-vesting = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
--pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
+@@ -37,7 +37,7 @@
+ pallet-session = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
+ pallet-staking = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
+ pallet-timestamp = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
+-pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
 +pallet-transaction-payment = { package = "rpallet-transaction-payment", path = "../../pallets/transaction-payment", default-features = false }
- pallet-treasury = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
- pallet-election-provider-multi-phase = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
- pallet-beefy-mmr = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
+ pallet-treasury = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
+ pallet-vesting = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
+ 

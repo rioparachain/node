@@ -23,6 +23,8 @@ FROM NIX AS BUILD
 ## We force it to execute on the side of the environment without executing the build node commands themselves.
 RUN nix-shell /shell.nix --run true
 
+#RUN nix-env -i dprint cargo-sort
+
 ARG POLKADOT_VERSION
 ARG ORML_REV
 ENV POLKADOT_VERSION=$POLKADOT_VERSION
@@ -34,23 +36,7 @@ ENV ORML_REV=$ORML_REV
 WORKDIR /rio/src
 COPY . .
 
-# submodule - works slow
-#RUN git submodule update --init --remote
-# this way is faster
-RUN mkdir -p submodules || true
-
-RUN git clone -b $POLKADOT_BRANCH --single-branch --depth 1 https://github.com/paritytech/polkadot submodules/polkadot
-
-RUN git clone -b $CUMULUS_BRANCH --single-branch --depth 1 https://github.com/paritytech/cumulus submodules/cumulus
-
-RUN git clone -b $SUBSTRATE_BRANCH --single-branch --depth 1 https://github.com/paritytech/substrate submodules/substrate
-
-RUN git clone --single-branch https://github.com/open-web3-stack/open-runtime-module-library submodules/open-runtime-module-library
-RUN cd submodules/open-runtime-module-library; git checkout $ORML_REV
-
-RUN nix-shell /shell.nix --run "./symlink_aws_fix.sh"
-RUN nix-shell /shell.nix --run "./patches_cmds/apply.sh all"
-RUN nix-shell /shell.nix --run "./patches_cmds/cumulus_gen.sh"
+RUN nix-shell /shell.nix --run "./patches_cmds/subdir_apply_all.sh ."
 
 RUN nix-shell /shell.nix --run 'cargo build --release --features fast-runtime --features rio-testnet'
 

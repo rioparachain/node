@@ -1,13 +1,14 @@
 use cumulus_primitives_core::ParaId;
 use parachain_rio_runtime::{
-	AccountId, AssetInfo, AuraId, Balance, CurrencyId, RioAssetsConfig, Signature, Text,
-	EXISTENTIAL_DEPOSIT,
+	AccountId, AssetInfo, AuraId, Balance, CurrencyId, EVMConfig, EthereumConfig, RioAssetsConfig,
+	Signature, Text, EXISTENTIAL_DEPOSIT,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
+use std::{collections::BTreeMap, str::FromStr};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<parachain_rio_runtime::GenesisConfig, Extensions>;
@@ -317,6 +318,10 @@ fn testnet_genesis(
 		polkadot_xcm: parachain_rio_runtime::PolkadotXcmConfig {
 			safe_xcm_version: Some(SAFE_XCM_VERSION),
 		},
+		evm: EVMConfig { accounts: BTreeMap::new() },
+		ethereum: EthereumConfig {},
+		dynamic_fee: Default::default(),
+		base_fee: Default::default(),
 		rio_assets: RioAssetsConfig { init: assets_init() },
 	}
 }

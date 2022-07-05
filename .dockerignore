@@ -11,8 +11,10 @@
 !.cargo
 !Cargo.lock
 !Cargo.toml
+!.dprint.json
 !.rustfmt*.toml
 !cumulus
+!frontier
 !node
 !pallets
 !primitives

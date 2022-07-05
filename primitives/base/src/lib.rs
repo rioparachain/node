@@ -9,6 +9,7 @@ pub mod types;
 
 pub mod macros;
 
+use sp_core::H160;
 use sp_runtime::{
   generic,
   traits::{BlakeTwo256, IdentifyAccount, Verify},
@@ -30,10 +31,17 @@ pub type SignedExtra<Runtime> = (
 
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic<Call, Runtime> =
-  generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra<Runtime>>;
+  fp_self_contained::UncheckedExtrinsic<Address, Call, Signature, SignedExtra<Runtime>>;
+
+//pub type UncheckedExtrinsic<Call, Runtime> =
+//  generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra<Runtime>>;
 
 /// Extrinsic type that has already been checked.
-pub type CheckedExtrinsic<Call, Runtime> = generic::CheckedExtrinsic<AccountId, Call, SignedExtra<Runtime>>;
+pub type CheckedExtrinsic<Call, Runtime> =
+  fp_self_contained::CheckedExtrinsic<AccountId, Call, SignedExtra<Runtime>, H160>;
+
+//pub type CheckedExtrinsic<Call, Runtime> = generic::CheckedExtrinsic<AccountId, Call,
+// SignedExtra<Runtime>>;
 
 pub type Percent = sp_runtime::Percent;
 

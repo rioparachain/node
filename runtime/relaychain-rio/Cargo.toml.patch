@@ -1,46 +1,51 @@
---- runtime/relaychain-rio/Cargo.toml.tmp
-+++ runtime/relaychain-rio/Cargo.toml.tmp.migrate
+--- runtime/relaychain-rio/.tmp/original/Cargo.toml
++++ runtime/relaychain-rio/.tmp/migrate/Cargo.toml
 @@ -1,5 +1,5 @@
  [package]
 -name = "polkadot-runtime"
 +name = "relaychain-rio-runtime"
  version = "0.9.24"
  authors = ["Parity Technologies <admin@parity.io>"]
- edition = "2021"
-@@ -63,9 +63,10 @@
- frame-support = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
- pallet-staking = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
+ build = "build.rs"
+@@ -64,6 +64,7 @@
+ pallet-session = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
+ pallet-staking = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
  pallet-staking-reward-curve = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
-+pallet-sudo = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24", optional = true }
- frame-system = {git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
- frame-system-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
++pallet-sudo = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24", optional = true }
+ pallet-timestamp = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
+ pallet-tips = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
+ pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
+@@ -72,7 +73,7 @@
+ pallet-utility = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
+ pallet-vesting = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.24" }
+ pallet-xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", default-features = false }
 -polkadot-runtime-constants = { package = "polkadot-runtime-constants", path = "./constants", default-features = false }
 +polkadot-runtime-constants = { package = "relaychain-rio-runtime-constants", path = "./constants", default-features = false }
- pallet-timestamp = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
- pallet-tips = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
- pallet-treasury = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.24" }
-@@ -92,7 +93,7 @@
  
- [dev-dependencies]
- hex-literal = "0.3.4"
+ frame-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true, branch = "polkadot-v0.9.24" }
+ frame-system-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true, branch = "polkadot-v0.9.24" }
+@@ -96,7 +97,7 @@
+ separator = "0.4.1"
+ serde_json = "1.0.81"
+ sp-trie = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
 -tiny-keccak = "2.0.2"
 +tiny-keccak = { version = "2.0.2", features = ["sha3"] }
- keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
- sp-trie = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
  trie-db = "0.23.1"
+ 
+ [build-dependencies]
 @@ -106,6 +107,7 @@
  default = ["std"]
  no_std = []
  only-staking = []
 +rio-testnet = ["pallet-sudo"]
  std = [
- 	"authority-discovery-primitives/std",
- 	"bitvec/std",
+   "authority-discovery-primitives/std",
+   "bitvec/std",
 @@ -148,6 +150,7 @@
- 	"pallet-scheduler/std",
- 	"pallet-session/std",
- 	"pallet-staking/std",
-+	"pallet-sudo/std",
- 	"pallet-timestamp/std",
- 	"pallet-treasury/std",
- 	"pallet-tips/std",
+   "pallet-scheduler/std",
+   "pallet-session/std",
+   "pallet-staking/std",
++  "pallet-sudo/std",
+   "pallet-timestamp/std",
+   "pallet-treasury/std",
+   "pallet-tips/std",
