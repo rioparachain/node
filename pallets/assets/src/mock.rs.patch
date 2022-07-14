@@ -1,0 +1,73 @@
+--- pallets/assets/src/mock.rs.tmp
++++ pallets/assets/src/mock.rs
+@@ -24,6 +24,7 @@
+ pub type CurrencyId = u32;
+ pub type Balance = u64;
+ pub type ReserveIdentifier = [u8; 8];
++pub type StringLimit = ConstU32<128>;
+ 
+ pub const DOT: CurrencyId = 1;
+ pub const BTC: CurrencyId = 2;
+@@ -281,6 +282,7 @@
+ 	type OnKilledTokenAccount = TrackKilledAccounts;
+ 	type MaxLocks = ConstU32<2>;
+ 	type MaxReserves = ConstU32<2>;
++	type StringLimit = ConstU32<128>;
+ 	type ReserveIdentifier = ReserveIdentifier;
+ 	type DustRemovalWhitelist = MockDustRemovalWhitelist;
+ }
+@@ -303,22 +305,42 @@
+ );
+ 
+ pub struct ExtBuilder {
+-	balances: Vec<(AccountId, CurrencyId, Balance)>,
+ 	treasury_genesis: bool,
++	init: Vec<(
++		CurrencyId,
++		AssetInfo<BoundedVec<u8, StringLimit>>,
++		Restrictions,
++		Vec<(AccountId, Balance)>,
++	)>
+ }
+ 
+ impl Default for ExtBuilder {
+ 	fn default() -> Self {
+ 		Self {
+-			balances: vec![],
+ 			treasury_genesis: false,
++			init: vec![],
+ 		}
+ 	}
+ }
++pub type Text = BoundedVec<u8, StringLimit>;
++macro_rules! bvec {
++  ($a:expr) => {
++    Text::try_from($a.to_vec()).unwrap()
++  };
++}
+ 
+ impl ExtBuilder {
+ 	pub fn balances(mut self, mut balances: Vec<(AccountId, CurrencyId, Balance)>) -> Self {
+-		self.balances.append(&mut balances);
++		for (account_id, currency_id, balance) in balances.iter() {
++			self.init.append(&mut vec![(*currency_id, AssetInfo {
++				symbol: bvec!(b"RFUEL"),
++				name: bvec!(b"Rfuel"),
++				decimals: 12,
++				desc: bvec!(b"Rfuel"),
++				chain: Chain::Rio,
++			}, Restrictions::none(), vec![(account_id.clone(), *balance)])]);
++		}
++
+ 		self
+ 	}
+ 
+@@ -328,7 +350,7 @@
+ 			.unwrap();
+ 
+ 		tokens::GenesisConfig::<Runtime> {
+-			balances: self.balances,
++			init: self.init,
+ 		}
+ 		.assimilate_storage(&mut t)
+ 		.unwrap();

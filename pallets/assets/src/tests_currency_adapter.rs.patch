@@ -1,0 +1,153 @@
+--- pallets/assets/src/tests_currency_adapter.rs.tmp
++++ pallets/assets/src/tests_currency_adapter.rs
+@@ -6,6 +6,22 @@
+ use frame_support::{assert_noop, assert_ok};
+ use mock::*;
+ 
++macro_rules! bvec {
++  ($a:expr) => {
++    Text::try_from($a.to_vec()).unwrap()
++  };
++}
++
++fn get_asset_info() -> AssetInfo<Text> {
++	AssetInfo {
++		symbol: bvec!(b"RFUEL"),
++		name: bvec!(b"Rfuel"),
++		decimals: 12,
++		desc: bvec!(b"Rfuel"),
++		chain: Chain::Rio,
++	}
++}
++
+ #[test]
+ fn currency_adapter_ensure_currency_adapter_should_work() {
+ 	ExtBuilder::default()
+@@ -153,6 +169,7 @@
+ #[test]
+ fn currency_adapter_reserving_balance_should_work() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 111);
+ 
+ 		assert_eq!(TreasuryCurrencyAdapter::total_balance(&TREASURY_ACCOUNT), 111);
+@@ -170,6 +187,7 @@
+ #[test]
+ fn currency_adapter_balance_transfer_when_reserved_should_not_work() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 111);
+ 		assert_ok!(TreasuryCurrencyAdapter::reserve(&TREASURY_ACCOUNT, 69));
+ 		assert_noop!(
+@@ -182,6 +200,7 @@
+ #[test]
+ fn currency_adapter_deducting_balance_should_work() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 111);
+ 		assert_ok!(TreasuryCurrencyAdapter::reserve(&TREASURY_ACCOUNT, 69));
+ 		assert_eq!(TreasuryCurrencyAdapter::free_balance(&TREASURY_ACCOUNT), 42);
+@@ -191,6 +210,7 @@
+ #[test]
+ fn currency_adapter_refunding_balance_should_work() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 42);
+ 		Tokens::set_reserved_balance(DOT, &TREASURY_ACCOUNT, 69);
+ 		TreasuryCurrencyAdapter::unreserve(&TREASURY_ACCOUNT, 69);
+@@ -202,6 +222,7 @@
+ #[test]
+ fn currency_adapter_slashing_balance_should_work() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 111);
+ 		assert_ok!(TreasuryCurrencyAdapter::reserve(&TREASURY_ACCOUNT, 69));
+ 		assert!(TreasuryCurrencyAdapter::slash(&TREASURY_ACCOUNT, 69).1.is_zero());
+@@ -214,6 +235,7 @@
+ #[test]
+ fn currency_adapter_slashing_incomplete_balance_should_work() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 42);
+ 		assert_eq!(TreasuryCurrencyAdapter::total_issuance(), 42);
+ 		assert_ok!(TreasuryCurrencyAdapter::reserve(&TREASURY_ACCOUNT, 21));
+@@ -451,6 +473,7 @@
+ #[test]
+ fn currency_adapter_slashing_reserved_balance_should_work() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 111);
+ 		assert_eq!(TreasuryCurrencyAdapter::total_issuance(), 111);
+ 		assert_ok!(TreasuryCurrencyAdapter::reserve(&TREASURY_ACCOUNT, 111));
+@@ -464,6 +487,7 @@
+ #[test]
+ fn currency_adapter_slashing_incomplete_reserved_balance_should_work() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 111);
+ 		assert_eq!(TreasuryCurrencyAdapter::total_issuance(), 111);
+ 		assert_ok!(TreasuryCurrencyAdapter::reserve(&TREASURY_ACCOUNT, 42));
+@@ -477,6 +501,7 @@
+ #[test]
+ fn currency_adapter_repatriating_reserved_balance_should_work() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 110);
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&ALICE, 2);
+ 		assert_ok!(TreasuryCurrencyAdapter::reserve(&TREASURY_ACCOUNT, 110));
+@@ -494,6 +519,7 @@
+ #[test]
+ fn currency_adapter_transferring_reserved_balance_should_work() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 110);
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&ALICE, 2);
+ 		assert_ok!(TreasuryCurrencyAdapter::reserve(&TREASURY_ACCOUNT, 110));
+@@ -511,6 +537,7 @@
+ #[test]
+ fn currency_adapter_transferring_reserved_balance_to_nonexistent_should_fail() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 111);
+ 		assert_ok!(TreasuryCurrencyAdapter::reserve(&TREASURY_ACCOUNT, 111));
+ 		assert_ok!(TreasuryCurrencyAdapter::repatriate_reserved(
+@@ -525,6 +552,7 @@
+ #[test]
+ fn currency_adapter_transferring_incomplete_reserved_balance_should_work() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 110);
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&ALICE, 2);
+ 		assert_ok!(TreasuryCurrencyAdapter::reserve(&TREASURY_ACCOUNT, 41));
+@@ -542,6 +570,7 @@
+ #[test]
+ fn currency_adapter_transferring_too_high_value_should_not_panic() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		TreasuryCurrencyAdapter::make_free_balance_be(&TREASURY_ACCOUNT, u64::max_value());
+ 		TreasuryCurrencyAdapter::make_free_balance_be(&ALICE, 2);
+ 
+@@ -584,6 +613,7 @@
+ #[test]
+ fn currency_adapter_slashing_named_reserved_balance_should_work() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 111);
+ 		assert_eq!(TreasuryCurrencyAdapter::total_issuance(), 111);
+ 		assert_ok!(TreasuryCurrencyAdapter::reserve_named(&RID_1, &TREASURY_ACCOUNT, 111));
+@@ -603,6 +633,7 @@
+ #[test]
+ fn currency_adapter_named_slashing_incomplete_reserved_balance_should_work() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 111);
+ 		assert_eq!(TreasuryCurrencyAdapter::total_issuance(), 111);
+ 		assert_ok!(TreasuryCurrencyAdapter::reserve_named(&RID_1, &TREASURY_ACCOUNT, 42));
+@@ -622,6 +653,7 @@
+ #[test]
+ fn currency_adapter_repatriating_named_reserved_balance_should_work() {
+ 	ExtBuilder::default().build().execute_with(|| {
++		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&TREASURY_ACCOUNT, 110);
+ 		let _ = TreasuryCurrencyAdapter::deposit_creating(&ALICE, 2);
+ 		assert_ok!(TreasuryCurrencyAdapter::reserve_named(&RID_1, &TREASURY_ACCOUNT, 110));
