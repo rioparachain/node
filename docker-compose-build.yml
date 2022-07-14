@@ -2,8 +2,8 @@ version: '3.7'
 
 services:
 
-  binaries:
-    image: binaries
+  polkadot:
+    image: polkadot
     build:
       context: .
       dockerfile: ./docker/polkadot.Dockerfile
@@ -16,12 +16,12 @@ services:
   chainspec:
     image: chainspec
     depends_on:
-      - binaries
+      - polkadot
     build:
       context: .
       dockerfile: ./docker/chainspec.Dockerfile
       args:
-        FROM_IMAGE: binaries
+        IMAGE_POLKADOT: polkadot
         MNEMONIC: ${MNEMONIC}
         RELAY_FILE_FROM: /rio/chainspec/polkadot-plain.json
         RELAY_FILE_TO: /rio/chainspec/polkadot-custom.json
@@ -37,7 +37,6 @@ services:
       - .keys:/rio/keys
       - ./docker:/rio/src/docker
     environment:
-      FROM_IMAGE: binaries
       MNEMONIC: ${MNEMONIC}
       RELAY_FILE_FROM: /rio/chainspec/polkadot-plain.json
       RELAY_FILE_TO: /rio/chainspec/polkadot-custom.json
@@ -56,5 +55,6 @@ services:
       context: .
       dockerfile: ./docker/runner.Dockerfile
       args:
-        FROM_IMAGE: chainspec
+        #IMAGE_CHAINSPEC: chainspec
+        #IMAGE_POLKADOT: polkadot
         NIX_LIB: /nix/store/z56jcx3j1gfyk4sv7g8iaan0ssbdkhz1-glibc-2.33-56

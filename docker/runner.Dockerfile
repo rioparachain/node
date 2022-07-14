@@ -1,7 +1,5 @@
-# todo remove values
-
-ARG FROM_IMAGE=chainspec
-FROM ${FROM_IMAGE} AS CHAINSPEC
+FROM chainspec AS CHAINSPEC
+FROM polkadot AS POLKADOT
 
 FROM alpine:latest
 
@@ -12,7 +10,7 @@ RUN apk add --no-cache curl nodejs nfs-utils sed gawk
 
 WORKDIR /rio
 
-COPY --from=CHAINSPEC /export/nix/store /nix/store
+COPY --from=POLKADOT  /export/nix/store /nix/store
 COPY --from=CHAINSPEC /rio/src/target/release/parachain-rio ./release/parachain-rio
 COPY --from=CHAINSPEC /rio/src/target/release/relaychain-rio ./release/relaychain-rio
 

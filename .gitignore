@@ -55,3 +55,4 @@ pallets/assets/**/*.rs
 .DS_Store
 .idea
 .vscode
+
