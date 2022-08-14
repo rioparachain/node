@@ -1,6 +1,11 @@
 const {
-    MNEMONIC = 'chronic scene situate genuine advice gospel lady obvious blood palace economy marble'
+	MNEMONIC
 } = process.env;
+
+if (!MNEMONIC) {
+	console.error(new Error('MNEMONIC phrase is not set!'));
+	process.exit(2);
+}
 
 const runCommand = require('./cmd.js');
 

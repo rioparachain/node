@@ -1,7 +1,8 @@
 # BUILD
 
 > export MNEMONIC="..."
-> docker-compose -f ./docker-compose-build.yml build --no-cache --build-arg "MNEMONIC=${MNEMONIC}"
+> export AIRDROP_SCAN_PAGES=500
+> docker-compose -f ./docker-compose-build.yml build --no-cache --build-arg "MNEMONIC=${MNEMONIC}" --build-arg "AIRDROP_SCAN_PAGES=${AIRDROP_SCAN_PAGES}"
 >
 > docker-compose -f ./docker-compose-build.yml up chainspec
 
@@ -24,6 +25,8 @@
 
 - login
 
+> aws configure
+>
 > aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 061416964074.dkr.ecr.us-east-1.amazonaws.com/rio-node
 
 > docker-compose up

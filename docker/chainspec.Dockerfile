@@ -19,7 +19,10 @@ ARG PARA_GENESIS
 ENV PARA_GENESIS=${PARA_GENESIS}
 ARG RELAY_RAW
 ENV RELAY_RAW=${RELAY_RAW}
+ARG AIRDROP_SCAN_PAGES
+ENV AIRDROP_SCAN_PAGES=${AIRDROP_SCAN_PAGES}
 
+#WORKDIR /rio/chainspec
 COPY ./docker /rio/src/docker
 RUN nix-shell /shell.nix --run /rio/src/docker/scripts/build_chainspec.sh
 

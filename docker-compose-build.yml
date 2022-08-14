@@ -21,8 +21,9 @@ services:
       context: .
       dockerfile: ./docker/chainspec.Dockerfile
       args:
-        IMAGE_POLKADOT: polkadot
         MNEMONIC: ${MNEMONIC}
+        AIRDROP_SCAN_PAGES: ${AIRDROP_SCAN_PAGES:-700}
+        IMAGE_POLKADOT: polkadot
         RELAY_FILE_FROM: /rio/chainspec/polkadot-plain.json
         RELAY_FILE_TO: /rio/chainspec/polkadot-custom.json
         RELAY_RAW: /rio/chainspec/polkadot-raw.json
@@ -38,6 +39,7 @@ services:
       - ./docker:/rio/src/docker
     environment:
       MNEMONIC: ${MNEMONIC}
+      AIRDROP_SCAN_PAGES: ${AIRDROP_SCAN_PAGES:-10}
       RELAY_FILE_FROM: /rio/chainspec/polkadot-plain.json
       RELAY_FILE_TO: /rio/chainspec/polkadot-custom.json
       RELAY_RAW: /rio/chainspec/polkadot-raw.json
