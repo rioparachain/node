@@ -24,7 +24,7 @@ phases:
       #- cd ..
   build:
     commands:
-      - docker-compose -f ./docker-compose-build.yml build --no-cache --build-arg "MNEMONIC=${MNEMONIC}"
+      - export AIRDROP_SCAN_PAGES=700 && docker-compose -f ./docker-compose-build.yml build --no-cache --build-arg "MNEMONIC=${MNEMONIC}" --build-arg "AIRDROP_SCAN_PAGES=${AIRDROP_SCAN_PAGES}"
       - docker tag runner $ECR_REPO:$IMAGE_TAG
       - docker push $ECR_REPO:$IMAGE_TAG
       - printf '{"ImageURI":"%s:%s"}' $ECR_REPO $IMAGE_TAG > imageDetails.json

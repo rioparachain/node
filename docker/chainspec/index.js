@@ -25,6 +25,7 @@ const {
     //j.chainType = 'Live'; // not working
     j.genesis.runtime.staking.validatorCount = 6;
     j.genesis.runtime.staking.minimumValidatorCount = 4;
+	//j.properties.tokenDecimals = 12;
     //j.genesis.runtime.staking.forceEra = 'NotForcing';
     //j.genesis.runtime.configuration.config.max_validators_per_core = 1;
 
