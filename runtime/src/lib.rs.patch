@@ -1,6 +1,6 @@
 --- runtime/src/lib.rs.tmp
 +++ runtime/src/lib.rs
-@@ -9,29 +9,38 @@
+@@ -9,29 +9,40 @@
  mod weights;
  pub mod xcm_config;
  
@@ -10,6 +10,7 @@
  use sp_api::impl_runtime_apis;
  use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 +
++pub use rpallet_gateway::{self, Bip32, Create2, DepositAddrInfo, WithdrawItem};
 +use sp_core::{crypto::ByteArray, H160, H256, U256};
  use sp_runtime::{
  	create_runtime_str, generic, impl_opaque_keys,
@@ -23,6 +24,7 @@
 +	transaction_validity::{TransactionSource, TransactionValidity, TransactionValidityError},
 +	ApplyExtrinsicResult,
  };
++use sp_std::collections::btree_map::BTreeMap;
  
 -use sp_std::prelude::*;
 +use sp_std::{marker::PhantomData, prelude::*};
@@ -45,7 +47,7 @@
  };
  use frame_system::{
  	limits::{BlockLength, BlockWeights},
-@@ -45,7 +54,7 @@
+@@ -45,7 +56,7 @@
  pub use sp_runtime::BuildStorage;
  
  // Polkadot imports
@@ -54,7 +56,7 @@
  
  use weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight};
  
-@@ -53,8 +62,26 @@
+@@ -53,8 +64,26 @@
  use xcm::latest::prelude::BodyId;
  use xcm_executor::XcmExecutor;
  
@@ -83,7 +85,7 @@
  
  /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
  pub type Signature = MultiSignature;
-@@ -108,6 +135,8 @@
+@@ -108,6 +137,8 @@
  /// Extrinsic type that has already been checked.
  pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
  
@@ -92,7 +94,7 @@
  /// Executive: handles dispatch to the various modules.
  pub type Executive = frame_executive::Executive<
  	Runtime,
-@@ -132,7 +161,7 @@
+@@ -132,7 +163,7 @@
  	type Balance = Balance;
  	fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
  		// in Rococo, extrinsic base weight (smallest non-zero weight) is mapped to 1 MILLIUNIT:
@@ -101,7 +103,7 @@
  		let p = MILLIUNIT / 10;
  		let q = 100 * Balance::from(ExtrinsicBaseWeight::get());
  		smallvec![WeightToFeeCoefficient {
-@@ -169,8 +198,8 @@
+@@ -169,8 +200,8 @@
  
  #[sp_version::runtime_version]
  pub const VERSION: RuntimeVersion = RuntimeVersion {
@@ -112,7 +114,7 @@
  	authoring_version: 1,
  	spec_version: 1,
  	impl_version: 0,
-@@ -398,7 +427,8 @@
+@@ -398,7 +429,8 @@
  }
  
  parameter_types! {
@@ -122,7 +124,7 @@
  	pub const Offset: u32 = 0;
  	pub const MaxAuthorities: u32 = 100_000;
  }
-@@ -427,7 +457,7 @@
+@@ -427,7 +459,7 @@
  	pub const PotId: PalletId = PalletId(*b"PotStake");
  	pub const MaxCandidates: u32 = 1000;
  	pub const MinCandidates: u32 = 5;
@@ -131,7 +133,7 @@
  	pub const MaxInvulnerables: u32 = 100;
  	pub const ExecutiveBody: BodyId = BodyId::Executive;
  }
-@@ -451,9 +481,177 @@
+@@ -451,9 +483,198 @@
  	type WeightInfo = ();
  }
  
@@ -186,7 +188,7 @@
 +}
 +
 +impl pallet_ethereum::Config for Runtime {
- 	type Event = Event;
++	type Event = Event;
 +	type StateRoot = pallet_ethereum::IntermediateStateRoot<Self>;
 +}
 +
@@ -271,6 +273,27 @@
 +	type StringLimit = StringLimit;
 +}
 +
++// orml
++parameter_types! {
++	pub const GetNativeCurrencyId: CurrencyId = rp_protocol::RFUEL;
++	pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
++}
++
++use orml_currencies::BasicCurrencyAdapter;
++
++impl orml_currencies::Config for Runtime {
++	type MultiCurrency = RioAssets;
++	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
++	type GetNativeCurrencyId = GetNativeCurrencyId;
++	type WeightInfo = ();
++}
++
++impl rpallet_gateway::Config for Runtime {
++	type Event = Event;
++	type Currency = Currencies;
++	type WeightInfo = ();
++}
++
 +impl rpallet_assets_ext::Config for Runtime {}
 +
 +use frame_support::traits::Get;
@@ -299,7 +322,7 @@
 +
 +impl rpallet_staking_pool::Config for Runtime {
 +	type DefaultPrice = DefaultPrice;
-+	type Event = Event;
+ 	type Event = Event;
 +	type MarkerCurrency = rpallet_assets::CurrencyAdapter<Runtime, StakingPoolMarker>;
 +	type MaximumPerBlockReward = MaximumPerBlockReward;
 +	type MinimumStakeBalance = MinimumStakeBalance;
@@ -311,7 +334,7 @@
  }
  
  // Create the runtime by composing the FRAME pallets that were previously configured.
-@@ -488,11 +686,98 @@
+@@ -488,11 +709,102 @@
  		CumulusXcm: cumulus_pallet_xcm::{Pallet, Event<T>, Origin} = 32,
  		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 33,
  
@@ -324,10 +347,14 @@
 +		BaseFee: pallet_base_fee::{Pallet, Call, Storage, Config<T>, Event} = 43,
 +		HotfixSufficients: pallet_hotfix_sufficients::{Pallet, Call} = 44,
 +
++		// Orml
++		Currencies: orml_currencies::{Pallet, Call, Storage} = 50,
++
 +		// Rio.
 +		RioAssets: rpallet_assets::{Pallet, Call, Storage, Config<T>, Event<T>} = 60,
 +		RioAssetsExt: rpallet_assets_ext::{Pallet, Call} = 61,
 +		RioStakingPool: rpallet_staking_pool::{Pallet, Call, Storage, Event<T>} = 62,
++		RioGateway: rpallet_gateway::{Pallet, Call, Storage, Config<T>, Event<T>} = 63,
  	}
  );
  
@@ -412,7 +439,41 @@
  #[cfg(feature = "runtime-benchmarks")]
  #[macro_use]
  extern crate frame_benchmarking;
-@@ -616,10 +901,161 @@
+@@ -510,6 +822,33 @@
+ }
+ 
+ impl_runtime_apis! {
++	impl rio_gateway_rpc_runtime_api::GatewayApi<
++		Block,
++		CurrencyId,
++		AccountId,
++		Balance,
++	> for Runtime {
++		fn withdraw_list() -> BTreeMap<u64, (WithdrawItem<CurrencyId, AccountId, Balance>, Balance)> {
++			RioGateway::withdraw_list()
++		}
++
++		fn pending_withdraw_list() -> BTreeMap<u64, (WithdrawItem<CurrencyId, AccountId, Balance>, Balance)> {
++			RioGateway::pending_withdraw_list()
++		}
++
++		fn try_get_current_strategy_unlocked_rewards() -> Balance {
++			RioStakingPool::try_get_current_strategy_unlocked_rewards().unwrap()
++		}
++
++		fn try_get_unlocked_rewards() -> (Balance, bool) {
++			RioStakingPool::try_get_unlocked_rewards().unwrap()
++		}
++
++		fn try_calculate_price() -> Price {
++			RioStakingPool::try_calculate_price().unwrap()
++		}
++	}
++
+ 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
+ 		fn slot_duration() -> sp_consensus_aura::SlotDuration {
+ 			sp_consensus_aura::SlotDuration::from_millis(Aura::slot_duration())
+@@ -616,10 +955,161 @@
  		}
  	}
  

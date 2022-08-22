@@ -37,7 +37,7 @@
  xcm = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.24" }
  xcm-builder = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.24" }
  xcm-executor = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.24" }
-@@ -75,6 +72,28 @@
+@@ -75,6 +72,30 @@
  pallet-collator-selection = { git = "https://github.com/paritytech/cumulus", default-features = false, branch = "polkadot-v0.9.24" }
  parachain-info = { git = "https://github.com/paritytech/cumulus", default-features = false, branch = "polkadot-v0.9.24" }
  
@@ -54,19 +54,21 @@
 +pallet-hotfix-sufficients = { path = "../frontier/frame/hotfix-sufficients", default-features = false }
 +
 +# Orml
++orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "27e3272d322dcdd915f0fc2002032e8d53a46523", version = "0.4.1-dev", default-features = false }
 +orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "27e3272d322dcdd915f0fc2002032e8d53a46523", version = "0.4.1-dev", default-features = false }
-+
++rio-gateway-rpc-runtime-api = { path = "../pallets/gateway/rpc/runtime-api", default-features = false }
 +# Rio
 +rp-base = { path = "../primitives/base", default-features = false }
 +rp-protocol = { path = "../primitives/protocol", default-features = false }
 +rpallet-assets = { path = "../pallets/assets", default-features = false }
 +rpallet-assets-ext = { path = "../pallets/assets-ext", default-features = false }
++rpallet-gateway = { path = "../pallets/gateway", default-features = false }
 +rpallet-staking-pool = { path = "../pallets/staking-pool", default-features = false }
 +
  [features]
  default = [
    "std",
-@@ -102,7 +121,6 @@
+@@ -102,7 +123,6 @@
    "pallet-collator-selection/std",
    "pallet-session/std",
    "pallet-sudo/std",
@@ -74,14 +76,17 @@
    "pallet-timestamp/std",
    "pallet-transaction-payment-rpc-runtime-api/std",
    "pallet-transaction-payment/std",
-@@ -125,6 +143,22 @@
+@@ -125,6 +145,25 @@
    "xcm-builder/std",
    "xcm-executor/std",
    "xcm/std",
 +  "orml-traits/std",
++  "orml-currencies/std",
 +  "rpallet-assets/std",
 +  "rpallet-assets-ext/std",
 +  "rpallet-staking-pool/std",
++  "rpallet-gateway/std",
++  "rio-gateway-rpc-runtime-api/std",
 +  "rp-base/std",
 +  "rp-protocol/std",
 +  "fp-rpc/std",
@@ -97,7 +102,7 @@
  ]
  
  runtime-benchmarks = [
-@@ -135,7 +169,6 @@
+@@ -135,7 +174,6 @@
    "frame-system/runtime-benchmarks",
    "pallet-balances/runtime-benchmarks",
    "pallet-collator-selection/runtime-benchmarks",
@@ -105,7 +110,7 @@
    "pallet-timestamp/runtime-benchmarks",
    "pallet-xcm/runtime-benchmarks",
    "sp-runtime/runtime-benchmarks",
-@@ -148,3 +181,6 @@
+@@ -148,3 +186,6 @@
    "frame-executive/try-runtime",
    "frame-try-runtime",
  ]

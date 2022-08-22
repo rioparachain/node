@@ -22,6 +22,8 @@ members = [
   "node/relaychain-rio-service",
   "pallets/assets",
   "pallets/assets-ext",
+  "pallets/gateway",
+  "pallets/gateway/rpc",
   "pallets/staking-pool",
   "proc-macro",
   "runtime",

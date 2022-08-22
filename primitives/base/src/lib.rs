@@ -1,9 +1,9 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
+use frame_support::{traits::ConstU32, BoundedVec};
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-
 pub mod traits;
 pub mod types;
 
@@ -94,8 +94,9 @@ pub type Amount = i128;
 pub type CurrencyId = u32;
 
 pub type Text = Vec<u8>;
-pub type ChainAddress = Vec<u8>;
-pub type Memo = Vec<u8>;
+pub type ChainAddress = BoundedVec<u8, ConstU32<128>>;
+pub type BBVec = BoundedVec<u8, ConstU32<128>>;
+pub type Memo = BoundedVec<u8, ConstU32<128>>;
 pub type Price = FixedU128;
 
 /// The address format for describing accounts.

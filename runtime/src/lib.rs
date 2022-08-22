@@ -15,6 +15,7 @@ use smallvec::smallvec;
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 
+pub use rpallet_gateway::{self, Bip32, Create2, DepositAddrInfo, WithdrawItem};
 use sp_core::{crypto::ByteArray, H160, H256, U256};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
@@ -25,6 +26,7 @@ use sp_runtime::{
 	transaction_validity::{TransactionSource, TransactionValidity, TransactionValidityError},
 	ApplyExtrinsicResult,
 };
+use sp_std::collections::btree_map::BTreeMap;
 
 use sp_std::{marker::PhantomData, prelude::*};
 #[cfg(feature = "std")]
@@ -615,6 +617,27 @@ impl rpallet_assets::Config for Runtime {
 	type StringLimit = StringLimit;
 }
 
+// orml
+parameter_types! {
+	pub const GetNativeCurrencyId: CurrencyId = rp_protocol::RFUEL;
+	pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
+}
+
+use orml_currencies::BasicCurrencyAdapter;
+
+impl orml_currencies::Config for Runtime {
+	type MultiCurrency = RioAssets;
+	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+	type GetNativeCurrencyId = GetNativeCurrencyId;
+	type WeightInfo = ();
+}
+
+impl rpallet_gateway::Config for Runtime {
+	type Event = Event;
+	type Currency = Currencies;
+	type WeightInfo = ();
+}
+
 impl rpallet_assets_ext::Config for Runtime {}
 
 use frame_support::traits::Get;
@@ -693,10 +716,14 @@ construct_runtime!(
 		BaseFee: pallet_base_fee::{Pallet, Call, Storage, Config<T>, Event} = 43,
 		HotfixSufficients: pallet_hotfix_sufficients::{Pallet, Call} = 44,
 
+		// Orml
+		Currencies: orml_currencies::{Pallet, Call, Storage} = 50,
+
 		// Rio.
 		RioAssets: rpallet_assets::{Pallet, Call, Storage, Config<T>, Event<T>} = 60,
 		RioAssetsExt: rpallet_assets_ext::{Pallet, Call} = 61,
 		RioStakingPool: rpallet_staking_pool::{Pallet, Call, Storage, Event<T>} = 62,
+		RioGateway: rpallet_gateway::{Pallet, Call, Storage, Config<T>, Event<T>} = 63,
 	}
 );
 
@@ -795,6 +822,33 @@ mod benches {
 }
 
 impl_runtime_apis! {
+	impl rio_gateway_rpc_runtime_api::GatewayApi<
+		Block,
+		CurrencyId,
+		AccountId,
+		Balance,
+	> for Runtime {
+		fn withdraw_list() -> BTreeMap<u64, (WithdrawItem<CurrencyId, AccountId, Balance>, Balance)> {
+			RioGateway::withdraw_list()
+		}
+
+		fn pending_withdraw_list() -> BTreeMap<u64, (WithdrawItem<CurrencyId, AccountId, Balance>, Balance)> {
+			RioGateway::pending_withdraw_list()
+		}
+
+		fn try_get_current_strategy_unlocked_rewards() -> Balance {
+			RioStakingPool::try_get_current_strategy_unlocked_rewards().unwrap()
+		}
+
+		fn try_get_unlocked_rewards() -> (Balance, bool) {
+			RioStakingPool::try_get_unlocked_rewards().unwrap()
+		}
+
+		fn try_calculate_price() -> Price {
+			RioStakingPool::try_calculate_price().unwrap()
+		}
+	}
+
 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
 		fn slot_duration() -> sp_consensus_aura::SlotDuration {
 			sp_consensus_aura::SlotDuration::from_millis(Aura::slot_duration())
