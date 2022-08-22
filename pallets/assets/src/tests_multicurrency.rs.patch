@@ -1,13 +1,13 @@
 --- pallets/assets/src/tests_multicurrency.rs.tmp
 +++ pallets/assets/src/tests_multicurrency.rs
-@@ -6,9 +6,27 @@
+@@ -6,9 +6,26 @@
  use frame_support::{assert_noop, assert_ok};
  use mock::{Event, *};
  
 +macro_rules! bvec {
-+  ($a:expr) => {
-+    Text::try_from($a.to_vec()).unwrap()
-+  };
++	($a:expr) => {
++		Text::try_from($a.to_vec()).unwrap()
++	};
 +}
 +
 +fn get_asset_info() -> AssetInfo<Text> {
@@ -22,14 +22,12 @@
 +
  #[test]
  fn multicurrency_deposit_work() {
--	ExtBuilder::default().build().execute_with(|| {
-+	ExtBuilder::default()
-+		.build().execute_with(|| {
+ 	ExtBuilder::default().build().execute_with(|| {
 +		assert_ok!(Pallet::<Runtime>::create_asset(DOT, get_asset_info()));
  		assert!(!Accounts::<Runtime>::contains_key(CHARLIE, DOT));
  		assert_eq!(Tokens::free_balance(DOT, &CHARLIE), 0);
  		assert_eq!(Tokens::total_issuance(DOT), 0);
-@@ -375,6 +393,7 @@
+@@ -375,6 +392,7 @@
  #[test]
  fn no_op_if_amount_is_zero() {
  	ExtBuilder::default().build().execute_with(|| {

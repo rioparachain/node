@@ -1,14 +1,13 @@
 --- pallets/assets/src/tests.rs.tmp
 +++ pallets/assets/src/tests.rs
-@@ -12,6 +12,23 @@
+@@ -12,6 +12,22 @@
  // tests for genesis
  // *************************************************
  
-+
 +macro_rules! bvec {
-+  ($a:expr) => {
-+    Text::try_from($a.to_vec()).unwrap()
-+  };
++	($a:expr) => {
++		Text::try_from($a.to_vec()).unwrap()
++	};
 +}
 +
 +fn get_asset_info() -> AssetInfo<Text> {
@@ -24,7 +23,7 @@
  #[test]
  fn genesis_issuance_should_work() {
  	ExtBuilder::default()
-@@ -185,84 +202,84 @@
+@@ -185,84 +201,85 @@
  		});
  }
  
@@ -113,24 +112,25 @@
 +// 		.build()
 +// 		.execute_with(|| {
 +// 			// bad origin
-+// 			assert_noop!(Tokens::set_balance(Some(ALICE).into(), ALICE, DOT, 200, 100), BadOrigin);
++// 			assert_noop!(Tokens::set_balance(Some(ALICE).into(), ALICE, DOT, 200, 100),
++// BadOrigin);
 +//
 +// 			// total balance overflow
 +// 			assert_noop!(
-+// 				Tokens::set_balance(RawOrigin::Root.into(), ALICE, DOT, Balance::max_value(), 1),
-+// 				ArithmeticError::Overflow
++// 				Tokens::set_balance(RawOrigin::Root.into(), ALICE, DOT, Balance::max_value(),
++// 1), 				ArithmeticError::Overflow
 +// 			);
 +//
 +// 			// total issurance overflow
 +// 			assert_noop!(
-+// 				Tokens::set_balance(RawOrigin::Root.into(), ALICE, DOT, Balance::max_value(), 0),
-+// 				ArithmeticError::Overflow
++// 				Tokens::set_balance(RawOrigin::Root.into(), ALICE, DOT, Balance::max_value(),
++// 0), 				ArithmeticError::Overflow
 +// 			);
 +//
 +// 			// total issurance overflow
 +// 			assert_noop!(
-+// 				Tokens::set_balance(RawOrigin::Root.into(), ALICE, DOT, Balance::max_value(), 0),
-+// 				ArithmeticError::Overflow
++// 				Tokens::set_balance(RawOrigin::Root.into(), ALICE, DOT, Balance::max_value(),
++// 0), 				ArithmeticError::Overflow
 +// 			);
 +//
 +// 			assert!(Accounts::<Runtime>::contains_key(ALICE, DOT));
@@ -138,8 +138,8 @@
 +// 			assert_eq!(Tokens::reserved_balance(DOT, &ALICE), 0);
 +// 			assert_eq!(Tokens::total_issuance(DOT), 200);
 +//
-+// 			assert_ok!(Tokens::set_balance(RawOrigin::Root.into(), ALICE, DOT, 200, 100));
-+// 			System::assert_has_event(Event::Tokens(crate::Event::BalanceSet {
++// 			assert_ok!(Tokens::set_balance(RawOrigin::Root.into(), ALICE, DOT, 200,
++// 100)); 			System::assert_has_event(Event::Tokens(crate::Event::BalanceSet {
 +// 				currency_id: DOT,
 +// 				who: ALICE,
 +// 				free: 200,
@@ -228,7 +228,7 @@
  		assert!(!Accounts::<Runtime>::contains_key(CHARLIE, DOT));
  		assert_noop!(
  			Tokens::do_deposit(DOT, &CHARLIE, 1, false, true),
-@@ -1150,20 +1171,20 @@
+@@ -1150,20 +1171,21 @@
  		});
  }
  
@@ -256,7 +256,8 @@
 +// 		assert_eq!(TrackCreatedAccounts::accounts(), vec![(ALICE, DOT)]);
 +//
 +// 		assert_ok!(Tokens::set_balance(RawOrigin::Root.into(), ALICE, BTC, 200, 0));
-+// 		assert_eq!(TrackCreatedAccounts::accounts(), vec![(ALICE, DOT), (ALICE, BTC)]);
++// 		assert_eq!(TrackCreatedAccounts::accounts(), vec![(ALICE, DOT), (ALICE,
++// BTC)]);
 +//
 +// 		assert_ok!(Tokens::transfer_all(Some(ALICE).into(), CHARLIE, BTC, false));
 +// 		assert_eq!(

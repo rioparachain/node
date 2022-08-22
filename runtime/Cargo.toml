@@ -85,13 +85,15 @@ pallet-evm-precompile-simple = { path = "../frontier/frame/evm/precompile/simple
 pallet-hotfix-sufficients = { path = "../frontier/frame/hotfix-sufficients", default-features = false }
 
 # Orml
+orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "27e3272d322dcdd915f0fc2002032e8d53a46523", version = "0.4.1-dev", default-features = false }
 orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "27e3272d322dcdd915f0fc2002032e8d53a46523", version = "0.4.1-dev", default-features = false }
-
+rio-gateway-rpc-runtime-api = { path = "../pallets/gateway/rpc/runtime-api", default-features = false }
 # Rio
 rp-base = { path = "../primitives/base", default-features = false }
 rp-protocol = { path = "../primitives/protocol", default-features = false }
 rpallet-assets = { path = "../pallets/assets", default-features = false }
 rpallet-assets-ext = { path = "../pallets/assets-ext", default-features = false }
+rpallet-gateway = { path = "../pallets/gateway", default-features = false }
 rpallet-staking-pool = { path = "../pallets/staking-pool", default-features = false }
 
 [features]
@@ -144,9 +146,12 @@ std = [
   "xcm-executor/std",
   "xcm/std",
   "orml-traits/std",
+  "orml-currencies/std",
   "rpallet-assets/std",
   "rpallet-assets-ext/std",
   "rpallet-staking-pool/std",
+  "rpallet-gateway/std",
+  "rio-gateway-rpc-runtime-api/std",
   "rp-base/std",
   "rp-protocol/std",
   "fp-rpc/std",

@@ -1,14 +1,15 @@
 use cumulus_primitives_core::ParaId;
+use frame_support::{traits::ConstU32, BoundedVec};
 use parachain_rio_runtime::{
 	AccountId, AssetInfo, AuraId, Balance, CurrencyId, EVMConfig, EthereumConfig, RioAssetsConfig,
-	Signature, Text, EXISTENTIAL_DEPOSIT,
+	RioGatewayConfig, Signature, Text, EXISTENTIAL_DEPOSIT,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use std::{collections::BTreeMap, str::FromStr};
+use std::{collections::BTreeMap, convert::TryFrom, str::FromStr};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<parachain_rio_runtime::GenesisConfig, Extensions>;
@@ -278,6 +279,13 @@ pub fn local_testnet_config() -> ChainSpec {
 	)
 }
 
+pub type TextL = BoundedVec<u8, ConstU32<128>>;
+macro_rules! bvec {
+	($a:expr) => {
+		TextL::try_from($a.to_vec()).unwrap()
+	};
+}
+
 fn testnet_genesis(
 	invulnerables: Vec<(AccountId, AuraId)>,
 	endowed_accounts: Vec<AccountId>,
@@ -322,6 +330,29 @@ fn testnet_genesis(
 		ethereum: EthereumConfig {},
 		dynamic_fee: Default::default(),
 		base_fee: Default::default(),
+		rio_gateway: RioGatewayConfig {
+			max_deposit_index: 10000,
+			initial_supported_currencies: vec![
+				(CurrencyId::from(rp_protocol::RFUEL), 10 * 1_000_000_000_000_000_000), // 10 RFUEL
+				(CurrencyId::from(rp_protocol::OM), 10 * 1_000_000_000_000_000_000),
+				(CurrencyId::from(rp_protocol::RBTC), 5 * 100_000),  // 0.005 BTC
+				(CurrencyId::from(rp_protocol::RETH), 5 * 1_000_000_000_000_000_000),  // 0.05 ETH
+				(CurrencyId::from(rp_protocol::RUSDT), 5 * 1_000_000), // 5 USDT
+			],
+			deposit_addr_info: vec![(
+				CurrencyId::from(rp_protocol::RBTC),
+				rpallet_gateway::DepositAddrInfo::Bip32(
+					rpallet_gateway::Bip32 {
+						x_pub: bvec!(b"upub5DRdTWfz3NeZwd25HeQ2xMNjnYtYRfZzC6fEDjmPH2AwnxjvTrySjVApEiDufv68gqsZ7TCUcNfb1P4KLjNvZCTsPCaVb68SLedQwPKMLKR"),
+						path: bvec!(b"m/49'/1'/0")
+					}
+				)
+			)],
+			admins: vec![(
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				rpallet_gateway::Auths::all(),
+			)],
+		},
 		rio_assets: RioAssetsConfig { init: assets_init() },
 	}
 }

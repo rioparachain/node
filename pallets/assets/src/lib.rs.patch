@@ -75,7 +75,7 @@
  	}
  
  	/// The total issuance of a token type.
-@@ -397,35 +428,57 @@
+@@ -397,35 +428,58 @@
  		ValueQuery,
  	>;
  
@@ -130,7 +130,8 @@
 +			for (currency_id, info, restrictions, balances) in self.init.iter() {
 +				// create asset
 +				if <Pallet<T>>::asset_info_of(&currency_id).is_none() {
-+					<Pallet<T>>::create_asset(*currency_id, info.clone()).expect("create_asset must success in genesis");
++					<Pallet<T>>::create_asset(*currency_id, info.clone())
++						.expect("create_asset must success in genesis");
 +					// restriction
 +					AssetRestrictions::<T>::insert(currency_id, restrictions);
 +				}
@@ -148,7 +149,7 @@
  					assert!(
  						*initial_balance >= T::ExistentialDeposits::get(currency_id),
  						"the balance of any account should always be more than existential deposit.",
-@@ -438,7 +491,8 @@
+@@ -438,7 +492,8 @@
  							.checked_add(initial_balance)
  							.expect("total issuance cannot overflow when building genesis")
  					});
@@ -158,7 +159,7 @@
  		}
  	}
  
-@@ -557,6 +611,8 @@
+@@ -557,6 +612,8 @@
  			Self::do_transfer(currency_id, &from, &to, amount, ExistenceRequirement::AllowDeath)
  		}
  
@@ -167,7 +168,7 @@
  		/// Set the balances of a given account.
  		///
  		/// This will alter `FreeBalance` and `ReservedBalance` in storage. it
-@@ -614,6 +670,139 @@
+@@ -614,6 +671,139 @@
  				Ok(())
  			})
  		}
@@ -307,7 +308,7 @@
  	}
  }
  
-@@ -703,6 +892,9 @@
+@@ -703,6 +893,9 @@
  		who: &T::AccountId,
  		amount: T::Balance,
  	) -> DispatchResult {
@@ -317,7 +318,7 @@
  		if amount.is_zero() {
  			return Ok(());
  		}
-@@ -890,6 +1082,9 @@
+@@ -890,6 +1083,9 @@
  		amount: T::Balance,
  		existence_requirement: ExistenceRequirement,
  	) -> DispatchResult {
@@ -327,7 +328,7 @@
  		if amount.is_zero() || from == to {
  			return Ok(());
  		}
-@@ -957,6 +1152,9 @@
+@@ -957,6 +1153,9 @@
  		existence_requirement: ExistenceRequirement,
  		change_total_issuance: bool,
  	) -> DispatchResult {
@@ -337,7 +338,7 @@
  		if amount.is_zero() {
  			return Ok(());
  		}
-@@ -1015,6 +1213,9 @@
+@@ -1015,6 +1214,9 @@
  		require_existed: bool,
  		change_total_issuance: bool,
  	) -> DispatchResult {
@@ -347,7 +348,7 @@
  		if amount.is_zero() {
  			return Ok(());
  		}
-@@ -1096,6 +1297,10 @@
+@@ -1096,6 +1298,10 @@
  
  	// Check if `value` amount of free balance can be slashed from `who`.
  	fn can_slash(currency_id: Self::CurrencyId, who: &T::AccountId, value: Self::Balance) -> bool {
@@ -358,7 +359,7 @@
  		if value.is_zero() {
  			return true;
  		}
-@@ -1265,6 +1470,10 @@
+@@ -1265,6 +1471,10 @@
  	///
  	/// Always `true` if value to be reserved is zero.
  	fn can_reserve(currency_id: Self::CurrencyId, who: &T::AccountId, value: Self::Balance) -> bool {
@@ -369,7 +370,7 @@
  		if value.is_zero() {
  			return true;
  		}
-@@ -1306,6 +1515,9 @@
+@@ -1306,6 +1516,9 @@
  	///
  	/// Is a no-op if value to be reserved is zero.
  	fn reserve(currency_id: Self::CurrencyId, who: &T::AccountId, value: Self::Balance) -> DispatchResult {
@@ -379,7 +380,7 @@
  		if value.is_zero() {
  			return Ok(());
  		}
-@@ -1329,6 +1541,10 @@
+@@ -1329,6 +1542,10 @@
  	///
  	/// Is a no-op if the value to be unreserved is zero.
  	fn unreserve(currency_id: Self::CurrencyId, who: &T::AccountId, value: Self::Balance) -> Self::Balance {

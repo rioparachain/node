@@ -16,7 +16,7 @@
  	type ReserveIdentifier = ReserveIdentifier;
  	type DustRemovalWhitelist = MockDustRemovalWhitelist;
  }
-@@ -303,22 +305,42 @@
+@@ -303,22 +305,47 @@
  );
  
  pub struct ExtBuilder {
@@ -27,7 +27,7 @@
 +		AssetInfo<BoundedVec<u8, StringLimit>>,
 +		Restrictions,
 +		Vec<(AccountId, Balance)>,
-+	)>
++	)>,
  }
  
  impl Default for ExtBuilder {
@@ -41,33 +41,44 @@
  }
 +pub type Text = BoundedVec<u8, StringLimit>;
 +macro_rules! bvec {
-+  ($a:expr) => {
-+    Text::try_from($a.to_vec()).unwrap()
-+  };
++	($a:expr) => {
++		Text::try_from($a.to_vec()).unwrap()
++	};
 +}
  
  impl ExtBuilder {
  	pub fn balances(mut self, mut balances: Vec<(AccountId, CurrencyId, Balance)>) -> Self {
 -		self.balances.append(&mut balances);
 +		for (account_id, currency_id, balance) in balances.iter() {
-+			self.init.append(&mut vec![(*currency_id, AssetInfo {
-+				symbol: bvec!(b"RFUEL"),
-+				name: bvec!(b"Rfuel"),
-+				decimals: 12,
-+				desc: bvec!(b"Rfuel"),
-+				chain: Chain::Rio,
-+			}, Restrictions::none(), vec![(account_id.clone(), *balance)])]);
++			self.init.append(&mut vec![(
++				*currency_id,
++				AssetInfo {
++					symbol: bvec!(b"RFUEL"),
++					name: bvec!(b"Rfuel"),
++					decimals: 12,
++					desc: bvec!(b"Rfuel"),
++					chain: Chain::Rio,
++				},
++				Restrictions::none(),
++				vec![(account_id.clone(), *balance)],
++			)]);
 +		}
 +
  		self
  	}
  
-@@ -328,7 +350,7 @@
+@@ -327,11 +354,9 @@
+ 			.build_storage::<Runtime>()
  			.unwrap();
  
- 		tokens::GenesisConfig::<Runtime> {
+-		tokens::GenesisConfig::<Runtime> {
 -			balances: self.balances,
-+			init: self.init,
- 		}
- 		.assimilate_storage(&mut t)
- 		.unwrap();
+-		}
+-		.assimilate_storage(&mut t)
+-		.unwrap();
++		tokens::GenesisConfig::<Runtime> { init: self.init }
++			.assimilate_storage(&mut t)
++			.unwrap();
+ 
+ 		if self.treasury_genesis {
+ 			GenesisBuild::<Runtime>::assimilate_storage(&pallet_treasury::GenesisConfig::default(), &mut t).unwrap();

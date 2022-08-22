@@ -5,9 +5,9 @@
  use mock::*;
  
 +macro_rules! bvec {
-+  ($a:expr) => {
-+    Text::try_from($a.to_vec()).unwrap()
-+  };
++	($a:expr) => {
++		Text::try_from($a.to_vec()).unwrap()
++	};
 +}
 +
 +fn get_asset_info() -> AssetInfo<Text> {
