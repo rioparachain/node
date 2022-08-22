@@ -17,7 +17,7 @@ const {
 				'acco', 'audi', 'imon',
 				'babe', 'gran', 'aura'
 			].map(async keyType => {
-				const suf = ('00'+(1+accIdx)).substr(-2);
+				const suf = ('00'+(accIdx)).substr(-2);
 				await runCommand([
 					`/rio/src/target/release/${['relaychain-rio', 'parachain-rio'][chainIdx]} key insert`,
 					`--base-path /rio/keys/${['relay', 'collator'][chainIdx]}-${suf}`,
