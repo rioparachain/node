@@ -9,7 +9,7 @@ echo '555' >> /mnt/${APP_NAME}/${STAGE}/1.txt
 
 IP_LOCAL=`ip a | sed 's,[ /], ,g' | awk '/inet 10\./{ print $2 }' | head -n 1`
 
-curl "http://44.202.25.232:3000/collator?stage=${STAGE}" -o cur_account.txt
+curl "${DISTRIBUTE_KEYS}/collator?stage=${STAGE}" -o cur_account.txt
 cat cur_account.txt
 ACCOUNT=$(cat cur_account.txt)
 if [ "$ACCOUNT" = "" ]; then
@@ -21,12 +21,12 @@ BASE_PATH=/rio/keys/collator-`printf "%02d" $ACCOUNT`
 # todo - change to more secure random string - get it from AWS secret store
 NODE_KEY=`echo "seed ${SEED_PREFIX}//collator//$ACCOUNT" | sha256sum | sed 's,^.,0,;s, *-,,'`
 ACCOUNT_PUBLIC_KEY=`echo -n ${NODE_KEY} | /rio/release/parachain-rio key inspect-node-key --file /dev/stdin | tail -n 1`
-curl "http://44.202.25.232:3000/collator/${ACCOUNT}?stage=${STAGE}" -H "content-type: application/json"  -d "{\"key\": \"${ACCOUNT_PUBLIC_KEY}\", \"ip\": \"${IP_LOCAL}\"}" -o bootnodes.json
+curl "${DISTRIBUTE_KEYS}/collator/${ACCOUNT}?stage=${STAGE}" -H "content-type: application/json"  -d "{\"key\": \"${ACCOUNT_PUBLIC_KEY}\", \"ip\": \"${IP_LOCAL}\"}" -o bootnodes.json
 cat bootnodes.json
 BOOTNODE_IP=`node -e "console.log(JSON.parse(require('fs').readFileSync('bootnodes.json'))[0].ip)"`
 BOOTNODE_KEY=`node -e "console.log(JSON.parse(require('fs').readFileSync('bootnodes.json'))[0].key)"`
 
-curl "http://44.202.25.232:3000/relay/1?stage=${STAGE}" -o relay_bootnodes.json
+curl "${DISTRIBUTE_KEYS}/relay/1?stage=${STAGE}" -o relay_bootnodes.json
 cat relay_bootnodes.json
 RELAY_BOOTNODE_IP=`node -e "console.log(JSON.parse(require('fs').readFileSync('relay_bootnodes.json'))[0].ip)"`
 RELAY_BOOTNODE_KEY=`node -e "console.log(JSON.parse(require('fs').readFileSync('relay_bootnodes.json'))[0].key)"`
