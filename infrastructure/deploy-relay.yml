@@ -72,7 +72,9 @@ Resources:
             - "-c"
           Secrets:
             - Name: SEED_PREFIX
-              ValueFrom: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/rio-node/testnet/seed-prefix"
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:rio-node/testnet-MGuWnE:SEED_PREFIX::"
+            - Name: DISTRIBUTE_KEYS
+              ValueFrom: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:rio-node/testnet-MGuWnE:DISTRIBUTE_KEYS::"
           Environment:
             - Name: WS_PORT
               Value: 80

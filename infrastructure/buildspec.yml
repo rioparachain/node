@@ -6,6 +6,7 @@ env:
   git-credential-helper: yes
   secrets-manager:
     MNEMONIC: rio-node/testnet:MNEMONIC
+    DISTRIBUTE_KEYS: rio-node/testnet:DISTRIBUTE_KEYS
 
 phases:
   pre_build:
@@ -33,7 +34,7 @@ phases:
   post_build:
     commands:
       # reset key distributor
-      - curl http://44.202.25.232:3000/reset -o 1.txt
+      - curl "${DISTRIBUTE_KEYS}/reset" -o 1.txt
       - cat 1.txt
 
 artifacts:
