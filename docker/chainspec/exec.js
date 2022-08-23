@@ -12,7 +12,7 @@ const runCommand = require('./cmd.js');
 // GENERATING PUBLIC KEYS
 module.exports = async () => {
     const all = [];
-    for(let i=0; i<=40; i++) all.push(i+1);
+    for(let i=0; i<=60; i++) all.push(i);
     const arr = await Promise.all(all.map(async accNumb => {
 		const suf = ('00'+accNumb).substr(-2);
         const orig = await runCommand(`/rio/src/target/release/relaychain-rio key inspect --scheme Sr25519 '//${MNEMONIC}//${suf}'`);

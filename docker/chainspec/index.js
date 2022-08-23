@@ -48,13 +48,13 @@ const {
     }]]];
 
     // any account as sudo
-    j.genesis.runtime.sudo.key = accounts[4].orig['Public key (SS58)'];
+    j.genesis.runtime.sudo.key = accounts[0].orig['Public key (SS58)'];
 
-    j.genesis.runtime.staking.invulnerables = relay.slice(0, 4).map(acc => {
+    j.genesis.runtime.staking.invulnerables = relay.slice(1, 5).map(acc => {
         return acc.stash['Public key (SS58)'];
     });
 
-    j.genesis.runtime.staking.stakers = relay.slice(0, 4).map(acc => {
+    j.genesis.runtime.staking.stakers = relay.slice(1, 5).map(acc => {
         return [
             acc.stash['Public key (SS58)'],
             acc.orig['Public key (SS58)'],
@@ -63,7 +63,7 @@ const {
         ];
     });
 
-    j.genesis.runtime.session.keys = relay.slice(0, 4).map(acc => {
+    j.genesis.runtime.session.keys = relay.slice(1, 5).map(acc => {
         return [
             acc.stash['Public key (SS58)'],
             acc.stash['Public key (SS58)'],
