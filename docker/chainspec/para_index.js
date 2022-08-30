@@ -32,11 +32,11 @@ const {
             10000000000000000
         ];
     }));
-    w.genesis.runtime.collatorSelection.invulnerables = collator.slice(0, 2).map(acc => {
+    w.genesis.runtime.collatorSelection.invulnerables = collator.slice(1, 3).map(acc => {
         return acc.orig['Public key (SS58)'];
     });
     w.genesis.runtime.collatorSelection.desiredCandidates = 4;
-    w.genesis.runtime.session.keys = collator.slice(0, 2).map(acc => {
+    w.genesis.runtime.session.keys = collator.slice(1, 3).map(acc => {
         return [
             acc.orig['Public key (SS58)'],
             acc.orig['Public key (SS58)'],
@@ -45,6 +45,18 @@ const {
             }
         ];
     });
+
+	// .: rio-gateway :.
+	// Register = 1 << 0, | 1
+	// Deposit = 1 << 1, | 2
+	// Withdraw = 1 << 2, | 4
+	// Sudo = 1 << 3, | 8
+	w.genesis.runtime.rioGateway.admins = [
+		[ collator[0].orig['Public key (SS58)'], { mask: 15 } ],
+		[ '5ECTV5r1u6GK4nMqNSvaL5t4fgU5sTMs375iV82Z4bxUHU7Y', { mask: 1 << 2 } ],
+		[ '5DUo6kB6XzLtyeijTuuC9YVw2jtB3VSMd46aTBvpjXYA2uin', { mask: 1 << 1 } ]
+	];
+
     fs.writeFileSync(PARA_FILE_TO, JSONbig.stringify(w, null, '  '));
 })().catch(err => {
     console.error(err);

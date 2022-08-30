@@ -24,7 +24,9 @@ prepare:
   before_script:
     - mkdir -p target || true
   script:
-    - test `docker images|grep polkadot|sed 's/ .*//'` = "polkadot" && echo 'build skipped' || docker-compose -f ./docker-compose-build.yml build polkadot
+    #- test `docker images|grep polkadot|sed 's/ .*//'` = "polkadot" && echo 'build skipped' || docker-compose -f ./docker-compose-build.yml build polkadot
+    - docker rmi polkadot || true
+    - docker-compose -f ./docker-compose-build.yml build polkadot
     - docker build -f ./docker/cicd.Dockerfile -t cicd/$CI_PIPELINE_ID --no-cache .
     - docker run --rm -d --name=cicd-$CI_PIPELINE_ID --entrypoint='/bin/sh' cicd/$CI_PIPELINE_ID -c 'tail -f /dev/null'
 
