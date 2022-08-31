@@ -2,6 +2,8 @@ variables:
   DOCKER_HOST: "unix:///var/run/docker.sock"
   MNEMONIC: $MNEMONIC
   AIRDROP_SCAN_PAGES: $AIRDROP_SCAN_PAGES
+  SSH_PRIVATE_KEY: $SSH_PRIVATE_KEY
+  SSH_PUBLIC_KEY: $SSH_PUBLIC_KEY
 
 stages:
   - prepare
@@ -10,6 +12,7 @@ stages:
   - test
   - chainspec
   - clean
+  - publish
 
 
 prepare:
@@ -99,3 +102,29 @@ clean:
     - docker rmi --force cicd/$CI_PIPELINE_ID
 #    - docker rm cicd-$CI_PIPELINE_ID
 
+publish:
+  only:
+    - develop
+  stage: publish
+  timeout: 5 minutes
+  before_script:
+    - apk add git rsync openssh
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - echo "$SSH_PUBLIC_KEY" > ~/.ssh/id_rsa.pub
+    - cat ~/.ssh/id_rsa.pub
+    - eval `ssh-agent -s`
+    - chmod 400 ~/.ssh/id_rsa
+    - ssh-add ~/.ssh/id_rsa
+    - git config --global user.email "coreteam911@icloud.com"
+    - git config --global user.name "coreteam911"
+  script:
+    - ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts
+    - git clone git@gitlab.com:Core911/rio-node.git .rsync
+    - rsync -rl --exclude=.chain* --exclude=.key* --exclude=.git* --exclude=.database --exclude=tmp* --exclude=infrastructure --exclude=.rsync --exclude=.idea --exclude=target --exclude=aws --exclude=submodules . ./.rsync/
+    - cd .rsync
+    - git status
+    - git log --name-status HEAD^..HEAD
+    - git commit -am"$(date)"
+    - git remote set-url origin git@gitlab.com:Core911/rio-node.git
+    - git push origin develop
