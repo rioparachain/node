@@ -1,4 +1,4 @@
-#!/bin/sh -xe
+#!/bin/sh -x
 
 SEED_PREFIX=Uf2IucQ3Fgm86
 NODE_KEY=`echo "seed ${SEED_PREFIX}//collator//${ACCOUNT}" | sha256sum | sed 's,^.,0,;s, *-,,'`
@@ -22,6 +22,3 @@ BASE_PATH=/rio/keys/collator-`printf "%02d" ${ACCOUNT}`
     --execution wasm \
     --chain ${RELAY_RAW} \
     --name collator-side-${ACCOUNT}
-
-#    --telemetry-url 'ws://3.89.91.186:8001/submit 0' \
-#    --telemetry-url 'ws://3.89.91.186:8001/submit 0' \

@@ -167,8 +167,9 @@ Resources:
                     "PrivateSubnets": "subnet-007c59b68581951d6,subnet-018291861b87cf9b0",
                     "SecurityGroups": "sg-03a6280ffaf8904d1",
                     "HostedZone": "riocorenetwork.com",
-                    "DesiredCount": "8"
+                    "DesiredCount": "6"
                   }
+                # NOTE: desired count will be multiplied x2 because of splitting to WS/RPC task-sets
                 StackName: rio-testnet-relay
                 TemplatePath: SourceArtifact::infrastructure/deploy-relay.yml
                 RoleArn:  arn:aws:iam::061416964074:role/rio-node-pipeline-role
@@ -196,8 +197,9 @@ Resources:
                           "PrivateSubnets": "subnet-007c59b68581951d6,subnet-018291861b87cf9b0",
                           "SecurityGroups": "sg-03a6280ffaf8904d1",
                           "HostedZone": "riocorenetwork.com",
-                          "DesiredCount": "8"
+                          "DesiredCount": "3"
                       }
+                  # NOTE: desired count will be multiplied x2 because of splitting to WS/RPC task-sets
                   StackName: rio-testnet-collator
                   TemplatePath: SourceArtifact::infrastructure/deploy-collator.yml
                   RoleArn: arn:aws:iam::061416964074:role/rio-node-pipeline-role

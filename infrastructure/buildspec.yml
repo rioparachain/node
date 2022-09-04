@@ -29,6 +29,9 @@ phases:
       - docker tag runner $ECR_REPO:$IMAGE_TAG
       - docker push $ECR_REPO:$IMAGE_TAG
       - printf '{"ImageURI":"%s:%s"}' $ECR_REPO $IMAGE_TAG > imageDetails.json
+## DEBUG SECTION >
+#      - export IMAGE_TAG=00476378
+#      - printf '{"ImageURI":"%s:%s"}' $ECR_REPO $IMAGE_TAG > imageDetails.json
     finally:
       - echo "The build process was exited"
   post_build:

@@ -1,4 +1,4 @@
-#!/bin/sh -xe
+#!/bin/sh -x
 
 SEED_PREFIX=Uf2IucQ3Fgm86
 NODE_KEY=`echo "seed ${SEED_PREFIX}//relay//${ACCOUNT}" | sha256sum | sed 's,^.,0,;s, *-,,'`
@@ -17,5 +17,3 @@ BASE_PATH=/rio/keys/relay-`printf "%02d" ${ACCOUNT}`
     --name relay-${ACCOUNT} \
     --ws-port ${WS_PORT} \
     --rpc-port ${RPC_PORT}
-
-#    --telemetry-url 'ws://3.89.91.186:8001/submit 0' \
