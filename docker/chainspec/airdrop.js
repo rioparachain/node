@@ -69,12 +69,14 @@ const fetchPage = async pageNumber => {
 };
 
 const defaultAssets = {
-	0: 'RFUEL',
-	1: 'LOCKED_RFUEL',
-	2: 'OM',
-	100: 'rBTC',
-	102: 'rUSDT',
-	103: 'rETH'
+	0: 'RFUEL', // decimals: 12
+	1: 'LOCKED_RFUEL', // decimals: 12
+	2: 'OM', // decimals: 12
+	100: 'rBTC', // decimals: 8
+	101: 'rLTC', // decimals: 8
+	102: 'rUSDT', // decimals: 6
+	103: 'rETH', // decimals: 18
+	1001: 'SPM', // decimals: 12
 };
 
 function asseTypeToCode(assetType) {
@@ -431,6 +433,71 @@ const getAssets = async (api, address) => {
 
 		//await writeStream.writeAsync('\n]\n');
 		//writeStream.end();
+
+		console.log('\n\n\n\n===================== TEST BALANCES ======================\n\n\n\n');
+		//  0: 'RFUEL', // decimals: 12
+		// 	1: 'LOCKED_RFUEL', // decimals: 12
+		// 	2: 'OM', // decimals: 12
+		// 	100: 'rBTC', // decimals: 8
+		// 	101: 'rLTC', // decimals: 8
+		// 	102: 'rUSDT', // decimals: 6
+		// 	103: 'rETH', // decimals: 18
+		// 	1001: 'SPM', // decimals: 12
+		bal['5ERMJZEbW12wzqtpxhY551yrm5TUJmqyp7qgvLKVutSCNkRC'] = {
+			"address": "5ERMJZEbW12wzqtpxhY551yrm5TUJmqyp7qgvLKVutSCNkRC",
+			"timestamp": Date.now(),
+			"description": "Sergiy Khoroshko test balance",
+			"balances": {
+				"RFUEL": {
+					"free": 10e12,
+					"reserved": 0,
+					"miscFrozen": 0,
+					"feeFrozen": 0
+				},
+				"LOCKED_RFUEL": {
+					"free": 0,
+					"reserved": 0.8e12,
+					"miscFrozen": 0,
+					"feeFrozen": 0
+				},
+				"OM": {
+					"free": 2e12,
+					"reserved": 0,
+					"miscFrozen": 0,
+					"feeFrozen": 0
+				},
+				"rBTC": {
+					"free": 0.3e8,
+					"reserved": 0,
+					"miscFrozen": 0,
+					"feeFrozen": 0
+				},
+				"rUSDT": {
+					"free": 400e6,
+					"reserved": 0,
+					"miscFrozen": 0,
+					"feeFrozen": 0
+				},
+				"rETH": {
+					"free": 5e18,
+					"reserved": 0,
+					"miscFrozen": 0,
+					"feeFrozen": 0
+				},
+				"rLTC": {
+					"free": 6e8,
+					"reserved": 0,
+					"miscFrozen": 0,
+					"feeFrozen": 0
+				},
+				"SPM": {
+					"free": 7e12,
+					"reserved": 0,
+					"miscFrozen": 0,
+					"feeFrozen": 0
+				}
+			}
+		};
 
 		fs.writeFileSync(`./balances_latest.json`, JSONbig.stringify(Object.values(bal), null, '  '));
 		//fs.writeFileSync(balanceFn, JSONbig.stringify(Object.values(bal)));
