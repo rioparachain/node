@@ -9,8 +9,11 @@ mkdir -p /rio/chainspec || true
 
 cd /rio/src/docker/chainspec && npm i
 cd /rio/chainspec
-node /rio/src/docker/chainspec/airdrop.js --action=accounts
-node /rio/src/docker/chainspec/airdrop.js --action=balances
+
+if [ -f "/rio/src/docker/chainspec/airdrop.js" ]; then
+    node /rio/src/docker/chainspec/airdrop.js --action=accounts
+    node /rio/src/docker/chainspec/airdrop.js --action=balances
+fi
 
 /rio/src/target/release/relaychain-rio build-spec --chain polkadot-local --disable-default-bootnode > $RELAY_FILE_FROM
 /rio/src/target/release/parachain-rio build-spec --disable-default-bootnode > $PARA_FILE_FROM
