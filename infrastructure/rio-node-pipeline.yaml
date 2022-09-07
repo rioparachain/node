@@ -2,11 +2,11 @@ AWSTemplateFormatVersion: "2010-09-09"
 Mappings:
   General:
     VpcId:
-      nonprod: vpc-028174fc08fa36def
+      nonprod: vpc-082b5fd3017aecc1c
     Subnet:
-      nonprod: subnet-007c59b68581951d6
+      nonprod: subnet-0dc08ca24c0b7f595
     SecurityGroupId:
-      nonprod: sg-03a6280ffaf8904d1
+      nonprod: sg-0eeb5bea7180af22d
     ArtifactAccessPolicy:
       nonprod: arn:aws:iam::061416964074:policy/non-prod-artifact-access-policy
     Repository:
@@ -101,12 +101,12 @@ Resources:
                     "AppName": "rio-testnet",
                     "Stage": "relay",
                     "Env": "us-east-1",
-                    "Vpc": "vpc-028174fc08fa36def",
-                    "PublicSubnets": "subnet-01ed013ef6306fd8c,subnet-0bbc65e29bf4a42d7",
-                    "PrivateSubnets": "subnet-007c59b68581951d6,subnet-018291861b87cf9b0",
-                    "SecurityGroups": "sg-03a6280ffaf8904d1",
+                    "Vpc": "vpc-082b5fd3017aecc1c",
+                    "PublicSubnets": "subnet-08f0d859c38c420a4,subnet-04defa35f908744ef",
+                    "PrivateSubnets": "subnet-0dc08ca24c0b7f595,subnet-034aa02bf03954706",
+                    "SecurityGroups": "sg-0eeb5bea7180af22d",
                     "HostedZone": "riocorenetwork.com",
-                    "DesiredCount": "4"
+                    "DesiredCount": "3"
                   }
                 # NOTE: desired count will be multiplied x2 because of splitting to WS/RPC task-sets
                 StackName: rio-testnet-relay
@@ -132,10 +132,10 @@ Resources:
                           "AppName": "rio-testnet",
                           "Stage": "collator",
                           "Env": "us-east-1",
-                          "Vpc": "vpc-028174fc08fa36def",
-                          "PublicSubnets": "subnet-01ed013ef6306fd8c,subnet-0bbc65e29bf4a42d7",
-                          "PrivateSubnets": "subnet-007c59b68581951d6,subnet-018291861b87cf9b0",
-                          "SecurityGroups": "sg-03a6280ffaf8904d1",
+                          "Vpc": "vpc-082b5fd3017aecc1c",
+                          "PublicSubnets": "subnet-08f0d859c38c420a4,subnet-04defa35f908744ef",
+                          "PrivateSubnets": "subnet-0dc08ca24c0b7f595,subnet-034aa02bf03954706",
+                          "SecurityGroups": "sg-0eeb5bea7180af22d",
                           "HostedZone": "riocorenetwork.com",
                           "DesiredCount": "2"
                       }
@@ -163,18 +163,18 @@ Resources:
                   {
                     "ImageURI" : { "Fn::GetParam" : ["BuildArtifact", "imageDetails.json", "ImageURI"] },
                     "AppName": "rio-testnet",
-                    "Stage": "relay",
+                    "Stage": "relay2",
                     "Env": "us-west-2",
-                    "Vpc": "vpc-0cfc20bb759b6c6ed",
-                    "PublicSubnets": "subnet-0d2e61c12213b2d9d,subnet-025356ab1bcf9204d",
-                    "PrivateSubnets": "subnet-025a97a7bfbc38a09,subnet-07e6037003394589b",
-                    "SecurityGroups": "sg-09675195d1f73287a",
+                    "Vpc": "vpc-0943bb58d3bdac0bd",
+                    "PublicSubnets": "subnet-09f8872d4499eea9b,subnet-064f1db3e48770b2c",
+                    "PrivateSubnets": "subnet-0a7d2c49157156f32,subnet-0b0ee2e64bc8d6ced",
+                    "SecurityGroups": "sg-0ddbadfeb40fa562e",
                     "HostedZone": "riocorenetwork.com",
                     "DesiredCount": "2"
                   }
                 # NOTE: desired count will be multiplied x2 because of splitting to WS/RPC task-sets
-                StackName: rio-testnet-relay
-                TemplatePath: SourceArtifact::infrastructure/deploy-relay-slave.yml
+                StackName: rio-testnet-relay2
+                TemplatePath: SourceArtifact::infrastructure/deploy-relay.yml
                 RoleArn:  arn:aws:iam::061416964074:role/rio-node-pipeline-role
               RunOrder: 1
               Region: us-west-2
@@ -194,18 +194,18 @@ Resources:
                       {
                           "ImageURI": { "Fn::GetParam" : ["BuildArtifact", "imageDetails.json", "ImageURI"] },
                           "AppName": "rio-testnet",
-                          "Stage": "collator",
+                          "Stage": "collator2",
                           "Env": "us-west-2",
-                          "Vpc": "vpc-0cfc20bb759b6c6ed",
-                          "PublicSubnets": "subnet-0d2e61c12213b2d9d,subnet-025356ab1bcf9204d",
-                          "PrivateSubnets": "subnet-025a97a7bfbc38a09,subnet-07e6037003394589b",
-                          "SecurityGroups": "sg-09675195d1f73287a",
+                          "Vpc": "vpc-0943bb58d3bdac0bd",
+                          "PublicSubnets": "subnet-09f8872d4499eea9b,subnet-064f1db3e48770b2c",
+                          "PrivateSubnets": "subnet-0a7d2c49157156f32,subnet-0b0ee2e64bc8d6ced",
+                          "SecurityGroups": "sg-0ddbadfeb40fa562e",
                           "HostedZone": "riocorenetwork.com",
                           "DesiredCount": "1"
                       }
                   # NOTE: desired count will be multiplied x2 because of splitting to WS/RPC task-sets
-                  StackName: rio-testnet-collator
-                  TemplatePath: SourceArtifact::infrastructure/deploy-collator-slave.yml
+                  StackName: rio-testnet-collator2
+                  TemplatePath: SourceArtifact::infrastructure/deploy-collator.yml
                   RoleArn: arn:aws:iam::061416964074:role/rio-node-pipeline-role
               RunOrder: 1
               Region: us-west-2
@@ -227,18 +227,18 @@ Resources:
                   {
                     "ImageURI" : { "Fn::GetParam" : ["BuildArtifact", "imageDetails.json", "ImageURI"] },
                     "AppName": "rio-testnet",
-                    "Stage": "relay",
+                    "Stage": "relay3",
                     "Env": "eu-central-1",
-                    "Vpc": "vpc-06c441b0b107603b0",
-                    "PublicSubnets": "subnet-0830f2e32b43a7bc4,subnet-016abaf3d800e963d",
-                    "PrivateSubnets": "subnet-0ea7fa517c2e123a7,subnet-0520eeb86d2a8c5d9",
-                    "SecurityGroups": "sg-0deaded1820f22d5c",
+                    "Vpc": "vpc-002e3744979dcbe0c",
+                    "PublicSubnets": "subnet-0f16ba565a805f39e,subnet-054052093c2550ea1",
+                    "PrivateSubnets": "subnet-09110bcd62dbd2417,subnet-0e47ea8178c04a7db",
+                    "SecurityGroups": "sg-03f24db84a7a4bc0c",
                     "HostedZone": "riocorenetwork.com",
-                    "DesiredCount": "2"
+                    "DesiredCount": "1"
                   }
                 # NOTE: desired count will be multiplied x2 because of splitting to WS/RPC task-sets
-                StackName: rio-testnet-relay
-                TemplatePath: SourceArtifact::infrastructure/deploy-relay-slave.yml
+                StackName: rio-testnet-relay3
+                TemplatePath: SourceArtifact::infrastructure/deploy-relay.yml
                 RoleArn:  arn:aws:iam::061416964074:role/rio-node-pipeline-role
               RunOrder: 1
               Region: eu-central-1
@@ -258,18 +258,18 @@ Resources:
                       {
                           "ImageURI": { "Fn::GetParam" : ["BuildArtifact", "imageDetails.json", "ImageURI"] },
                           "AppName": "rio-testnet",
-                          "Stage": "collator",
+                          "Stage": "collator3",
                           "Env": "eu-central-1",
-                          "Vpc": "vpc-06c441b0b107603b0",
-                          "PublicSubnets": "subnet-0830f2e32b43a7bc4,subnet-016abaf3d800e963d",
-                          "PrivateSubnets": "subnet-0ea7fa517c2e123a7,subnet-0520eeb86d2a8c5d9",
-                          "SecurityGroups": "sg-0deaded1820f22d5c",
+                          "Vpc": "vpc-002e3744979dcbe0c",
+                          "PublicSubnets": "subnet-0f16ba565a805f39e,subnet-054052093c2550ea1",
+                          "PrivateSubnets": "subnet-09110bcd62dbd2417,subnet-0e47ea8178c04a7db",
+                          "SecurityGroups": "sg-03f24db84a7a4bc0c",
                           "HostedZone": "riocorenetwork.com",
                           "DesiredCount": "1"
                       }
                   # NOTE: desired count will be multiplied x2 because of splitting to WS/RPC task-sets
-                  StackName: rio-testnet-collator
-                  TemplatePath: SourceArtifact::infrastructure/deploy-collator-slave.yml
+                  StackName: rio-testnet-collator3
+                  TemplatePath: SourceArtifact::infrastructure/deploy-collator.yml
                   RoleArn: arn:aws:iam::061416964074:role/rio-node-pipeline-role
               RunOrder: 1
               Region: eu-central-1
@@ -288,11 +288,15 @@ Resources:
         SecurityGroupIds:
           - !FindInMap [General, SecurityGroupId, nonprod]
       Environment:
-        ComputeType: BUILD_GENERAL1_2XLARGE
-        #ComputeType: BUILD_GENERAL1_MEDIUM
-        #ComputeType: BUILD_GENERAL1_LARGE
-        Image: aws/codebuild/standard:5.0
         Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_2XLARGE
+#        ComputeType: BUILD_GENERAL1_MEDIUM
+#        ComputeType: BUILD_GENERAL1_LARGE
+        Image: aws/codebuild/standard:5.0
+# The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+#        Type: ARM_CONTAINER
+#        ComputeType: BUILD_GENERAL1_LARGE
+#        Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
         PrivilegedMode: true
         EnvironmentVariables:
           - Name: REPOSITORY_NAME
@@ -353,7 +357,7 @@ Resources:
                   - codecommit:GitPull
                   - ssm:GetParameter
                   - ssm:GetParameters
-                  - ssm:GetParameterByPath
+#                  - ssm:GetParameterByPath
                   - cloudformation:*
                   - s3:*
                   - iam:*

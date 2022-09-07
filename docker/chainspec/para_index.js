@@ -53,9 +53,12 @@ const {
 	// Sudo = 1 << 3, | 8
 	w.genesis.runtime.rioGateway.admins = [
 		[ collator[0].orig['Public key (SS58)'], { mask: 15 } ],
+		// rio requested addr
 		[ '5ECTV5r1u6GK4nMqNSvaL5t4fgU5sTMs375iV82Z4bxUHU7Y', { mask: 4 } ],
 		[ '5DUo6kB6XzLtyeijTuuC9YVw2jtB3VSMd46aTBvpjXYA2uin', { mask: 2 } ],
-		[ '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY', { mask: 2 } ]
+		[ '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY', { mask: 2 } ],
+		// test addr
+		[ 'WFJmNPw8gBVdqUwz5WsRLfSEJ9Cynd2gxckz3mAVbkraDaq', { mask: 2 } ]
 	];
 
     fs.writeFileSync(PARA_FILE_TO, JSONbig.stringify(w, null, '  '));

@@ -3,42 +3,52 @@ version: 0.2
 env:
   variables:
     IMAGE_NAME: rio-node
+    AIRDROP_SCAN_PAGES: 700
   git-credential-helper: yes
   secrets-manager:
     MNEMONIC: rio-node/testnet:MNEMONIC
     DISTRIBUTE_KEYS: rio-node/testnet:DISTRIBUTE_KEYS
 
 phases:
+#  install:
+#    runtime-version:
+#      nodejs: 16
+#    on-failure: ABORT
+#    commands:
+#      - cd docker/chainspec
+#      - yarn
+#      - yarn accounts
+#      - yarn balances
+#      - aws s3 cp addreses_latest.json "s3://airdrop-balances-private"
+#      - aws s3 cp balances_latest.json "s3://airdrop-balances-private"
+#      - cd ../..
   pre_build:
     commands:
       - export IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-8)
       - export AWS_ACCOUNT_ID=$(echo $CODEBUILD_BUILD_ARN | awk -F":" '{print $5}')
       - export ECR_REPO=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_NAME
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      - echo 'Using "$REPOSITORY_BRANCH" branch from "$REPOSITORY_NAME" repository'
-      # you can clone the repository to get additional info about the latest commit
-      #- git clone https://git-codecommit.us-east-1.amazonaws.com/v1/repos/$REPOSITORY_NAME .clone
-      #- cd .clone
-      #- git checkout $REPOSITORY_BRANCH
-      #- docker-compose -f ./docker-compose-build.yml build --no-cache --build-arg "MNEMONIC=$MNEMONIC"
-      #- git log | head -10
-      #- cd ..
   build:
+    on-failure: ABORT
     commands:
-      - export AIRDROP_SCAN_PAGES=700 && docker-compose -f ./docker-compose-build.yml build --no-cache --build-arg "MNEMONIC=${MNEMONIC}" --build-arg "AIRDROP_SCAN_PAGES=${AIRDROP_SCAN_PAGES}"
+      - aws s3 sync s3://airdrop-balances-private docker/chainspec
+      - |
+        docker-compose -f docker-compose-build.yml build --no-cache \
+          --build-arg "MNEMONIC=${MNEMONIC}" \
+          --build-arg "AIRDROP_SCAN_PAGES=${AIRDROP_SCAN_PAGES}" \
+          --build-arg "AIRDROP_ENABLED=${AIRDROP_ENABLED}"
       - docker tag runner $ECR_REPO:$IMAGE_TAG
       - docker push $ECR_REPO:$IMAGE_TAG
       - printf '{"ImageURI":"%s:%s"}' $ECR_REPO $IMAGE_TAG > imageDetails.json
 ## DEBUG SECTION >
-#      - export IMAGE_TAG=00476378
+#      - export IMAGE_TAG=6590e44c
 #      - printf '{"ImageURI":"%s:%s"}' $ECR_REPO $IMAGE_TAG > imageDetails.json
     finally:
       - echo "The build process was exited"
   post_build:
     commands:
       # reset key distributor
-      - curl "${DISTRIBUTE_KEYS}/reset" -o 1.txt
-      - cat 1.txt
+      - curl -s "${DISTRIBUTE_KEYS}/reset"
 
 artifacts:
   files:

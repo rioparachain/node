@@ -3,11 +3,22 @@
   "Statement": [
     {
       "Action": [
+        "ssm:*"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
+    },
+    {
+      "Action": [
         "s3:*"
       ],
       "Resource": [
         "arn:aws:s3:::rio-artifacts-us-east-1/*",
-        "arn:aws:s3:::rio-artifacts-us-east-1"
+        "arn:aws:s3:::rio-artifacts-us-east-1",
+        "arn:aws:s3:::rio-artifacts-us-west-2/*",
+        "arn:aws:s3:::rio-artifacts-us-west-2",
+        "arn:aws:s3:::rio-artifacts-eu-central-1/*",
+        "arn:aws:s3:::rio-artifacts-eu-central-1"
       ],
       "Effect": "Allow"
     },
@@ -20,7 +31,9 @@
         "kms:Decrypt"
       ],
       "Resource": [
-        "arn:aws:kms:us-east-1:061416964074:key/76b00609-4add-4c06-8aac-d8c129e8d229"
+        "arn:aws:kms:us-east-1:061416964074:key/76b00609-4add-4c06-8aac-d8c129e8d229",
+        "arn:aws:kms:us-west-2:061416964074:key/e31312f9-1ed9-48cd-bed3-2ba780675984",
+        "arn:aws:kms:eu-central-1:061416964074:key/71f754aa-84bc-4a14-9b16-e8226ff0e06d"
       ],
       "Effect": "Allow"
     }

@@ -12,3 +12,6 @@ aws cloudformation create-stack --stack-name rio-node-cluster --capabilities CAP
 ---
 aws cloudformation create-stack --stack-name rio-node-ecr --capabilities CAPABILITY_NAMED_IAM --template-body file://infrastructure/rio-node-ecr.yml --region eu-central-1
 aws cloudformation create-stack --stack-name rio-node-cluster --capabilities CAPABILITY_NAMED_IAM --template-body file://infrastructure/rio-node-cluster.yml --region eu-central-1
+---
+
+aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:us-west-2:061416964074:secret:rio-node/testnet-MGuWnE --region us-west-2

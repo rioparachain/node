@@ -25,12 +25,25 @@ const JSONbig = require('json-bigint')({useNativeBigInt: true});
 
 const axios = require('axios');
 const {ApiPromise, WsProvider} = require('@polkadot/api');
-const {get, pick, forEach, find} = require('lodash');
+const {get, find} = require('lodash');
 
 const transactionUrl = 'https://scan.riochain.io/api/v1/extrinsic';
 const balances = {};
 
-const fetchPage = async pageNumber => {
+const getTxResponse = (url, retry = 3) => {
+	return axios.get(url).catch((err) => {
+		if (retry) {
+			console.warn('Retry', { url }, retry - 1);
+			return getTxResponse(url, retry - 1);
+		} else {
+			console.error('getTxResponse', url);
+			console.error(err);
+			throw err;
+		}
+	});
+};
+
+const fetchPage = async (pageNumber, repeat = 3) => {
 	console.log('start', pageNumber);
 	const response = await axios.get(transactionUrl, {
 		params: {
@@ -38,32 +51,43 @@ const fetchPage = async pageNumber => {
 			'page[number]': pageNumber,
 			'page[size]': 25
 		}
+	}).catch((err) => {
+		if (!repeat) {
+			console.error('Failed to fetch page', pageNumber);
+			throw err;
+		} else {
+			console.warn('Retry', { pageNumber }, repeat - 1);
+			return fetchPage(pageNumber, repeat - 1);
+		}
 	});
 	const data = get(response, 'data.data', []);
-	await Promise.all(data.map(async tx => {
-		const transactionId = get(tx, 'attributes.extrinsic_hash');
-		if (!transactionId) {
-			console.log('.');
-			return null;
-		}
-		const txResponse = await axios.get(
-			`${transactionUrl}/0x${transactionId}`
-		);
-		const txData = get(txResponse, 'data.data.attributes');
-		if (txData.address && txData.address.length !== 48) {
-			txData;
-		}
-		balances[txData.address] = null;
-		const param = find(txData.params, p => ['Address'].includes(p.type));
-		if (param) {
-			if (param.value && param.value.length !== 48) {
+	await Promise.map(
+		data,
+		async tx => {
+			const transactionId = get(tx, 'attributes.extrinsic_hash');
+			if (!transactionId) {
+				console.log('.');
+				return null;
+			}
+			const txResponse = await getTxResponse(`${transactionUrl}/0x${transactionId}`);
+			const txData = get(txResponse, 'data.data.attributes');
+			if (txData.address && txData.address.length !== 48) {
 				txData;
 			}
-			balances[param.value] = null;
-		} else {
-			txData.params;
-		}
-	}));
+			balances[txData.address] = null;
+			const param = find(txData.params, p => ['Address'].includes(p.type));
+			if (param) {
+				if (param.value && param.value.length !== 48) {
+					txData;
+				}
+				balances[param.value] = null;
+			} else {
+				txData.params;
+			}
+		},
+		{concurrency: 5}
+	);
+
 	console.log('end', pageNumber);
 	return data.length !== 0;
 };
@@ -273,9 +297,10 @@ const getAssets = async (api, address) => {
 	if (argv.action === 'accounts') {
 		// await Promise.map(Array(50), (_, pageNumber) =>
 		const scanPages = parseInt(AIRDROP_SCAN_PAGES || '50');
-		await Promise.map(Array(scanPages), (_, pageNumber) =>
-			fetchPage(pageNumber),
-			{concurrency: 6}
+		await Promise.map(
+			Array(scanPages),
+			(_, pageNumber) => fetchPage(pageNumber),
+			{concurrency: 3}
 		);
 
 		// fs.writeFileSync(`./addreses_${date.toISOString()}.json`, JSONbig.stringify(Object.keys(balances), null, '  '));
@@ -376,7 +401,10 @@ const getAssets = async (api, address) => {
 		const wsProvider1 = new WsProvider('wss://node.v1.riochain.io/ws');
 		// const wsProvider2 = new WsProvider('wss://node.v1.riochain.io/ws');
 		// const wsProvider1 = new WsProvider('wss://node.riochain.io/');
-		const wsProvider2 = new WsProvider('wss://node.riochain.io/');
+
+		// todo - make parameter
+		// const wsProvider2 = new WsProvider('wss://node.riochain.io/'); // fails on cicd due to ban
+		const wsProvider2 = new WsProvider('wss://node.v1.riochain.io/ws');
 		const api1 = await ApiPromise.create({provider: wsProvider1, types});
 		const api2 = await ApiPromise.create({provider: wsProvider2, types});
 		const apiPool = [api1, api2];
@@ -449,7 +477,7 @@ const getAssets = async (api, address) => {
 			"description": "Sergiy Khoroshko test balance",
 			"balances": {
 				"RFUEL": {
-					"free": 10e12,
+					"free": 1000000e12,
 					"reserved": 0,
 					"miscFrozen": 0,
 					"feeFrozen": 0
@@ -497,6 +525,11 @@ const getAssets = async (api, address) => {
 					"feeFrozen": 0
 				}
 			}
+		};
+		// test accests addr
+		bal['WFJmNPw8gBVdqUwz5WsRLfSEJ9Cynd2gxckz3mAVbkraDaq'] = {
+			...bal['5ERMJZEbW12wzqtpxhY551yrm5TUJmqyp7qgvLKVutSCNkRC'],
+			address: 'WFJmNPw8gBVdqUwz5WsRLfSEJ9Cynd2gxckz3mAVbkraDaq'
 		};
 
 		fs.writeFileSync(`./balances_latest.json`, JSONbig.stringify(Object.values(bal), null, '  '));
