@@ -10,3 +10,8 @@ aws task definition --> Network settings --> links
 
 # todo
  - https://www.proud2becloud.com/ecs-deployment-strategies-reduce-downtime-and-risk-with-blue-green-deployment/
+
+# CONNECT TWO VPC's
+ - https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#PeeringConnections:
+ - https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html
+ - https://docs.aws.amazon.com/vpc/latest/peering/create-vpc-peering-connection.html

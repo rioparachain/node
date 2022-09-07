@@ -125,6 +125,7 @@ publish:
     - cd .rsync
     - git status
     - git log --name-status HEAD^..HEAD
+    - git checkout .gitignore
     - git add .
     - git commit -am"$(date)"
     - git remote set-url origin git@gitlab.com:Core911/rio-node.git

@@ -14,7 +14,7 @@ Parameters:
     Type: String
   Stage:
     Type: String
-    Default: relay
+    Default: collator
   Env:
     Type: String
     Default: dev
@@ -60,7 +60,7 @@ Resources:
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: !Ref RelayLogGroup
+              awslogs-group: !Ref CollatorLogGroup
               awslogs-stream-prefix: !Sub ${AppName}-${Stage}
               awslogs-region: !Ref "AWS::Region"
           PortMappings:
@@ -71,7 +71,7 @@ Resources:
             - ContainerPort: 9933
               Protocol: tcp
           Command:
-            - /rio/start_relay.sh
+            - /rio/start_collator.sh
           EntryPoint:
             - "sh"
             - "-c"
@@ -91,6 +91,22 @@ Resources:
               Value: !Sub ${AppName}
             - Name: RELAY_RAW
               Value: /rio/chainspec/polkadot-raw.json
+            - Name: PARA_RAW
+              Value: /rio/chainspec/parachain-raw.json
+          MountPoints:
+            - ContainerPath: !Sub /mnt/${AppName}/${Stage}
+              ReadOnly: false
+              SourceVolume: !Sub ${AppName}-${Stage}-volume
+      Volumes:
+        - Name: !Sub ${AppName}-${Stage}-volume
+          EFSVolumeConfiguration:
+            #AuthorizationConfig:
+            #  AuthorizationConfig
+            FilesystemId: 'fs-03f1ba29a017f459f'
+            #RootDirectory: !Sub /${AppName}/${Stage}
+            RootDirectory: '/'
+            #TransitEncryption: String
+            #TransitEncryptionPort: Integer
       Tags:
         - Key: Name
           Value: !Sub ${AppName}-${Stage}
@@ -110,14 +126,6 @@ Resources:
           Value: !Sub ${AppName}-${Stage}-service
         - Key: ENVIRONMENT
           Value: !Ref Stage
-# LoadBalancers must be empty or null
-#      LoadBalancers:
-#        - ContainerName: !Sub ${AppName}-${Stage}
-#          ContainerPort: 80
-#          TargetGroupArn: !Ref ServiceTargetGroup
-#        - ContainerName: !Sub ${AppName}-${Stage}
-#          ContainerPort: 9933
-#          TargetGroupArn: !Ref ServiceTargetGroup1
     DependsOn:
       - ServiceTargetGroup
       - ServiceTargetGroup1
@@ -180,7 +188,7 @@ Resources:
       TaskSetId: !GetAtt TaskSet.Id
 
   # Logs resources
-  RelayLogGroup:
+  CollatorLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/ecs/${AppName}-${Stage}-${Env}
@@ -190,18 +198,18 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Name: !Sub ${AppName}-${Stage}-lb
-      Scheme: internet-facing # internet-facing || internal
+      Scheme: internal # internet-facing || internal
       SecurityGroups: !Ref SecurityGroups
-      Subnets: !Ref PublicSubnets # PublicSubnets for internet-facing || PrivateSubnets for internal
+      Subnets: !Ref PrivateSubnets # PublicSubnets for internet-facing || PrivateSubnets for internal
       Type: application
 
   LoadBalancer1:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Name: !Sub ${AppName}-${Stage}-rpc-lb
-      Scheme: internet-facing # internet-facing || internal
+      Scheme: internal # internet-facing || internal
       SecurityGroups: !Ref SecurityGroups
-      Subnets: !Ref PublicSubnets # PublicSubnets for internet-facing || PrivateSubnets for internal
+      Subnets: !Ref PrivateSubnets # PublicSubnets for internet-facing || PrivateSubnets for internal
       Type: application
 
   ServiceTargetGroup:
@@ -251,82 +259,24 @@ Resources:
   HTTPSListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
-      Certificates:
-        - CertificateArn: !Ref DomainCertificate
       DefaultActions:
         - Type: forward
           TargetGroupArn:
             Ref: ServiceTargetGroup
       LoadBalancerArn: !Ref LoadBalancer
-      Port: 443
-      Protocol: HTTPS
+      Port: 80
+      Protocol: HTTP
 
   HTTPSListener1:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
-      Certificates:
-        - CertificateArn: !Ref DomainCertificate1
-#        - CertificateArn: !Ref DomainCertificate
       DefaultActions:
         - Type: forward
           TargetGroupArn:
             Ref: ServiceTargetGroup1
-#            Ref: ServiceTargetGroup
       LoadBalancerArn: !Ref LoadBalancer1
-      Port: 443
-      Protocol: HTTPS
-
-  DomainCertificate:
-    Type: AWS::CertificateManager::Certificate
-    Properties:
-      DomainName: !Sub ${AppName}-${Stage}.${HostedZone}
-      DomainValidationOptions:
-        - DomainName: !Sub ${AppName}-${Stage}.${HostedZone}
-          ValidationDomain: !Sub ${AppName}-${Stage}.${HostedZone}
-      ValidationMethod: DNS
-
-  DomainCertificate1:
-    Type: AWS::CertificateManager::Certificate
-    Properties:
-      DomainName: !Sub ${AppName}-${Stage}-rpc.${HostedZone}
-      DomainValidationOptions:
-        - DomainName: !Sub ${AppName}-${Stage}-rpc.${HostedZone}
-          ValidationDomain: !Sub ${AppName}-${Stage}-rpc.${HostedZone}
-      ValidationMethod: DNS
-
-  # Manual step:
-  # to create record navigate to
-  # AWS Certificate Manager > Certificates > [record_guid]
-  # and press "Create Records in Route 53"
-  Route53:
-    Type: AWS::Route53::RecordSet
-    DependsOn:
-     - LoadBalancer
-#     - LoadBalancer1
-    Properties:
-      Comment: 'Manual approval required on first deployment in region'
-      HostedZoneName: !Sub ${HostedZone}.
-      Name: !Sub ${AppName}-${Stage}.${HostedZone}
-      Type: CNAME
-      TTL: '60'
-      ResourceRecords:
-        - !GetAtt LoadBalancer.DNSName
-#        - !GetAtt LoadBalancer1.DNSName
-
-  Route53RPC:
-    Type: AWS::Route53::RecordSet
-    DependsOn:
-#      - LoadBalancer
-      - LoadBalancer1
-    Properties:
-      Comment: 'Manual approval required on first deployment in region'
-      HostedZoneName: !Sub ${HostedZone}.
-      Name: !Sub ${AppName}-${Stage}-rpc.${HostedZone}
-      Type: CNAME
-      TTL: '60'
-      ResourceRecords:
-#        - !GetAtt LoadBalancer.DNSName
-        - !GetAtt LoadBalancer1.DNSName
+      Port: 80
+      Protocol: HTTP
 
   # Application AutoScaling
   ScalableTarget:
@@ -457,7 +407,7 @@ Resources:
                   - logs:PutLogEvents
                 Effect: Allow
                 Resource:
-                  - !GetAtt RelayLogGroup.Arn
+                  - !GetAtt CollatorLogGroup.Arn
               - Action:
                   - ssm:GetParameter
                   - ssm:GetParameters
