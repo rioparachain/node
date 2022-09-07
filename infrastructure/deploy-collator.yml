@@ -33,6 +33,11 @@ Parameters:
 #    - !Ref "AWS::AccountId"
 #    - "<prod_prj_id>"
 
+#Conditions:
+#  IsUsEast1: !Equals
+#    - !Ref Env
+#    - "us-east-1"
+
 Resources:
   # ECS resources
   TaskDefinition:
@@ -102,7 +107,6 @@ Resources:
             RootDirectory: '/'
             #TransitEncryption: String
             #TransitEncryptionPort: Integer
-
       Tags:
         - Key: Name
           Value: !Sub ${AppName}-${Stage}
@@ -187,7 +191,7 @@ Resources:
   CollatorLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/ecs/${AppName}-${Stage}
+      LogGroupName: !Sub /aws/ecs/${AppName}-${Stage}-${Env}
 
   # Load balancer resources
   LoadBalancer:
@@ -347,7 +351,7 @@ Resources:
   ScalingPolicy:
     Type: AWS::ApplicationAutoScaling::ScalingPolicy
     Properties:
-      PolicyName: !Sub ${AppName}-${Stage}-service-auto-scaling-policy
+      PolicyName: !Sub ${AppName}-${Stage}-${Env}-auto-scaling-policy
       PolicyType: TargetTrackingScaling
       ScalingTargetId: !Ref ScalableTarget
       TargetTrackingScalingPolicyConfiguration:
@@ -360,7 +364,7 @@ Resources:
   AutoScalingRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AppName}-${Stage}-service-auto-scaling-role
+      RoleName: !Sub ${AppName}-${Stage}-${Env}-auto-scaling-role
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
@@ -369,7 +373,7 @@ Resources:
             Principal:
               Service: application-autoscaling.amazonaws.com
       Policies:
-        - PolicyName: !Sub ${AppName}-${Stage}-service-auto-scaling-policy
+        - PolicyName: !Sub ${AppName}-${Stage}-${Env}-auto-scaling-policy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -422,7 +426,7 @@ Resources:
   ServiceTaskRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AppName}-${Stage}-task-role
+      RoleName: !Sub ${AppName}-${Stage}-${Env}-task-role
       AssumeRolePolicyDocument:
         Statement:
           - Action: sts:AssumeRole
@@ -434,7 +438,7 @@ Resources:
   ServiceTaskExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AppName}-${Stage}-execution-role
+      RoleName: !Sub ${AppName}-${Stage}-${Env}-execution-role
       AssumeRolePolicyDocument:
         Statement:
           - Action: sts:AssumeRole
@@ -443,7 +447,7 @@ Resources:
               Service: ecs-tasks.amazonaws.com
         Version: "2012-10-17"
       Policies:
-        - PolicyName: !Sub ${AppName}-${Stage}-execution-policy
+        - PolicyName: !Sub ${AppName}-${Stage}-${Env}-execution-policy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:

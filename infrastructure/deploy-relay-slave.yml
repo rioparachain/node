@@ -190,18 +190,18 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Name: !Sub ${AppName}-${Stage}-lb
-      Scheme: internet-facing # internet-facing || internal
+      Scheme: internal # internet-facing || internal
       SecurityGroups: !Ref SecurityGroups
-      Subnets: !Ref PublicSubnets # PublicSubnets for internet-facing || PrivateSubnets for internal
+      Subnets: !Ref PrivateSubnets # PublicSubnets for internet-facing || PrivateSubnets for internal
       Type: application
 
   LoadBalancer1:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Name: !Sub ${AppName}-${Stage}-rpc-lb
-      Scheme: internet-facing # internet-facing || internal
+      Scheme: internal # internet-facing || internal
       SecurityGroups: !Ref SecurityGroups
-      Subnets: !Ref PublicSubnets # PublicSubnets for internet-facing || PrivateSubnets for internal
+      Subnets: !Ref PrivateSubnets # PublicSubnets for internet-facing || PrivateSubnets for internal
       Type: application
 
   ServiceTargetGroup:
@@ -251,82 +251,24 @@ Resources:
   HTTPSListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
-      Certificates:
-        - CertificateArn: !Ref DomainCertificate
       DefaultActions:
         - Type: forward
           TargetGroupArn:
             Ref: ServiceTargetGroup
       LoadBalancerArn: !Ref LoadBalancer
-      Port: 443
-      Protocol: HTTPS
+      Port: 80
+      Protocol: HTTP
 
   HTTPSListener1:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
-      Certificates:
-        - CertificateArn: !Ref DomainCertificate1
-#        - CertificateArn: !Ref DomainCertificate
       DefaultActions:
         - Type: forward
           TargetGroupArn:
             Ref: ServiceTargetGroup1
-#            Ref: ServiceTargetGroup
       LoadBalancerArn: !Ref LoadBalancer1
-      Port: 443
-      Protocol: HTTPS
-
-  DomainCertificate:
-    Type: AWS::CertificateManager::Certificate
-    Properties:
-      DomainName: !Sub ${AppName}-${Stage}.${HostedZone}
-      DomainValidationOptions:
-        - DomainName: !Sub ${AppName}-${Stage}.${HostedZone}
-          ValidationDomain: !Sub ${AppName}-${Stage}.${HostedZone}
-      ValidationMethod: DNS
-
-  DomainCertificate1:
-    Type: AWS::CertificateManager::Certificate
-    Properties:
-      DomainName: !Sub ${AppName}-${Stage}-rpc.${HostedZone}
-      DomainValidationOptions:
-        - DomainName: !Sub ${AppName}-${Stage}-rpc.${HostedZone}
-          ValidationDomain: !Sub ${AppName}-${Stage}-rpc.${HostedZone}
-      ValidationMethod: DNS
-
-  # Manual step:
-  # to create record navigate to
-  # AWS Certificate Manager > Certificates > [record_guid]
-  # and press "Create Records in Route 53"
-  Route53:
-    Type: AWS::Route53::RecordSet
-    DependsOn:
-     - LoadBalancer
-#     - LoadBalancer1
-    Properties:
-      Comment: 'Manual approval required on first deployment in region'
-      HostedZoneName: !Sub ${HostedZone}.
-      Name: !Sub ${AppName}-${Stage}.${HostedZone}
-      Type: CNAME
-      TTL: '60'
-      ResourceRecords:
-        - !GetAtt LoadBalancer.DNSName
-#        - !GetAtt LoadBalancer1.DNSName
-
-  Route53RPC:
-    Type: AWS::Route53::RecordSet
-    DependsOn:
-#      - LoadBalancer
-      - LoadBalancer1
-    Properties:
-      Comment: 'Manual approval required on first deployment in region'
-      HostedZoneName: !Sub ${HostedZone}.
-      Name: !Sub ${AppName}-${Stage}-rpc.${HostedZone}
-      Type: CNAME
-      TTL: '60'
-      ResourceRecords:
-#        - !GetAtt LoadBalancer.DNSName
-        - !GetAtt LoadBalancer1.DNSName
+      Port: 80
+      Protocol: HTTP
 
   # Application AutoScaling
   ScalableTarget:
