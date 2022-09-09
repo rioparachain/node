@@ -123,8 +123,8 @@ publish:
     - git clone git@gitlab.com:Core911/rio-node.git .rsync
     - rsync -rl --exclude=.chain* --exclude=.key* --exclude=.git* --exclude=.database --exclude=tmp* --exclude=infrastructure --exclude=.rsync --exclude=.idea --exclude=target --exclude=aws --exclude=submodules . ./.rsync/
     - cd .rsync
-    - rm ./docker/chainspec/airdrop.js
-    - rm .gitlab-ci.yml
+    - rm -f ./docker/chainspec/airdrop.js
+    - rm -f .gitlab-ci.yml
     - git status
     - git log --name-status HEAD^..HEAD
     - git add .
