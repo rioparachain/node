@@ -1,5 +1,7 @@
 # ..:: Rio Core Network ::..
 
+## [RELEASE NOTES](./RELEASE_NOTES.md)
+
 ## TESTNET URL's
 
 ### WS
