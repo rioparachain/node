@@ -5,7 +5,7 @@
  use fp_storage::EthereumStorageSchema;
  // Runtime
 -use frontier_template_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
-+use parachain_rio_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
++use parachain_rio_runtime::{opaque::Block, CurrencyId, AccountId, Balance, Hash, Index};
  
  /// Full client dependencies.
  pub struct FullDeps<C, P, A: ChainApi> {
@@ -18,7 +18,23 @@
  	/// Maximum number of logs in a query.
  	pub max_past_logs: u32,
  	/// Fee history cache.
-@@ -136,7 +136,7 @@
+@@ -114,6 +114,7 @@
+ 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
+ 	C::Api: BlockBuilder<Block>,
+ 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
++	C::Api: rio_gateway_rpc::GatewayRuntimeApi<Block, CurrencyId, AccountId, Balance>,
+ 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
+ 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
+ 	P: TransactionPool<Block = Block> + 'static,
+@@ -124,6 +125,7 @@
+ 		EthPubSubApiServer, EthSigner, Net, NetApiServer, Web3, Web3ApiServer,
+ 	};
+ 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
++	use rio_gateway_rpc::{Gateway, GatewayApiServer};
+ 	use substrate_frame_rpc_system::{System, SystemApiServer};
+ 
+ 	let mut io = RpcModule::new(());
+@@ -136,7 +138,7 @@
  		enable_dev_signer,
  		network,
  		filter_pool,
@@ -27,7 +43,15 @@
  		max_past_logs,
  		fee_history_cache,
  		fee_history_cache_limit,
-@@ -159,11 +159,11 @@
+@@ -148,6 +150,7 @@
+ 
+ 	io.merge(System::new(client.clone(), pool.clone(), deny_unsafe).into_rpc())?;
+ 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
++	io.merge(Gateway::new(client.clone()).into_rpc())?;
+ 
+ 	let mut signers = Vec::new();
+ 	if enable_dev_signer {
+@@ -159,11 +162,11 @@
  			client.clone(),
  			pool.clone(),
  			graph,
@@ -41,7 +65,7 @@
  			// Is authority.
  			is_authority,
  			block_data_cache.clone(),
-@@ -177,7 +177,7 @@
+@@ -177,7 +180,7 @@
  		io.merge(
  			EthFilter::new(
  				client.clone(),

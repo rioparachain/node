@@ -1,0 +1,1 @@
+../../submodules/aframe/precompiles/assets-erc20/ERC20.sol

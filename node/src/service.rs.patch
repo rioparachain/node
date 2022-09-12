@@ -15,7 +15,7 @@
 -use parachain_template_runtime::{
 -	opaque::Block, AccountId, Balance, Hash, Index as Nonce, RuntimeApi,
 -};
-+use parachain_rio_runtime::{opaque::Block, AccountId, Balance, Hash, Index as Nonce, RuntimeApi};
++use parachain_rio_runtime::{opaque::Block, CurrencyId, AccountId, Balance, Hash, Index as Nonce, RuntimeApi};
 +
 +use sc_cli::SubstrateCli;
  
@@ -134,16 +134,17 @@
  	};
  
  	Ok(params)
-@@ -220,6 +255,8 @@
+@@ -220,6 +255,9 @@
  		+ sp_block_builder::BlockBuilder<Block>
  		+ cumulus_primitives_core::CollectCollationInfo<Block>
  		+ pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>
++	    + rio_gateway_rpc::GatewayRuntimeApi<Block, CurrencyId, AccountId, Balance>
 +		+ fp_rpc::EthereumRuntimeRPCApi<Block>
 +		+ fp_rpc::ConvertTransactionRuntimeApi<Block>
  		+ substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
  	sc_client_api::StateBackendFor<TFullBackend<Block>, Block>: sp_api::StateBackend<BlakeTwo256>,
  	Executor: sc_executor::NativeExecutionDispatch + 'static,
-@@ -230,6 +267,11 @@
+@@ -230,6 +268,11 @@
  		+ 'static,
  	BIQ: FnOnce(
  			Arc<TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<Executor>>>,
@@ -155,7 +156,7 @@
  			&Configuration,
  			Option<TelemetryHandle>,
  			&TaskManager,
-@@ -264,7 +306,7 @@
+@@ -264,7 +307,7 @@
  	let parachain_config = prepare_node_config(parachain_config);
  
  	let params = new_partial::<RuntimeApi, Executor, BIQ>(&parachain_config, build_import_queue)?;
@@ -164,7 +165,7 @@
  
  	let client = params.client.clone();
  	let backend = params.backend.clone();
-@@ -304,18 +346,91 @@
+@@ -304,18 +347,91 @@
  			warp_sync: None,
  		})?;
  
@@ -258,7 +259,7 @@
  		})
  	};
  
-@@ -405,14 +520,21 @@
+@@ -405,14 +521,21 @@
  /// Build the import queue for the parachain runtime.
  #[allow(clippy::type_complexity)]
  pub fn parachain_build_import_queue(
@@ -282,7 +283,7 @@
  	>,
  	sc_service::Error,
  > {
-@@ -457,9 +579,9 @@
+@@ -457,9 +580,9 @@
  	hwbench: Option<sc_sysinfo::HwBench>,
  ) -> sc_service::error::Result<(
  	TaskManager,
