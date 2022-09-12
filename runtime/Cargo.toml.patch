@@ -37,7 +37,7 @@
  xcm = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.24" }
  xcm-builder = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.24" }
  xcm-executor = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.24" }
-@@ -75,6 +72,30 @@
+@@ -75,6 +72,33 @@
  pallet-collator-selection = { git = "https://github.com/paritytech/cumulus", default-features = false, branch = "polkadot-v0.9.24" }
  parachain-info = { git = "https://github.com/paritytech/cumulus", default-features = false, branch = "polkadot-v0.9.24" }
  
@@ -48,10 +48,13 @@
 +pallet-dynamic-fee = { path = "../frontier/frame/dynamic-fee", default-features = false }
 +pallet-ethereum = { path = "../frontier/frame/ethereum", default-features = false }
 +pallet-evm = { path = "../frontier/frame/evm", default-features = false }
++pallet-evm-precompile-dispatch = { path = "../frontier/frame/evm/precompile/dispatch", default-features = false }
 +pallet-evm-precompile-modexp = { path = "../frontier/frame/evm/precompile/modexp", default-features = false }
 +pallet-evm-precompile-sha3fips = { path = "../frontier/frame/evm/precompile/sha3fips", default-features = false }
 +pallet-evm-precompile-simple = { path = "../frontier/frame/evm/precompile/simple", default-features = false }
 +pallet-hotfix-sufficients = { path = "../frontier/frame/hotfix-sufficients", default-features = false }
++
++pallet-evm-precompile-assets-erc20 = { path = "../precompiles/assets-erc20", default-features = false }
 +
 +# Orml
 +orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "27e3272d322dcdd915f0fc2002032e8d53a46523", version = "0.4.1-dev", default-features = false }
@@ -68,7 +71,7 @@
  [features]
  default = [
    "std",
-@@ -102,7 +123,6 @@
+@@ -102,7 +126,6 @@
    "pallet-collator-selection/std",
    "pallet-session/std",
    "pallet-sudo/std",
@@ -76,7 +79,7 @@
    "pallet-timestamp/std",
    "pallet-transaction-payment-rpc-runtime-api/std",
    "pallet-transaction-payment/std",
-@@ -125,6 +145,25 @@
+@@ -125,6 +148,27 @@
    "xcm-builder/std",
    "xcm-executor/std",
    "xcm/std",
@@ -98,11 +101,13 @@
 +  "pallet-evm-precompile-modexp/std",
 +  "pallet-evm-precompile-sha3fips/std",
 +  "pallet-evm-precompile-simple/std",
++  "pallet-evm-precompile-dispatch/std",
 +  "pallet-hotfix-sufficients/std",
++  "pallet-evm-precompile-assets-erc20/std",
  ]
  
  runtime-benchmarks = [
-@@ -135,7 +174,6 @@
+@@ -135,7 +179,6 @@
    "frame-system/runtime-benchmarks",
    "pallet-balances/runtime-benchmarks",
    "pallet-collator-selection/runtime-benchmarks",
@@ -110,7 +115,7 @@
    "pallet-timestamp/runtime-benchmarks",
    "pallet-xcm/runtime-benchmarks",
    "sp-runtime/runtime-benchmarks",
-@@ -148,3 +186,6 @@
+@@ -148,3 +191,6 @@
    "frame-executive/try-runtime",
    "frame-try-runtime",
  ]

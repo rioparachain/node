@@ -8,7 +8,7 @@ use jsonrpsee::RpcModule;
 
 use cumulus_client_cli::CollatorOptions;
 // Local Runtime Types
-use parachain_rio_runtime::{opaque::Block, AccountId, Balance, Hash, Index as Nonce, RuntimeApi};
+use parachain_rio_runtime::{opaque::Block, CurrencyId, AccountId, Balance, Hash, Index as Nonce, RuntimeApi};
 
 use sc_cli::SubstrateCli;
 
@@ -255,6 +255,7 @@ where
 		+ sp_block_builder::BlockBuilder<Block>
 		+ cumulus_primitives_core::CollectCollationInfo<Block>
 		+ pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>
+	    + rio_gateway_rpc::GatewayRuntimeApi<Block, CurrencyId, AccountId, Balance>
 		+ fp_rpc::EthereumRuntimeRPCApi<Block>
 		+ fp_rpc::ConvertTransactionRuntimeApi<Block>
 		+ substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,

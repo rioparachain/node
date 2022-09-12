@@ -3,7 +3,7 @@ if [ "$USE_PATCHES_CONFIG" != "1" ]; then exit 0; fi
 polkadot_version="v0.9.24"
 polkadot_version_old_regex="v0\.9\.23"
 
-submodules_list="polkadot cumulus substrate orml frontier ptemplate"
+submodules_list="polkadot cumulus substrate orml frontier ptemplate aframe"
 
 polkadot_repo="https://github.com/paritytech/polkadot"
 polkadot_branch="release-$polkadot_version"
@@ -29,6 +29,10 @@ ptemplate_repo="https://github.com/substrate-developer-hub/substrate-parachain-t
 ptemplate_rev="polkadot-$polkadot_version"
 ptemplate_submodules_path="submodules/ptemplate"
 
+aframe_repo="https://github.com/AstarNetwork/astar-frame"
+aframe_branch="polkadot-$polkadot_version"
+aframe_submodules_path="submodules/aframe"
+
 get_original() {
   eval "cat \$${submodule}_submodules_path/\$1"
 }
@@ -40,6 +44,9 @@ rewrite_path() {
       ;;
     substrate)
       sed "s,path = \"../[^\"]*\",git = \"$substrate_repo\"@COMMA@ branch = \"$substrate_branch\",g" | sed 's/@COMMA@/,/g'
+      ;;
+    aframe)
+      sed "s,path = \"../[^\"]*\",git = \"$aframe_repo\"@COMMA@ branch = \"$aframe_branch\",g" | sed 's/@COMMA@/,/g'
       ;;
     cumulus)
       sed "s,path = \"../[^\"]*\",git = \"$cumulus_repo\"@COMMA@ branch = \"$cumulus_branch\",g" | sed 's/@COMMA@/,/g'
@@ -75,7 +82,7 @@ remove_time_from_patch() {
 
 loads=""
 
-configs=`find node pallets runtime -type f -name patches_config.sh`
+configs=`find node pallets runtime precompiles -type f -name patches_config.sh`
 
 for config in $configs
 do

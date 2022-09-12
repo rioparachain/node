@@ -82,7 +82,11 @@ pallet-evm = { path = "../frontier/frame/evm", default-features = false }
 pallet-evm-precompile-modexp = { path = "../frontier/frame/evm/precompile/modexp", default-features = false }
 pallet-evm-precompile-sha3fips = { path = "../frontier/frame/evm/precompile/sha3fips", default-features = false }
 pallet-evm-precompile-simple = { path = "../frontier/frame/evm/precompile/simple", default-features = false }
+pallet-evm-precompile-dispatch = { path = "../frontier/frame/evm/precompile/dispatch", default-features = false }
 pallet-hotfix-sufficients = { path = "../frontier/frame/hotfix-sufficients", default-features = false }
+
+pallet-evm-precompile-assets-erc20 = { path = "../precompiles/assets-erc20", default-features = false }
+
 
 # Orml
 orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "27e3272d322dcdd915f0fc2002032e8d53a46523", version = "0.4.1-dev", default-features = false }
@@ -163,7 +167,9 @@ std = [
   "pallet-evm-precompile-modexp/std",
   "pallet-evm-precompile-sha3fips/std",
   "pallet-evm-precompile-simple/std",
+  "pallet-evm-precompile-dispatch/std",
   "pallet-hotfix-sufficients/std",
+  "pallet-evm-precompile-assets-erc20/std",
 ]
 
 runtime-benchmarks = [

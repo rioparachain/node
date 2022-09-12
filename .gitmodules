@@ -16,3 +16,6 @@
 [submodule "submodules/ptemplate"]
 	path = submodules/ptemplate
 	url = https://github.com/substrate-developer-hub/substrate-parachain-template
+[submodule "submodules/aframe"]
+	path = submodules/aframe
+	url = https://github.com/AstarNetwork/astar-frame

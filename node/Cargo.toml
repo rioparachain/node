@@ -28,9 +28,9 @@ serde = { version = "1.0.137", features = ["derive"] }
 parachain-rio-runtime = { path = "../runtime" }
 
 # Substrate
+frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
 frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
-frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
 pallet-transaction-payment-rpc = { package = "rpallet-transaction-payment-rpc", path = "../pallets/transaction-payment/rpc" }
 sc-basic-authorship = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
 sc-chain-spec = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }
@@ -102,6 +102,8 @@ pallet-evm = { path = "../frontier/frame/evm" }
 rp-protocol = { path = "../primitives/protocol", default-features = false }
 rpallet-assets = { path = "../pallets/assets", default-features = false }
 rpallet-gateway = { path = "../pallets/gateway", default-features = false }
+rio-gateway-rpc = { path = "../pallets/gateway/rpc", default-features = false }
+rio-gateway-rpc-runtime-api = { path = "../pallets/gateway/rpc/runtime-api", default-features = false }
 
 [build-dependencies]
 substrate-build-script-utils = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24" }

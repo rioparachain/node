@@ -20,4 +20,5 @@
 !primitives
 !proc-macro
 !runtime
+!precompiles
 

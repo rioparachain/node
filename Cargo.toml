@@ -25,6 +25,8 @@ members = [
   "pallets/gateway",
   "pallets/gateway/rpc",
   "pallets/staking-pool",
+  "precompiles/assets-erc20",
+  "precompiles/utils",
   "proc-macro",
   "runtime",
   "runtime/common-rio",

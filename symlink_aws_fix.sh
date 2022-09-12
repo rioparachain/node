@@ -1,4 +1,7 @@
 #!/bin/sh
+ln -sf ../../submodules/aframe/precompiles/assets-erc20/ERC20.sol precompiles/assets-erc20/ERC20.sol
+ln -sf ../../submodules/aframe/precompiles/utils/macro precompiles/utils/macro
+ln -sf ../../submodules/aframe/precompiles/utils/src precompiles/utils/src
 ln -sf ../../submodules/polkadot/node/client/src node/relaychain-rio-client/src
 ln -sf ../../submodules/polkadot/cli/build.rs node/relaychain-rio-cli/build.rs
 ln -sf ../../../submodules/polkadot/cli/src/lib.rs node/relaychain-rio-cli/src/lib.rs
@@ -16,14 +19,6 @@ ln -sf ../../../../../submodules/substrate/frame/transaction-payment/rpc/runtime
 ln -sf ../../../submodules/substrate/frame/transaction-payment/src/payment.rs pallets/transaction-payment/src/payment.rs
 ln -sf ../../../submodules/substrate/frame/transaction-payment/src/lib.rs pallets/transaction-payment/src/lib.rs
 ln -sf ../../../submodules/substrate/frame/transaction-payment/src/types.rs pallets/transaction-payment/src/types.rs
-ln -sf ../../../submodules/open-runtime-module-library/tokens/src/tests_fungibles.rs pallets/assets/src/tests_fungibles.rs
-ln -sf ../../../submodules/open-runtime-module-library/tokens/src/mock.rs pallets/assets/src/mock.rs
-ln -sf ../../../submodules/open-runtime-module-library/tokens/src/tests_currency_adapter.rs pallets/assets/src/tests_currency_adapter.rs
-ln -sf ../../../submodules/open-runtime-module-library/tokens/src/tests.rs pallets/assets/src/tests.rs
-ln -sf ../../../submodules/open-runtime-module-library/tokens/src/imbalances.rs pallets/assets/src/imbalances.rs
-ln -sf ../../../submodules/open-runtime-module-library/tokens/src/impls.rs pallets/assets/src/impls.rs
-ln -sf ../../../submodules/open-runtime-module-library/tokens/src/tests_multicurrency.rs pallets/assets/src/tests_multicurrency.rs
-ln -sf ../../../submodules/open-runtime-module-library/tokens/src/tests_events.rs pallets/assets/src/tests_events.rs
 ln -sf ../../submodules/polkadot/runtime/common/slot_range_helper runtime/common-rio/slot_range_helper
 ln -sf ../../submodules/polkadot/runtime/common/src runtime/common-rio/src
 ln -sf ../../../../submodules/polkadot/runtime/polkadot/constants/src/weights runtime/relaychain-rio/constants/src/weights
