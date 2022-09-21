@@ -6,7 +6,7 @@ FROM alpine:latest
 # By default, the logic of the first failure for sh.
 SHELL ["/bin/sh", "-xe", "-c"]
 
-RUN apk add --no-cache curl nodejs nfs-utils sed gawk
+RUN apk add --no-cache curl nfs-utils sed jq
 
 WORKDIR /rio
 
