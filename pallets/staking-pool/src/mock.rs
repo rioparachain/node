@@ -149,6 +149,7 @@ impl rpallet_assets::Config for Test {
   type ReserveIdentifier = [u8; 8];
   type StringLimit = StringLimit;
   type WeightInfo = ();
+  type ApprovalDeposit = frame_support::traits::ConstU128<0_u128>;
 }
 
 parameter_types! {

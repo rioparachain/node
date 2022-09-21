@@ -37,7 +37,7 @@
  use frame_support::{
  	construct_runtime, parameter_types,
 -	traits::Everything,
-+	traits::{ConstU32, ConstU8, Everything, FindAuthor, KeyOwnerProofSystem, Randomness},
++	traits::{ConstU32, ConstU8, ConstU128, Everything, FindAuthor, KeyOwnerProofSystem, Randomness},
  	weights::{
  		constants::WEIGHT_PER_SECOND, ConstantMultiplier, DispatchClass, Weight,
  		WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
@@ -133,7 +133,7 @@
  	pub const MaxInvulnerables: u32 = 100;
  	pub const ExecutiveBody: BodyId = BodyId::Executive;
  }
-@@ -451,9 +483,198 @@
+@@ -451,9 +483,199 @@
  	type WeightInfo = ();
  }
  
@@ -271,6 +271,7 @@
 +	type ReserveIdentifier = [u8; 8];
 +	type DustRemovalWhitelist = DustRemovalWhitelist;
 +	type StringLimit = StringLimit;
++    type ApprovalDeposit = ConstU128<0_u128>;
 +}
 +
 +// orml
@@ -334,7 +335,7 @@
  }
  
  // Create the runtime by composing the FRAME pallets that were previously configured.
-@@ -488,11 +709,102 @@
+@@ -488,11 +710,102 @@
  		CumulusXcm: cumulus_pallet_xcm::{Pallet, Event<T>, Origin} = 32,
  		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 33,
  
@@ -439,7 +440,7 @@
  #[cfg(feature = "runtime-benchmarks")]
  #[macro_use]
  extern crate frame_benchmarking;
-@@ -510,6 +822,33 @@
+@@ -510,6 +823,33 @@
  }
  
  impl_runtime_apis! {
@@ -473,7 +474,7 @@
  	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
  		fn slot_duration() -> sp_consensus_aura::SlotDuration {
  			sp_consensus_aura::SlotDuration::from_millis(Aura::slot_duration())
-@@ -616,10 +955,161 @@
+@@ -616,10 +956,161 @@
  		}
  	}
  
