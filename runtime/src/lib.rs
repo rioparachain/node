@@ -37,7 +37,7 @@ use fp_rpc::TransactionStatus;
 
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{ConstU32, ConstU8, Everything, FindAuthor, KeyOwnerProofSystem, Randomness},
+	traits::{ConstU32, ConstU8, ConstU128, Everything, FindAuthor, KeyOwnerProofSystem, Randomness},
 	weights::{
 		constants::WEIGHT_PER_SECOND, ConstantMultiplier, DispatchClass, Weight,
 		WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
@@ -615,6 +615,7 @@ impl rpallet_assets::Config for Runtime {
 	type ReserveIdentifier = [u8; 8];
 	type DustRemovalWhitelist = DustRemovalWhitelist;
 	type StringLimit = StringLimit;
+    type ApprovalDeposit = ConstU128<0_u128>;
 }
 
 // orml

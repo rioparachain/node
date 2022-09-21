@@ -8,15 +8,18 @@
  
  pub const DOT: CurrencyId = 1;
  pub const BTC: CurrencyId = 2;
-@@ -281,6 +282,7 @@
+@@ -281,8 +282,10 @@
  	type OnKilledTokenAccount = TrackKilledAccounts;
  	type MaxLocks = ConstU32<2>;
  	type MaxReserves = ConstU32<2>;
 +	type StringLimit = ConstU32<128>;
  	type ReserveIdentifier = ReserveIdentifier;
  	type DustRemovalWhitelist = MockDustRemovalWhitelist;
++	type ApprovalDeposit = ConstU64<0_u64>;
  }
-@@ -303,22 +305,47 @@
+ pub type TreasuryCurrencyAdapter = <Runtime as pallet_treasury::Config>::Currency;
+ 
+@@ -303,22 +306,47 @@
  );
  
  pub struct ExtBuilder {
@@ -67,7 +70,7 @@
  		self
  	}
  
-@@ -327,11 +354,9 @@
+@@ -327,11 +355,9 @@
  			.build_storage::<Runtime>()
  			.unwrap();
  

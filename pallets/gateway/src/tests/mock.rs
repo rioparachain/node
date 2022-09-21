@@ -2,7 +2,7 @@ use super::*;
 use crate as rio_gateway;
 use frame_support::{
 	parameter_types,
-	traits::{ConstU32, ConstU64, Contains},
+	traits::{ConstU32, ConstU64, ConstU128, Contains},
 	weights::{
 		DispatchClass, DispatchInfo, GetDispatchInfo, PostDispatchInfo, RuntimeDbWeight, Weight,
 		WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
@@ -198,6 +198,7 @@ impl rpallet_assets::Config for Test {
 	type ReserveIdentifier = ();
 	type DustRemovalWhitelist = MockDustRemovalWhitelist;
 	type StringLimit = StringLimit;
+    type ApprovalDeposit = ConstU128<0_u128>;
 }
 
 impl rio_gateway::Config for Test {

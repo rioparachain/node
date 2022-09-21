@@ -78,10 +78,10 @@
 -    Burn = "burn(address,uint256)",
 +	TotalSupply = "totalSupply()",
 +	BalanceOf = "balanceOf(address)",
-+	//Allowance = "allowance(address,address)",
++	Allowance = "allowance(address,address)",
 +	Transfer = "transfer(address,uint256)",
-+	//Approve = "approve(address,uint256)",
-+	//TransferFrom = "transferFrom(address,address,uint256)",
++	Approve = "approve(address,uint256)",
++	TransferFrom = "transferFrom(address,address,uint256)",
 +	Name = "name()",
 +	Symbol = "symbol()",
 +	Decimals = "decimals()",
@@ -105,7 +105,7 @@
  }
  
  /// The following distribution has been decided for the precompiles
-@@ -99,430 +102,438 @@
+@@ -99,430 +102,432 @@
  
  /// This means that every address that starts with 0xFFFFFFFF will go through an additional db read,
  /// but the probability for this to happen is 2^-32 for random addresses
@@ -218,9 +218,9 @@
 +					};
 +
 +					if let Err(err) = handle.check_function_modifier(match selector {
-+						//Action::Approve
++						Action::Approve
++						| Action::TransferFrom
 +						| Action::Transfer => FunctionModifier::NonPayable,
-+						//| Action::TransferFrom
 +						//| Action::Mint
 +						//| Action::Burn => FunctionModifier::NonPayable,
 +						| _ => FunctionModifier::View,
@@ -232,10 +232,10 @@
 +						// XC20
 +						| Action::TotalSupply => Self::total_supply(asset_id, handle),
 +						| Action::BalanceOf => Self::balance_of(asset_id, handle),
-+						//Action::Allowance => Self::allowance(asset_id, handle),
-+						//Action::Approve => Self::approve(asset_id, handle),
++						| Action::Allowance => Self::allowance(asset_id, handle),
++						| Action::Approve => Self::approve(asset_id, handle),
 +						| Action::Transfer => Self::transfer(asset_id, handle),
-+						//Action::TransferFrom => Self::transfer_from(asset_id, handle),
++						| Action::TransferFrom => Self::transfer_from(asset_id, handle),
 +						| Action::Name => Self::name(asset_id, handle),
 +						| Action::Symbol => Self::symbol(asset_id, handle),
 +						| Action::Decimals => Self::decimals(asset_id, handle),
@@ -649,11 +649,10 @@
 +		Ok(succeed(EvmDataWriter::new().write(amount).build()))
 +	}
 +
-+	/*
-+		fn allowance(
++	fn allowance(
 +		asset_id: AssetIdOf<Runtime>,
 +		handle: &mut impl PrecompileHandle,
-+		) -> EvmResult<PrecompileOutput> {
++	) -> EvmResult<PrecompileOutput> {
 +		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 +
 +		let mut input = handle.read_input()?;
@@ -668,18 +667,16 @@
 +			let spender: Runtime::AccountId = Runtime::AddressMapping::into_account_id(spender);
 +
 +			// Fetch info.
-+			pallet_assets::Pallet::<Runtime>::allowance(asset_id, &owner, &spender).into()
++		    pallet_assets::Pallet::<Runtime>::allowance(asset_id, &owner, &spender).into()
 +		};
 +
 +		Ok(succeed(EvmDataWriter::new().write(amount).build()))
-+		}
-+	*/
++	}
 +
-+	/*
-+		fn approve(
++	fn approve(
 +		asset_id: AssetIdOf<Runtime>,
 +		handle: &mut impl PrecompileHandle,
-+		) -> EvmResult<PrecompileOutput> {
++	) -> EvmResult<PrecompileOutput> {
 +		handle.record_log_costs_manual(3, 32)?;
 +
 +		let mut input = handle.read_input()?;
@@ -707,7 +704,7 @@
 +				Some(origin.clone()).into(),
 +				pallet_assets::Call::<Runtime>::cancel_approval {
 +				id: asset_id,
-+				delegate: Runtime::Lookup::unlookup(spender.clone()),
++				delegate: spender.clone(),
 +				},
 +			)?;
 +			}
@@ -717,7 +714,7 @@
 +			Some(origin).into(),
 +			pallet_assets::Call::<Runtime>::approve_transfer {
 +				id: asset_id,
-+				delegate: Runtime::Lookup::unlookup(spender),
++				delegate: spender,
 +				amount,
 +			},
 +			)?;
@@ -733,8 +730,7 @@
 +			.record(handle)?;
 +
 +		Ok(succeed(EvmDataWriter::new().write(true).build()))
-+		}
-+	*/
++	}
 +
 +	fn transfer(
 +		asset_id: AssetIdOf<Runtime>,
@@ -777,11 +773,10 @@
 +		Ok(succeed(EvmDataWriter::new().write(true).build()))
 +	}
 +
-+	/*
-+		fn transfer_from(
++	fn transfer_from(
 +		asset_id: AssetIdOf<Runtime>,
 +		handle: &mut impl PrecompileHandle,
-+		) -> EvmResult<PrecompileOutput> {
++	) -> EvmResult<PrecompileOutput> {
 +		handle.record_log_costs_manual(3, 32)?;
 +
 +		let mut input = handle.read_input()?;
@@ -805,8 +800,8 @@
 +				Some(caller).into(),
 +				pallet_assets::Call::<Runtime>::transfer_approved {
 +				id: asset_id,
-+				owner: Runtime::Lookup::unlookup(from),
-+				destination: Runtime::Lookup::unlookup(to),
++				owner: from,
++				destination: to,
 +				amount,
 +				},
 +			)?;
@@ -816,8 +811,8 @@
 +				handle,
 +				Some(from).into(),
 +				pallet_assets::Call::<Runtime>::transfer {
-+				id: asset_id,
-+				target: Runtime::Lookup::unlookup(to),
++				dest: Runtime::Lookup::unlookup(to),
++				currency_id: asset_id,
 +				amount,
 +				},
 +			)?;
@@ -834,8 +829,7 @@
 +			.record(handle)?;
 +
 +		Ok(succeed(EvmDataWriter::new().write(true).build()))
-+		}
-+	*/
++	}
 +
 +	fn name(
 +		asset_id: AssetIdOf<Runtime>,
