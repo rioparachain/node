@@ -10,18 +10,18 @@ env:
     DISTRIBUTE_KEYS: rio-node/testnet:DISTRIBUTE_KEYS
 
 phases:
-#  install:
-#    runtime-version:
-#      nodejs: 16
-#    on-failure: ABORT
-#    commands:
-#      - cd docker/chainspec
-#      - yarn
-#      - yarn accounts
-#      - yarn balances
-#      - aws s3 cp addreses_latest.json "s3://airdrop-balances-private"
-#      - aws s3 cp balances_latest.json "s3://airdrop-balances-private"
-#      - cd ../..
+  install:
+    runtime-version:
+      nodejs: 16
+    on-failure: ABORT
+    commands:
+      - cd docker/chainspec
+      - yarn
+      - yarn accounts
+      - yarn balances
+      - aws s3 cp addreses_latest.json "s3://airdrop-balances-private"
+      - aws s3 cp balances_latest.json "s3://airdrop-balances-private"
+      - cd ../..
   pre_build:
     commands:
       - export IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-8)
@@ -32,6 +32,7 @@ phases:
     on-failure: ABORT
     commands:
       - aws s3 sync s3://airdrop-balances-private docker/chainspec
+      - ls -lA docker/chainspec
       - |
         docker-compose -f docker-compose-build.yml build --no-cache \
           --build-arg "MNEMONIC=${MNEMONIC}" \
@@ -41,7 +42,7 @@ phases:
       - docker push $ECR_REPO:$IMAGE_TAG
       - printf '{"ImageURI":"%s:%s"}' $ECR_REPO $IMAGE_TAG > imageDetails.json
 ## DEBUG SECTION >
-#      - export IMAGE_TAG=6590e44c
+#      - export IMAGE_TAG=5f35a1ca
 #      - printf '{"ImageURI":"%s:%s"}' $ECR_REPO $IMAGE_TAG > imageDetails.json
     finally:
       - echo "The build process was exited"

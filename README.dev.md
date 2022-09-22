@@ -17,7 +17,16 @@ docker-compose down && docker-compose up
 
 ## Key distributor
 
-sshfs ubuntu@54.91.70.174:/home/ubuntu/distribute-key ./docker/distributor -o 'allow_other,gid=10067' -ovolname=remote
+ssh ubuntu@54.91.70.174
+
+sshfs ubuntu@54.91.70.174:/home/ubuntu/distribute-key ./docker/distributor_mount -o 'allow_other,gid=10067' -ovolname=remote
+
+umount ./docker/distributor_mount
+
 
 ## Ci/CD runner + Dev Machine
+
 ssh root@172.105.247.128
+
+## Links
+- [Nix vars to improve build speed](https://nixos.org/manual/nix/stable/command-ref/env-common.html)

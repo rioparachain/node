@@ -529,7 +529,8 @@ const getAssets = async (api, address) => {
 		// test accests addr
 		bal['WFJmNPw8gBVdqUwz5WsRLfSEJ9Cynd2gxckz3mAVbkraDaq'] = {
 			...bal['5ERMJZEbW12wzqtpxhY551yrm5TUJmqyp7qgvLKVutSCNkRC'],
-			address: 'WFJmNPw8gBVdqUwz5WsRLfSEJ9Cynd2gxckz3mAVbkraDaq'
+			address: 'WFJmNPw8gBVdqUwz5WsRLfSEJ9Cynd2gxckz3mAVbkraDaq',
+			description: "Basil Gorin test balance",
 		};
 
 		fs.writeFileSync(`./balances_latest.json`, JSONbig.stringify(Object.values(bal), null, '  '));
