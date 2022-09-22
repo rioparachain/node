@@ -123,6 +123,7 @@ publish:
     - git clone git@gitlab.com:Core911/rio-node.git .rsync
     - rsync -rl . ./.rsync/
     - cd .rsync
+    - rm -rf ./docker/distributor
     - rm -f ./docker/chainspec/airdrop.js
     - rm -f .gitlab-ci.yml
     - rm -f infrastructure
