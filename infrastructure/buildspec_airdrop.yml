@@ -1,0 +1,28 @@
+version: 0.2
+
+env:
+  variables:
+    AIRDROP_SCAN_PAGES: 700
+
+phases:
+  build:
+    runtime-version:
+      nodejs: 16
+    on-failure: ABORT
+    commands:
+      - cd docker/chainspec
+      - yarn
+      - yarn accounts
+      - yarn balances
+    finally:
+      - echo "Airdrop process was exited"
+  post_build:
+    commands:
+      - aws s3 cp addreses_latest.json "s3://airdrop-balances-private"
+      - aws s3 cp balances_latest.json "s3://airdrop-balances-private"
+    finally:
+      - echo "Uploaded addresses and balances to S3"
+
+cache:
+  paths:
+    - '/root/.npm/**/*'

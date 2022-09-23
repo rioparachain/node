@@ -21,6 +21,7 @@ submodules
 tmp
 
 docker/.chainspec
+docker/distributor_mount
 **/node_modules
 
 # Folders with patches
@@ -56,3 +57,4 @@ pallets/assets/**/*.rs
 .idea
 .vscode
 .chainspec
+

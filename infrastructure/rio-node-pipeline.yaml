@@ -65,6 +65,20 @@ Resources:
                 - Name: SourceArtifact
               InputArtifacts: []
               Region: us-east-1
+        - Name: Airdrop
+          Actions:
+            - Name: Airdrop
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              RunOrder: 1
+              Configuration:
+                ProjectName: RioNodeAirdrop
+              InputArtifacts:
+                - Name: SourceArtifact
+              Region: us-east-1
         - Name: BuildSource
           Actions:
             - Name: Build
@@ -315,6 +329,43 @@ Resources:
           - LOCAL_DOCKER_LAYER_CACHE
           #- LOCAL_SOURCE_CACHE
       TimeoutInMinutes: 60
+
+  DeployAirdrop:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: RioNodeAirdrop
+      Artifacts:
+        Type: CODEPIPELINE
+      VpcConfig:
+        VpcId: !FindInMap [General, VpcId, nonprod]
+        Subnets:
+          - !FindInMap [General, Subnet, nonprod]
+        SecurityGroupIds:
+          - !FindInMap [General, SecurityGroupId, nonprod]
+      Environment:
+        Type: ARM_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
+        PrivilegedMode: true
+        EnvironmentVariables:
+          - Name: REPOSITORY_NAME
+            Type: PLAINTEXT
+            Value: !FindInMap [General, Repository, name]
+          - Name: REPOSITORY_BRANCH
+            Type: PLAINTEXT
+            Value: !FindInMap [General, Repository, branch]
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: infrastructure/buildspec_airdrop.yml
+      Cache:
+        Type: S3
+        Location: rio-artifacts-us-east-1/rio-node-codebuild-cache
+        Modes:
+          - LOCAL_CUSTOM_CACHE
+          - LOCAL_DOCKER_LAYER_CACHE
+          #- LOCAL_SOURCE_CACHE
+      TimeoutInMinutes: 20
 
   CodeBuildRole:
     Type: AWS::IAM::Role
