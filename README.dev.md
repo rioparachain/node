@@ -17,9 +17,9 @@ docker-compose down && docker-compose up
 
 ## Key distributor
 
-ssh ubuntu@54.205.90.136
+ssh ubuntu@44.209.179.185
 
-sshfs ubuntu@54.205.90.136:/home/ubuntu/distribute-key ./docker/distributor_mount -o 'allow_other,gid=10067' -ovolname=remote
+sshfs ubuntu@44.209.179.185:/home/ubuntu/distribute-key ./docker/distributor_mount -o 'allow_other,gid=10067' -ovolname=remote
 
 umount ./docker/distributor_mount
 

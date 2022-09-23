@@ -3,25 +3,11 @@ version: 0.2
 env:
   variables:
     IMAGE_NAME: rio-node
-    AIRDROP_SCAN_PAGES: 700
-  git-credential-helper: yes
   secrets-manager:
     MNEMONIC: rio-node/testnet:MNEMONIC
     DISTRIBUTE_KEYS: rio-node/testnet:DISTRIBUTE_KEYS
 
 phases:
-  install:
-    runtime-version:
-      nodejs: 16
-    on-failure: ABORT
-    commands:
-      - cd docker/chainspec
-      - yarn
-      - yarn accounts
-      - yarn balances
-      - aws s3 cp addreses_latest.json "s3://airdrop-balances-private"
-      - aws s3 cp balances_latest.json "s3://airdrop-balances-private"
-      - cd ../..
   pre_build:
     commands:
       - export IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-8)
@@ -41,20 +27,17 @@ phases:
       - docker push $ECR_REPO:$IMAGE_TAG
       - printf '{"ImageURI":"%s:%s"}' $ECR_REPO $IMAGE_TAG > imageDetails.json
 ## DEBUG SECTION >
-#      - export IMAGE_TAG=531a74a3
+#      - export IMAGE_TAG=0dce31c1
 #      - printf '{"ImageURI":"%s:%s"}' $ECR_REPO $IMAGE_TAG > imageDetails.json
     finally:
       - echo "The build process was exited"
   post_build:
     commands:
-      # reset key distributor
       - curl -s "${DISTRIBUTE_KEYS}/reset"
+    finally:
+      - echo "Key distributor was reset"
 
 artifacts:
   files:
     - imageDetails.json
-
-#cache:
-#  paths:
-#    - '/root/.npm/**/*'
 

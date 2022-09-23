@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const port = 3000;
 const bodyParser = require('body-parser');
+const axios = require('axios');
 
 console.log('Version 1.0.1');
 
@@ -35,6 +36,38 @@ app.get('/reset', (req, res) => {
 
 app.get('/', (req, res) => {
 	res.json(instances);
+});
+
+app.get('/status/:ip', async (req, res) => {
+	const ip = req.params.ip;
+	res.json(
+		await axios
+			.get(`http://${ip}:9933/health`)
+			.then(r => {
+				return r.data;
+			})
+			.catch(e => {
+				return e;
+			})
+	);
+});
+
+app.get('/status', async (req, res) => {
+	const result = [];
+	await Promise.all(instances.map(async v => {
+		const status = await axios
+			.get(`http://${v.ip}:9933/health`)
+			.then(r => {
+				return r.data;
+			})
+			.catch(e => {
+				console.error(e);
+				return { error: e.message };
+			});
+		console.log(status);
+		result.push(status);
+	}));
+	res.json(result);
 });
 
 app.get('/relay', async (req, res) => {
