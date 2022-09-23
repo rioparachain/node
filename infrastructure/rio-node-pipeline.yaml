@@ -81,9 +81,9 @@ Resources:
               InputArtifacts:
                 - Name: SourceArtifact
               Region: us-east-1
-        - Name: DeployTestnet1
+        - Name: DeployTestnetRelay
           Actions:
-            - Name: RelayTestnet1
+            - Name: UsEast1
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
@@ -106,7 +106,7 @@ Resources:
                     "PrivateSubnets": "subnet-0dc08ca24c0b7f595,subnet-034aa02bf03954706",
                     "SecurityGroups": "sg-0eeb5bea7180af22d",
                     "HostedZone": "riocorenetwork.com",
-                    "DesiredCount": "3"
+                    "DesiredCount": "2"
                   }
                 # NOTE: desired count will be multiplied x2 because of splitting to WS/RPC task-sets
                 StackName: rio-testnet-relay
@@ -114,7 +114,71 @@ Resources:
                 RoleArn:  arn:aws:iam::061416964074:role/rio-node-pipeline-role
               RunOrder: 1
               Region: us-east-1
-            - Name: CollatorTestnet1
+            - Name: UsWest2
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              InputArtifacts:
+                - Name: SourceArtifact
+                - Name: BuildArtifact
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                Capabilities: "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND"
+                ParameterOverrides: !Sub |
+                  {
+                    "ImageURI" : { "Fn::GetParam" : ["BuildArtifact", "imageDetails.json", "ImageURI"] },
+                    "AppName": "rio-testnet",
+                    "Stage": "relay2",
+                    "Env": "us-west-2",
+                    "Vpc": "vpc-000fc4858ed354132",
+                    "PublicSubnets": "subnet-0ad378b5a65b411c0,subnet-0dd5adc3152f9c8a9",
+                    "PrivateSubnets": "subnet-0d81f229f91e0d2eb,subnet-020c447f1d183ab9b",
+                    "SecurityGroups": "sg-0b2c2d449139d892c",
+                    "HostedZone": "riocorenetwork.com",
+                    "DesiredCount": "1"
+                  }
+                # NOTE: desired count will be multiplied x2 because of splitting to WS/RPC task-sets
+                StackName: rio-testnet-relay2
+                TemplatePath: SourceArtifact::infrastructure/deploy-relay.yml
+                RoleArn:  arn:aws:iam::061416964074:role/rio-node-pipeline-role
+              RunOrder: 1
+              Region: us-west-2
+            - Name: EuCentral1
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              InputArtifacts:
+                - Name: SourceArtifact
+                - Name: BuildArtifact
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                Capabilities: "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND"
+                ParameterOverrides: !Sub |
+                  {
+                    "ImageURI" : { "Fn::GetParam" : ["BuildArtifact", "imageDetails.json", "ImageURI"] },
+                    "AppName": "rio-testnet",
+                    "Stage": "relay3",
+                    "Env": "eu-central-1",
+                    "Vpc": "vpc-04d18d76e49837ee8",
+                    "PublicSubnets": "subnet-07a115ab15717cd63,subnet-08299fa771ffc6e62",
+                    "PrivateSubnets": "subnet-051c7f34e9c74983b,subnet-085be6565e5dd4adb",
+                    "SecurityGroups": "sg-0fadbd5a3ab9e17b7",
+                    "HostedZone": "riocorenetwork.com",
+                    "DesiredCount": "1"
+                  }
+                # NOTE: desired count will be multiplied x2 because of splitting to WS/RPC task-sets
+                StackName: rio-testnet-relay3
+                TemplatePath: SourceArtifact::infrastructure/deploy-relay.yml
+                RoleArn:  arn:aws:iam::061416964074:role/rio-node-pipeline-role
+              RunOrder: 1
+              Region: eu-central-1
+        - Name: DeployTestnetCollator
+          Actions:
+            - Name: UsEast1
               ActionTypeId:
                   Category: Deploy
                   Owner: AWS
@@ -137,7 +201,7 @@ Resources:
                           "PrivateSubnets": "subnet-0dc08ca24c0b7f595,subnet-034aa02bf03954706",
                           "SecurityGroups": "sg-0eeb5bea7180af22d",
                           "HostedZone": "riocorenetwork.com",
-                          "DesiredCount": "2"
+                          "DesiredCount": "1"
                       }
                   # NOTE: desired count will be multiplied x2 because of splitting to WS/RPC task-sets
                   StackName: rio-testnet-collator
@@ -145,40 +209,7 @@ Resources:
                   RoleArn: arn:aws:iam::061416964074:role/rio-node-pipeline-role
               RunOrder: 1
               Region: us-east-1
-        - Name: DeployTestnet2
-          Actions:
-            - Name: RelayTestnet2
-              ActionTypeId:
-                Category: Deploy
-                Owner: AWS
-                Version: 1
-                Provider: CloudFormation
-              InputArtifacts:
-                - Name: SourceArtifact
-                - Name: BuildArtifact
-              Configuration:
-                ActionMode: CREATE_UPDATE
-                Capabilities: "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND"
-                ParameterOverrides: !Sub |
-                  {
-                    "ImageURI" : { "Fn::GetParam" : ["BuildArtifact", "imageDetails.json", "ImageURI"] },
-                    "AppName": "rio-testnet",
-                    "Stage": "relay2",
-                    "Env": "us-west-2",
-                    "Vpc": "vpc-0943bb58d3bdac0bd",
-                    "PublicSubnets": "subnet-09f8872d4499eea9b,subnet-064f1db3e48770b2c",
-                    "PrivateSubnets": "subnet-0a7d2c49157156f32,subnet-0b0ee2e64bc8d6ced",
-                    "SecurityGroups": "sg-0ddbadfeb40fa562e",
-                    "HostedZone": "riocorenetwork.com",
-                    "DesiredCount": "2"
-                  }
-                # NOTE: desired count will be multiplied x2 because of splitting to WS/RPC task-sets
-                StackName: rio-testnet-relay2
-                TemplatePath: SourceArtifact::infrastructure/deploy-relay.yml
-                RoleArn:  arn:aws:iam::061416964074:role/rio-node-pipeline-role
-              RunOrder: 1
-              Region: us-west-2
-            - Name: CollatorTestnet2
+            - Name: UsWest2
               ActionTypeId:
                   Category: Deploy
                   Owner: AWS
@@ -196,10 +227,10 @@ Resources:
                           "AppName": "rio-testnet",
                           "Stage": "collator2",
                           "Env": "us-west-2",
-                          "Vpc": "vpc-0943bb58d3bdac0bd",
-                          "PublicSubnets": "subnet-09f8872d4499eea9b,subnet-064f1db3e48770b2c",
-                          "PrivateSubnets": "subnet-0a7d2c49157156f32,subnet-0b0ee2e64bc8d6ced",
-                          "SecurityGroups": "sg-0ddbadfeb40fa562e",
+                          "Vpc": "vpc-000fc4858ed354132",
+                          "PublicSubnets": "subnet-0ad378b5a65b411c0,subnet-0dd5adc3152f9c8a9",
+                          "PrivateSubnets": "subnet-0d81f229f91e0d2eb,subnet-020c447f1d183ab9b",
+                          "SecurityGroups": "sg-0b2c2d449139d892c",
                           "HostedZone": "riocorenetwork.com",
                           "DesiredCount": "1"
                       }
@@ -209,40 +240,7 @@ Resources:
                   RoleArn: arn:aws:iam::061416964074:role/rio-node-pipeline-role
               RunOrder: 1
               Region: us-west-2
-        - Name: DeployTestnet3
-          Actions:
-            - Name: RelayTestnet3
-              ActionTypeId:
-                Category: Deploy
-                Owner: AWS
-                Version: 1
-                Provider: CloudFormation
-              InputArtifacts:
-                - Name: SourceArtifact
-                - Name: BuildArtifact
-              Configuration:
-                ActionMode: CREATE_UPDATE
-                Capabilities: "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND"
-                ParameterOverrides: !Sub |
-                  {
-                    "ImageURI" : { "Fn::GetParam" : ["BuildArtifact", "imageDetails.json", "ImageURI"] },
-                    "AppName": "rio-testnet",
-                    "Stage": "relay3",
-                    "Env": "eu-central-1",
-                    "Vpc": "vpc-002e3744979dcbe0c",
-                    "PublicSubnets": "subnet-0f16ba565a805f39e,subnet-054052093c2550ea1",
-                    "PrivateSubnets": "subnet-09110bcd62dbd2417,subnet-0e47ea8178c04a7db",
-                    "SecurityGroups": "sg-03f24db84a7a4bc0c",
-                    "HostedZone": "riocorenetwork.com",
-                    "DesiredCount": "1"
-                  }
-                # NOTE: desired count will be multiplied x2 because of splitting to WS/RPC task-sets
-                StackName: rio-testnet-relay3
-                TemplatePath: SourceArtifact::infrastructure/deploy-relay.yml
-                RoleArn:  arn:aws:iam::061416964074:role/rio-node-pipeline-role
-              RunOrder: 1
-              Region: eu-central-1
-            - Name: CollatorTestnet3
+            - Name: EuCentral1
               ActionTypeId:
                   Category: Deploy
                   Owner: AWS
@@ -260,10 +258,10 @@ Resources:
                           "AppName": "rio-testnet",
                           "Stage": "collator3",
                           "Env": "eu-central-1",
-                          "Vpc": "vpc-002e3744979dcbe0c",
-                          "PublicSubnets": "subnet-0f16ba565a805f39e,subnet-054052093c2550ea1",
-                          "PrivateSubnets": "subnet-09110bcd62dbd2417,subnet-0e47ea8178c04a7db",
-                          "SecurityGroups": "sg-03f24db84a7a4bc0c",
+                          "Vpc": "vpc-04d18d76e49837ee8",
+                          "PublicSubnets": "subnet-07a115ab15717cd63,subnet-08299fa771ffc6e62",
+                          "PrivateSubnets": "subnet-051c7f34e9c74983b,subnet-085be6565e5dd4adb",
+                          "SecurityGroups": "sg-0fadbd5a3ab9e17b7",
                           "HostedZone": "riocorenetwork.com",
                           "DesiredCount": "1"
                       }
