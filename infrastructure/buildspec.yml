@@ -3,6 +3,7 @@ version: 0.2
 env:
   variables:
     IMAGE_NAME: rio-node
+    AIRDROP_SCAN_PAGES: 700
   secrets-manager:
     MNEMONIC: rio-node/testnet:MNEMONIC
     DISTRIBUTE_KEYS: rio-node/testnet:DISTRIBUTE_KEYS

@@ -121,15 +121,13 @@ publish:
   script:
     - ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts
     - git clone git@gitlab.com:Core911/rio-node.git .rsync
-    - rsync -rl . ./.rsync/
+    - rsync -rl --exclude=.git --exclude=.rsync --exclude=.gitlab-ci.yml . .rsync
     - cd .rsync
+    - rm -rf ./infrastructure
     - rm -rf ./docker/distributor
+    - rm -rf .database .key* .chain*
+    - rm -rf tmp* aws submodules target
     - rm -f ./docker/chainspec/airdrop.js
-    - rm -f .gitlab-ci.yml
-    - rm -f infrastructure
-    - rm -f .database .key* .chain*
-    - rm -f .git* .idea
-    - rm -f tmp* aws submodules target
     - rm -f README.dev.md
     - git status
     - git log --name-status HEAD^..HEAD
