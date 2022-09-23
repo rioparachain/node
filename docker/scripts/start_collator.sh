@@ -7,13 +7,10 @@
 #mkdir -p /mnt/${APP_NAME}/${STAGE} || true
 #echo '555' >> /mnt/${APP_NAME}/${STAGE}/1.txt
 
-IP_LOCAL=`ip a|grep 'inet '|sed 's/^.*inet //'|sed 's/\/.*$//'|grep -E '1[0-9]\.'`
+ip a
+IP_LOCAL=`ip a|grep 'inet '|sed 's/^.*inet //'|sed 's/\/.*$//'|grep -E '(15|20|30)\.0\.'`
 
 ACCOUNT=$(curl -s "${DISTRIBUTE_KEYS}/collator")
-if [ "$ACCOUNT" = "" ]; then
-    sleep 30
-    exit 1
-fi
 ACCOUNT_NAME=`printf "%02d" $ACCOUNT`
 BASE_PATH=/rio/keys/collator-`printf "%02d" $ACCOUNT`
 
@@ -48,11 +45,9 @@ if [ "$ACCOUNT" = "1" ]; then
         --force-authoring \
         --ws-port ${WS_PORT} \
         --rpc-port ${RPC_PORT} \
-        --telemetry-url 'ws://3.89.91.186:8001/submit 0' \
         -- \
         --execution wasm \
         --chain ${RELAY_RAW} \
-        --telemetry-url 'ws://3.89.91.186:8001/submit 0' \
         --name collator-side-${ACCOUNT_NAME} \
         --bootnodes /ip4/${RELAY_BOOTNODE_IP}/tcp/30333/p2p/${RELAY_BOOTNODE_KEY}
 else
@@ -70,12 +65,10 @@ else
         --force-authoring \
         --ws-port ${WS_PORT} \
         --rpc-port ${RPC_PORT} \
-        --telemetry-url 'ws://3.89.91.186:8001/submit 0' \
         --bootnodes /ip4/${BOOTNODE_IP}/tcp/30333/p2p/${BOOTNODE_KEY} \
         -- \
         --execution wasm \
         --chain ${RELAY_RAW} \
-        --telemetry-url 'ws://3.89.91.186:8001/submit 0' \
         --name collator-side-${ACCOUNT_NAME} \
         --bootnodes /ip4/${RELAY_BOOTNODE_IP}/tcp/30333/p2p/${RELAY_BOOTNODE_KEY}
 fi

@@ -3,6 +3,8 @@ const app = express();
 const port = 3000;
 const bodyParser = require('body-parser');
 
+console.log('Version 1.0.1');
+
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
 
@@ -35,14 +37,14 @@ app.get('/', (req, res) => {
 	res.json(instances);
 });
 
-app.get('/relay', (req, res) => {
+app.get('/relay', async (req, res) => {
+	await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 10000)));
 	const freeIndex = relayInstances().length + 1;
 	res.send(freeIndex.toString());
 });
 
-app.get('/collator', (req, res) => {
-	const relayActive = relayInstances().length > 0;
-	if (!relayActive) return setTimeout(() => res.end(), 30000 - Math.floor(Math.random() * 10000));
+app.get('/collator', async (req, res) => {
+	await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 10000)));
 	const freeIndex = collatorInstances().length + 1;
 	res.send(freeIndex.toString());
 });

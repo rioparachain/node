@@ -12,7 +12,7 @@
 [Relay Chain](https://rio-testnet-relay-rpc.riocorenetwork.com/health) /
 [ParaChain](https://rio-testnet-collator-rpc.riocorenetwork.com/health)
 
-### Telemetry
+### Telemetry (broken by ...)
 
 [Relay Chain](http://3.89.91.186:3000/#list/0xdfa36d69aa63a31410cd8bc47af78f4f27743aad6847c4b00e94ba70ba2587d6) /
 [ParaChain](http://3.89.91.186:3000/#list/0xa79d4d745152595c699bc1a2111993c775bce65218855dd0c5d5dd4a721f7045)
