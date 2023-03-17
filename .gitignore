@@ -15,6 +15,10 @@
 
 # Submodules dir
 submodules
+subm
+
+/frontier
+/cumulus
 
 # Some tmp files
 **/*.swp

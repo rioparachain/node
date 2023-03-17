@@ -6,7 +6,7 @@ topdir=$PWD
 subdir=$1
 
 set -x
-mkdir -p $subdir/submodules
+mkdir -p $subdir/subm
 set +x
 
 for subm in $submodules_list
@@ -35,8 +35,14 @@ set -x
 cd $subdir
 
 # Applying patches to create rs and toml files, generate patched cumulus source files.
-$topdir/symlink_aws_fix.sh
-$topdir/patches_cmds/apply.sh all
-$topdir/patches_cmds/cumulus_gen.sh
-$topdir/patches_cmds/frontier_gen.sh
+#./symlink_aws_fix.sh
+#./patches_cmds/apply.sh all
+./patches_cmds/cumulus_gen.sh
+./patches_cmds/frontier_gen.sh
 
+if [ "$ADD_PATCHED_TO_GIT" = "1" ]; then
+  for file in `find cumulus`
+  do
+    git add -f $file
+  done
+fi

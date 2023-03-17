@@ -22,6 +22,7 @@ do
     format_toml $dst_toml_tmp/original
     patch $dst_toml_tmp/original/$dst_toml_name $dst_toml.patch
     mv $dst_toml_tmp/original/$dst_toml_name $dst_toml
+    add_patched_file_to_git $dst_toml
     rm -Rf $dst_toml_tmp
   fi
 done
@@ -34,6 +35,7 @@ do
       > $dst_rs.tmp
     patch $dst_rs.tmp $dst_rs.patch
     mv $dst_rs.tmp $dst_rs
+    add_patched_file_to_git $dst_rs
   fi
 done
 

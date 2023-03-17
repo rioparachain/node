@@ -1,37 +1,36 @@
 if [ "$USE_PATCHES_CONFIG" != "1" ]; then exit 0; fi
 
-polkadot_version="v0.9.24"
-polkadot_version_old_regex="v0\.9\.23"
+add_patched_file_to_git()
+{
+  if [ "$ADD_PATCHED_TO_GIT" = "1" ]; then
+    git add -f $1
+  fi
+}
 
-submodules_list="polkadot cumulus substrate orml frontier ptemplate aframe"
+polkadot_version="v0.9.37"
+polkadot_version_old_regex="v0\.9\.36"
 
-polkadot_repo="https://github.com/paritytech/polkadot"
-polkadot_branch="release-$polkadot_version"
-polkadot_submodules_path="submodules/polkadot"
+submodules_list="ptemplate cumulus orml frontier aframe"
+
+ptemplate_repo="https://github.com/substrate-developer-hub/substrate-parachain-template"
+ptemplate_rev="6cde4f130cc41287ef2ed5a00093991197f3c1a3"
+ptemplate_submodules_path="subm/ptemplate"
 
 cumulus_repo="https://github.com/paritytech/cumulus"
 cumulus_branch="polkadot-$polkadot_version"
-cumulus_submodules_path="submodules/cumulus"
-
-substrate_repo="https://github.com/paritytech/substrate"
-substrate_branch="polkadot-$polkadot_version"
-substrate_submodules_path="submodules/substrate"
+cumulus_submodules_path="subm/cumulus"
 
 orml_repo="https://github.com/open-web3-stack/open-runtime-module-library"
-orml_rev="27e3272d322dcdd915f0fc2002032e8d53a46523"
-orml_submodules_path="submodules/open-runtime-module-library"
+orml_rev="16b6c1149a15674d21c87244b7988a667e2c14d9"
+orml_submodules_path="subm/orml"
 
 frontier_repo="https://github.com/paritytech/frontier"
-frontier_rev="175e42fc47cb6cd2772cccb7ac3ff59fd2d1a4dd"
-frontier_submodules_path="submodules/frontier"
-
-ptemplate_repo="https://github.com/substrate-developer-hub/substrate-parachain-template"
-ptemplate_rev="polkadot-$polkadot_version"
-ptemplate_submodules_path="submodules/ptemplate"
+frontier_branch="polkadot-$polkadot_version"
+frontier_submodules_path="subm/frontier"
 
 aframe_repo="https://github.com/AstarNetwork/astar-frame"
-aframe_branch="polkadot-$polkadot_version"
-aframe_submodules_path="submodules/aframe"
+aframe_rev="07b479cd20c8f6cbd09efe0086e85eefe4430a9d"
+aframe_submodules_path="subm/aframe"
 
 get_original() {
   eval "cat \$${submodule}_submodules_path/\$1"
@@ -39,24 +38,27 @@ get_original() {
 
 rewrite_path() {
   case $submodule in
-    polkadot)
-      sed "s,path = \"../[^\"]*\",git = \"$polkadot_repo\"@COMMA@ branch = \"$polkadot_branch\",g" | sed 's/@COMMA@/,/g'
-      ;;
-    substrate)
-      sed "s,path = \"../[^\"]*\",git = \"$substrate_repo\"@COMMA@ branch = \"$substrate_branch\",g" | sed 's/@COMMA@/,/g'
-      ;;
-    aframe)
-      sed "s,path = \"../[^\"]*\",git = \"$aframe_repo\"@COMMA@ branch = \"$aframe_branch\",g" | sed 's/@COMMA@/,/g'
-      ;;
-    cumulus)
-      sed "s,path = \"../[^\"]*\",git = \"$cumulus_repo\"@COMMA@ branch = \"$cumulus_branch\",g" | sed 's/@COMMA@/,/g'
-      ;;
-    orml)
-      sed "s,path = \"../[^\"]*\",git = \"$orml_repo\"@COMMA@ rev = \"$orml_rev\",g" | sed 's/@COMMA@/,/g'
-      ;;
+
     ptemplate)
       sed "s,path = \"../[^\"]*\",git = \"$ptemplate_repo\"@COMMA@ rev = \"$ptemplate_rev\",g" | sed 's/@COMMA@/,/g'
       ;;
+
+    cumulus)
+      sed "s,path = \"../[^\"]*\",git = \"$cumulus_repo\"@COMMA@ branch = \"$cumulus_branch\",g" | sed 's/@COMMA@/,/g'
+      ;;
+
+    orml)
+      sed "s,path = \"../[^\"]*\",git = \"$orml_repo\"@COMMA@ branch = \"$orml_dev\",g" | sed 's/@COMMA@/,/g'
+      ;;
+
+    frontier)
+      sed "s,path = \"../[^\"]*\",git = \"$frontier_repo\"@COMMA@ branch = \"$frontier_branch\",g" | sed 's/@COMMA@/,/g'
+      ;;
+
+    aframe)
+      sed "s,path = \"../[^\"]*\",git = \"$aframe_repo\"@COMMA@ rev = \"$aframe_rev\",g" | sed 's/@COMMA@/,/g'
+      ;;
+
     *)
       exit 1
       ;;
@@ -64,8 +66,6 @@ rewrite_path() {
 }
 
 format_toml() {
-  # TODO: What it nix is not used.
-  #nix-shell -p dprint -p cargo-sort --run "
   sh -c "
     set -xe
     dprint fmt $1/*.toml
@@ -82,7 +82,7 @@ remove_time_from_patch() {
 
 loads=""
 
-configs=`find node pallets runtime precompiles -type f -name patches_config.sh`
+configs=`find node pallets runtime -type f -name patches_config.sh`
 
 for config in $configs
 do

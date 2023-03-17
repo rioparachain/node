@@ -57,14 +57,14 @@ rewrites() {
 for dir in $dirs
 do
   dst=frontier/$dir
-  src=submodules/$dst
+  src=subm/$dst
   back=`echo $dir | sed 's,[^/]*,..,g'`
   mkdir -p $dst
   #ln -rsf $src/* $dst/
   cp -Rp $src/* $dst/
   rm -f $dst/Cargo.toml
   cat $src/Cargo.toml | rewrites $back/../ > $dst/Cargo.toml
-  ln -rsf submodules/frontier/rustfmt.toml $dst/.rustfmt.toml
+  ln -rsf subm/frontier/rustfmt.toml $dst/.rustfmt.toml
   for pfile in `find $dst -name "*.patch"`
   do
     sh -ec "cd `dirname $pfile`; patch" < $pfile

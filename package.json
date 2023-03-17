@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "json-big": "^1.0.2",
+    "json-bigint": "^1.0.0"
+  }
+}

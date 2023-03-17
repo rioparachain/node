@@ -1,4 +1,4 @@
-//! Substrate Parachain Rio Node CLI
+//! Substrate Parachain Node Template CLI
 
 #![warn(missing_docs)]
 
@@ -12,12 +12,12 @@ mod rpc;
 use std::env;
 
 fn main() -> sc_cli::Result<()> {
-	let path = env::args().nth(0).unwrap();
-	let name = path.split('/').last().unwrap();
-	if name == "relaychain-rio" {
-		polkadot_cli::run().unwrap();
-		Ok(())
-	} else {
-		command::run()
-	}
+    let path = env::args().nth(0).unwrap();
+    let name = path.split('/').last().unwrap();
+    if name == "polkadot" {
+        polkadot_cli::run().unwrap();
+        Ok(())
+    } else {
+        command::run()
+    }
 }

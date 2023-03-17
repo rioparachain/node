@@ -1,21 +1,18 @@
-[submodule "submodules/polkadot"]
-	path = submodules/polkadot
-	url = https://github.com/paritytech/polkadot
-[submodule "submodules/cumulus"]
-	path = submodules/cumulus
+[submodule "subm/cumulus"]
+	path = subm/cumulus
 	url = https://github.com/paritytech/cumulus
-[submodule "submodules/substrate"]
-	path = submodules/substrate
-	url = https://github.com/paritytech/substrate
-[submodule "submodules/open-runtime-module-library"]
-	path = submodules/open-runtime-module-library
+[submodule "subm/open-runtime-module-library"]
+	path = subm/open-runtime-module-library
 	url = https://github.com/open-web3-stack/open-runtime-module-library
-[submodule "submodules/frontier"]
-	path = submodules/frontier
+[submodule "subm/frontier"]
+	path = subm/frontier
 	url = https://github.com/paritytech/frontier
-[submodule "submodules/ptemplate"]
-	path = submodules/ptemplate
+[submodule "subm/ptemplate"]
+	path = subm/ptemplate
 	url = https://github.com/substrate-developer-hub/substrate-parachain-template
-[submodule "submodules/aframe"]
-	path = submodules/aframe
+[submodule "subm/aframe"]
+	path = subm/aframe
 	url = https://github.com/AstarNetwork/astar-frame
+[submodule "subm/orml"]
+	path = subm/orml
+	url = https://github.com/open-web3-stack/open-runtime-module-library

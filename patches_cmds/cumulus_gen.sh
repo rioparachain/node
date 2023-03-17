@@ -15,6 +15,7 @@ client/service
 client/relay-chain-interface
 client/relay-chain-inprocess-interface
 client/relay-chain-rpc-interface
+client/relay-chain-minimal-node
 primitives/parachain-inherent
 "
 
@@ -26,8 +27,9 @@ rewrite() {
 }
 
 rewrites() {
-  rewrite ${1}node/ polkadot-client relaychain-rio-client | \
-  rewrite ${1}node/ polkadot-service relaychain-rio-service | \
+  #rewrite ${1}node/ polkadot-client relaychain-rio-client | \
+  #rewrite ${1}node/ polkadot-service relaychain-rio-service | \
+  cat | \
   sed "s,path = \"[\./]*primitives/core\",$cumulus_fill,g" | \
   sed "s,path = \"[\./]*../core\",$cumulus_fill,g" | \
   sed "s,path = \"[\./]*test/client\",$cumulus_fill,g" | \
@@ -40,14 +42,14 @@ rewrites() {
 for dir in $dirs
 do
   dst=cumulus/$dir
-  src=submodules/$dst
+  src=subm/$dst
   back=`echo $dir | sed 's,[^/]*,..,g'`
   mkdir -p $dst
   #ln -rsf $src/* $dst/
   cp -Rp $src/* $dst/
   rm -f $dst/Cargo.toml
   cat $src/Cargo.toml | rewrites $back/../ > $dst/Cargo.toml
-  ln -rsf submodules/cumulus/.rustfmt.toml $dst/
+  ln -rsf subm/cumulus/.rustfmt.toml $dst/
   for pfile in `find $dst -name "*.patch"`
   do
     sh -ec "cd `dirname $pfile`; patch" < $pfile
