@@ -18,6 +18,7 @@ primitives/dynamic-fee
 primitives/ethereum
 template/runtime
 frame/evm
+frame/evm-chain-id
 frame/evm/precompile/modexp
 frame/evm/precompile/sha3fips
 frame/evm/precompile/dispatch

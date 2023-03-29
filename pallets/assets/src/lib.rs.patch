@@ -2,7 +2,7 @@
 +++ pallets/assets/src/lib.rs
 @@ -62,7 +62,7 @@
  	},
- 	ArithmeticError, DispatchError, DispatchResult, RuntimeDebug,
+ 	ArithmeticError, DispatchError, DispatchResult, FixedPointOperand, RuntimeDebug,
  };
 -use sp_std::{cmp, convert::Infallible, marker, prelude::*, vec::Vec};
 +use sp_std::{cmp, convert::Infallible, marker, prelude::*, result, vec::Vec};
@@ -10,7 +10,7 @@
  use orml_traits::{
  	arithmetic::{self, Signed},
 @@ -71,6 +71,8 @@
- 	MultiReservableCurrency, NamedMultiReservableCurrency, OnDust,
+ 	MultiReservableCurrency, NamedMultiReservableCurrency,
  };
  
 +use rp_support::info;
@@ -29,7 +29,7 @@
  pub use impls::*;
  pub use weights::WeightInfo;
  
-@@ -171,6 +177,16 @@
+@@ -171,10 +177,18 @@
  
  pub use module::*;
  
@@ -45,8 +45,29 @@
 +
  #[frame_support::pallet]
  pub mod module {
+-	use orml_traits::currency::MutationHooks;
+-
  	use super::*;
-@@ -235,8 +251,20 @@
+ 
+ 	#[pallet::config]
+@@ -216,9 +230,14 @@
+ 		/// System::AccountInfo, zero ED may cause some problems.
+ 		type ExistentialDeposits: GetByKey<Self::CurrencyId, Self::Balance>;
+ 
+-		/// Hooks are actions that are executed on certain events.
+-		/// For example: OnDust, OnNewTokenAccount
+ 		type CurrencyHooks: MutationHooks<Self::AccountId, Self::CurrencyId, Self::Balance>;
++		type OnDust: OnDust<Self::AccountId, Self::CurrencyId, Self::Balance>;
++
++		/// Handler for when an account was created
++		type OnNewTokenAccount: Happened<(Self::AccountId, Self::CurrencyId)>;
++
++		/// Handler for when an account was created
++		type OnKilledTokenAccount: Happened<(Self::AccountId, Self::CurrencyId)>;
+ 
+ 		#[pallet::constant]
+ 		type MaxLocks: Get<u32>;
+@@ -233,8 +252,20 @@
  		// The whitelist of accounts that will not be reaped even if its total
  		// is zero or below ED.
  		type DustRemovalWhitelist: Contains<Self::AccountId>;
@@ -67,7 +88,7 @@
  	#[pallet::error]
  	pub enum Error<T> {
  		/// The balance is too low
-@@ -255,6 +283,22 @@
+@@ -253,6 +284,22 @@
  		DeadAccount,
  		// Number of named reserves exceed `T::MaxReserves`
  		TooManyReserves,
@@ -90,7 +111,7 @@
  	}
  
  	#[pallet::event]
-@@ -345,6 +389,33 @@
+@@ -343,6 +390,33 @@
  			currency_id: T::CurrencyId,
  			who: T::AccountId,
  		},
@@ -124,7 +145,7 @@
  	}
  
  	/// The total issuance of a token type.
-@@ -397,35 +468,73 @@
+@@ -395,35 +469,73 @@
  		ValueQuery,
  	>;
  
@@ -161,9 +182,8 @@
 +
  	#[pallet::genesis_config]
  	pub struct GenesisConfig<T: Config> {
--		pub balances: Vec<(T::AccountId, T::CurrencyId, T::Balance)>,
-+		pub init: Vec<(
-+			T::CurrencyId,
+ 		pub balances: Vec<(T::AccountId, T::CurrencyId, T::Balance)>,
++		pub init: Vec<( T::CurrencyId,
 +			AssetInfo<BoundedVec<u8, T::StringLimit>>,
 +			Restrictions,
 +			Vec<(T::AccountId, T::Balance)>,
@@ -174,7 +194,7 @@
  	impl<T: Config> Default for GenesisConfig<T> {
  		fn default() -> Self {
 -			GenesisConfig { balances: vec![] }
-+			GenesisConfig { init: vec![] }
++			GenesisConfig { balances: vec![], init: vec![] }
  		}
  	}
  
@@ -213,7 +233,7 @@
  					assert!(
  						*initial_balance >= T::ExistentialDeposits::get(currency_id),
  						"the balance of any account should always be more than existential deposit.",
-@@ -438,7 +547,8 @@
+@@ -436,7 +548,8 @@
  							.checked_add(initial_balance)
  							.expect("total issuance cannot overflow when building genesis")
  					});
@@ -223,7 +243,7 @@
  		}
  	}
  
-@@ -451,6 +561,11 @@
+@@ -449,6 +562,11 @@
  
  	#[pallet::call]
  	impl<T: Config> Pallet<T> {
@@ -235,7 +255,7 @@
  		/// Transfer some liquid free balance to another account.
  		///
  		/// `transfer` will set the `FreeBalance` of the sender and receiver.
-@@ -557,6 +672,8 @@
+@@ -559,6 +677,8 @@
  			Self::do_transfer(currency_id, &from, &to, amount, ExistenceRequirement::AllowDeath)
  		}
  
@@ -244,7 +264,7 @@
  		/// Set the balances of a given account.
  		///
  		/// This will alter `FreeBalance` and `ReservedBalance` in storage. it
-@@ -614,6 +731,322 @@
+@@ -617,6 +737,322 @@
  				Ok(())
  			})
  		}
@@ -567,7 +587,7 @@
  	}
  }
  
-@@ -703,6 +1136,9 @@
+@@ -706,6 +1142,9 @@
  		who: &T::AccountId,
  		amount: T::Balance,
  	) -> DispatchResult {
@@ -577,7 +597,7 @@
  		if amount.is_zero() {
  			return Ok(());
  		}
-@@ -890,6 +1326,9 @@
+@@ -893,15 +1332,18 @@
  		amount: T::Balance,
  		existence_requirement: ExistenceRequirement,
  	) -> DispatchResult {
@@ -587,7 +607,20 @@
  		if amount.is_zero() || from == to {
  			return Ok(());
  		}
-@@ -957,6 +1396,9 @@
+ 
+ 		<T::CurrencyHooks as MutationHooks<T::AccountId, T::CurrencyId, T::Balance>>::PreTransfer::on_transfer(
+-			currency_id,
+-			from,
+-			to,
+-			amount,
++				currency_id,
++				from,
++				to,
++				amount,
+ 		)?;
+ 		Self::try_mutate_account(to, currency_id, |to_account, _existed| -> DispatchResult {
+ 			Self::try_mutate_account(from, currency_id, |from_account, _existed| -> DispatchResult {
+@@ -972,6 +1414,9 @@
  		existence_requirement: ExistenceRequirement,
  		change_total_issuance: bool,
  	) -> DispatchResult {
@@ -597,7 +630,7 @@
  		if amount.is_zero() {
  			return Ok(());
  		}
-@@ -1015,6 +1457,9 @@
+@@ -1030,14 +1475,17 @@
  		require_existed: bool,
  		change_total_issuance: bool,
  	) -> DispatchResult {
@@ -607,7 +640,18 @@
  		if amount.is_zero() {
  			return Ok(());
  		}
-@@ -1096,6 +1541,10 @@
+ 
+ 		<T::CurrencyHooks as MutationHooks<T::AccountId, T::CurrencyId, T::Balance>>::PreDeposit::on_deposit(
+-			currency_id,
+-			who,
+-			amount,
++				currency_id,
++				who,
++				amount,
+ 		)?;
+ 		Self::try_mutate_account(who, currency_id, |account, existed| -> DispatchResult {
+ 			if require_existed {
+@@ -1121,6 +1569,10 @@
  
  	// Check if `value` amount of free balance can be slashed from `who`.
  	fn can_slash(currency_id: Self::CurrencyId, who: &T::AccountId, value: Self::Balance) -> bool {
@@ -618,7 +662,7 @@
  		if value.is_zero() {
  			return true;
  		}
-@@ -1265,6 +1714,10 @@
+@@ -1306,6 +1758,10 @@
  	///
  	/// Always `true` if value to be reserved is zero.
  	fn can_reserve(currency_id: Self::CurrencyId, who: &T::AccountId, value: Self::Balance) -> bool {
@@ -629,7 +673,7 @@
  		if value.is_zero() {
  			return true;
  		}
-@@ -1306,6 +1759,9 @@
+@@ -1352,6 +1808,9 @@
  	///
  	/// Is a no-op if value to be reserved is zero.
  	fn reserve(currency_id: Self::CurrencyId, who: &T::AccountId, value: Self::Balance) -> DispatchResult {
@@ -639,7 +683,7 @@
  		if value.is_zero() {
  			return Ok(());
  		}
-@@ -1329,6 +1785,10 @@
+@@ -1375,6 +1834,10 @@
  	///
  	/// Is a no-op if the value to be unreserved is zero.
  	fn unreserve(currency_id: Self::CurrencyId, who: &T::AccountId, value: Self::Balance) -> Self::Balance {

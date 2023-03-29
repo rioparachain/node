@@ -1,15 +1,37 @@
 --- precompiles/utils/.tmp/original/Cargo.toml
 +++ precompiles/utils/.tmp/migrate/Cargo.toml
-@@ -24,9 +24,9 @@
- sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
+@@ -1,13 +1,11 @@
+ [package]
+ name = "precompile-utils"
+-version = "0.4.3"
++version = "0.4.0"
+ authors = ["StakeTechnologies", "PureStake"]
+ edition = "2021"
+ description = "Utils to write EVM precompiles."
+ 
+ [dependencies]
+-# There's a problem with --all-features when this is moved under dev-deps
+-evm = { version = "0.37.0", optional = true }
+ impl-trait-for-tuples = "0.2.2"
+ log = "0.4.16"
+ num_enum = { version = "0.5.3", default-features = false }
+@@ -26,8 +24,9 @@
+ sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.37", default-features = false }
  
  # Frontier
--evm = { git = "https://github.com/rust-blockchain/evm", branch = "master", default-features = false, features = ["with-codec"] }
--fp-evm = { git = "https://github.com/AstarNetwork/frontier", branch = "polkadot-v0.9.24", default-features = false }
--pallet-evm = { git = "https://github.com/AstarNetwork/frontier", branch = "polkadot-v0.9.24", default-features = false }
+-fp-evm = { git = "https://github.com/AstarNetwork/frontier", branch = "polkadot-v0.9.37", default-features = false }
+-pallet-evm = { git = "https://github.com/AstarNetwork/frontier", branch = "polkadot-v0.9.37", default-features = false, features = ["forbid-evm-reentrancy"] }
 +evm = { git = "https://github.com/rust-blockchain/evm", rev = "01bcbd2205a212c34451d3b4fabc962793b057d3", default-features = false, features = ["with-codec"] }
 +fp-evm = { path = "../../frontier/primitives/evm", default-features = false }
 +pallet-evm = { path = "../../frontier/frame/evm", default-features = false }
  
  # Polkadot / XCM
- xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.24", default-features = false }
+ xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.37", default-features = false }
+@@ -38,7 +37,6 @@
+ [features]
+ default = ["std"]
+ std = [
+-  "evm/std",
+   "codec/std",
+   "fp-evm/std",
+   "frame-support/std",

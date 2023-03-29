@@ -4,7 +4,17 @@ panic = "unwind"
 [workspace]
 members = [
 	"node",
+	"pallets/assets",
+    "pallets/assets-ext",
 	"pallets/template",
+    "pallets/gateway",
+    "pallets/gateway/rpc",
+    "pallets/staking-pool",
+    "proc-macro",
+    "primitives/base",
+    "primitives/protocol",
+    "primitives/support",
+    "precompiles/assets-erc20",
 	"runtime",
 ]
 

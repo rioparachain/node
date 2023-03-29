@@ -8,7 +8,7 @@ edition = "2018"
 proc-macro = true
 
 [dependencies]
-frame-support-procedural = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
+frame-support-procedural = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.37", default-features = false }
 proc-macro2 = { version = "1.0.26" }
 quote = "1.0.9"
 regex = "1.5.4"

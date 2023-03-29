@@ -8,7 +8,7 @@ add_patched_file_to_git()
 }
 
 polkadot_version="v0.9.37"
-polkadot_version_old_regex="v0\.9\.36"
+polkadot_version_old_regex="v0\.9\.24"
 
 submodules_list="ptemplate cumulus orml frontier aframe"
 
@@ -82,7 +82,7 @@ remove_time_from_patch() {
 
 loads=""
 
-configs=`find node pallets runtime -type f -name patches_config.sh`
+configs=`find node pallets runtime precompiles -type f -name patches_config.sh`
 
 for config in $configs
 do

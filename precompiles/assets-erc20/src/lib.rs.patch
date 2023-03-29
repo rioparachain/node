@@ -1,6 +1,28 @@
 --- precompiles/assets-erc20/src/lib.rs.tmp
 +++ precompiles/assets-erc20/src/lib.rs
-@@ -20,31 +20,34 @@
+@@ -1,21 +1,3 @@
+-// This file is part of Astar.
+-
+-// Copyright (C) 2019-2023 Stake Technologies Pte.Ltd.
+-// SPDX-License-Identifier: GPL-3.0-or-later
+-
+-// Astar is free software: you can redistribute it and/or modify
+-// it under the terms of the GNU General Public License as published by
+-// the Free Software Foundation, either version 3 of the License, or
+-// (at your option) any later version.
+-
+-// Astar is distributed in the hope that it will be useful,
+-// but WITHOUT ANY WARRANTY; without even the implied warranty of
+-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-// GNU General Public License for more details.
+-
+-// You should have received a copy of the GNU General Public License
+-// along with Astar. If not, see <http://www.gnu.org/licenses/>.
+-
+ // Copyright 2019-2022 PureStake Inc.
+ // Copyright 2022      Stake Technologies
+ // This file is part of AssetsERC20 package, originally developed by Purestake Inc.
+@@ -38,31 +20,34 @@
  #![cfg_attr(test, feature(assert_matches))]
  
  use fp_evm::{PrecompileHandle, PrecompileOutput};
@@ -47,7 +69,7 @@
  
  /// Solidity selector of the Transfer log, which is the Keccak of the Log signature.
  pub const SELECTOR_LOG_TRANSFER: [u8; 32] = keccak256!("Transfer(address,address,uint256)");
-@@ -52,37 +55,37 @@
+@@ -70,37 +55,37 @@
  /// Solidity selector of the Approval log, which is the Keccak of the Log signature.
  pub const SELECTOR_LOG_APPROVAL: [u8; 32] = keccak256!("Approval(address,address,uint256)");
  
@@ -105,7 +127,7 @@
  }
  
  /// The following distribution has been decided for the precompiles
-@@ -99,430 +102,432 @@
+@@ -117,430 +102,432 @@
  
  /// This means that every address that starts with 0xFFFFFFFF will go through an additional db read,
  /// but the probability for this to happen is 2^-32 for random addresses
@@ -130,19 +152,19 @@
  where
 -    Instance: 'static,
 -    Runtime: pallet_assets::Config<Instance> + pallet_evm::Config + frame_system::Config,
--    Runtime::Call: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
--    Runtime::Call: From<pallet_assets::Call<Runtime, Instance>>,
--    <Runtime::Call as Dispatchable>::Origin: From<Option<Runtime::AccountId>>,
+-    Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
+-    Runtime::RuntimeCall: From<pallet_assets::Call<Runtime, Instance>>,
+-    <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 -    BalanceOf<Runtime, Instance>: TryFrom<U256> + Into<U256> + EvmData,
 -    Runtime: AddressToAssetId<AssetIdOf<Runtime, Instance>>,
--    <<Runtime as frame_system::Config>::Call as Dispatchable>::Origin: OriginTrait,
+-    <<Runtime as frame_system::Config>::RuntimeCall as Dispatchable>::RuntimeOrigin: OriginTrait,
 +	Runtime: pallet_assets::Config + pallet_evm::Config + frame_system::Config,
-+	Runtime::Call: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
-+	Runtime::Call: From<pallet_assets::Call<Runtime>>,
-+	<Runtime::Call as Dispatchable>::Origin: From<Option<Runtime::AccountId>>,
++	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
++	Runtime::RuntimeCall: From<pallet_assets::Call<Runtime>>,
++	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 +	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + EvmData,
 +	Runtime: AddressToAssetId<AssetIdOf<Runtime>>,
-+	<<Runtime as frame_system::Config>::Call as Dispatchable>::Origin: OriginTrait,
++	<<Runtime as frame_system::Config>::RuntimeCall as Dispatchable>::RuntimeOrigin: OriginTrait,
  {
 -    fn execute(&self, handle: &mut impl PrecompileHandle) -> Option<EvmResult<PrecompileOutput>> {
 -        let address = handle.code_address();
@@ -272,19 +294,19 @@
  where
 -    Instance: 'static,
 -    Runtime: pallet_assets::Config<Instance> + pallet_evm::Config + frame_system::Config,
--    Runtime::Call: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
--    Runtime::Call: From<pallet_assets::Call<Runtime, Instance>>,
--    <Runtime::Call as Dispatchable>::Origin: From<Option<Runtime::AccountId>>,
+-    Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
+-    Runtime::RuntimeCall: From<pallet_assets::Call<Runtime, Instance>>,
+-    <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 -    BalanceOf<Runtime, Instance>: TryFrom<U256> + Into<U256> + EvmData,
 -    Runtime: AddressToAssetId<AssetIdOf<Runtime, Instance>>,
--    <<Runtime as frame_system::Config>::Call as Dispatchable>::Origin: OriginTrait,
+-    <<Runtime as frame_system::Config>::RuntimeCall as Dispatchable>::RuntimeOrigin: OriginTrait,
 +	Runtime: pallet_assets::Config + pallet_evm::Config + frame_system::Config,
-+	Runtime::Call: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
-+	Runtime::Call: From<pallet_assets::Call<Runtime>>,
-+	<Runtime::Call as Dispatchable>::Origin: From<Option<Runtime::AccountId>>,
++	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
++	Runtime::RuntimeCall: From<pallet_assets::Call<Runtime>>,
++	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 +	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + EvmData,
 +	Runtime: AddressToAssetId<AssetIdOf<Runtime>>,
-+	<<Runtime as frame_system::Config>::Call as Dispatchable>::Origin: OriginTrait,
++	<<Runtime as frame_system::Config>::RuntimeCall as Dispatchable>::RuntimeOrigin: OriginTrait,
  {
 -    fn total_supply(
 -        asset_id: AssetIdOf<Runtime, Instance>,
@@ -373,7 +395,7 @@
 -                    handle,
 -                    Some(origin.clone()).into(),
 -                    pallet_assets::Call::<Runtime, Instance>::cancel_approval {
--                        id: asset_id,
+-                        id: asset_id.into(),
 -                        delegate: Runtime::Lookup::unlookup(spender.clone()),
 -                    },
 -                )?;
@@ -383,7 +405,7 @@
 -                handle,
 -                Some(origin).into(),
 -                pallet_assets::Call::<Runtime, Instance>::approve_transfer {
--                    id: asset_id,
+-                    id: asset_id.into(),
 -                    delegate: Runtime::Lookup::unlookup(spender),
 -                    amount,
 -                },
@@ -424,7 +446,7 @@
 -                handle,
 -                Some(origin).into(),
 -                pallet_assets::Call::<Runtime, Instance>::transfer {
--                    id: asset_id,
+-                    id: asset_id.into(),
 -                    target: Runtime::Lookup::unlookup(to),
 -                    amount,
 -                },
@@ -469,7 +491,7 @@
 -                    handle,
 -                    Some(caller).into(),
 -                    pallet_assets::Call::<Runtime, Instance>::transfer_approved {
--                        id: asset_id,
+-                        id: asset_id.into(),
 -                        owner: Runtime::Lookup::unlookup(from),
 -                        destination: Runtime::Lookup::unlookup(to),
 -                        amount,
@@ -481,7 +503,7 @@
 -                    handle,
 -                    Some(from).into(),
 -                    pallet_assets::Call::<Runtime, Instance>::transfer {
--                        id: asset_id,
+-                        id: asset_id.into(),
 -                        target: Runtime::Lookup::unlookup(to),
 -                        amount,
 -                    },
@@ -582,7 +604,7 @@
 -            handle,
 -            Some(origin).into(),
 -            pallet_assets::Call::<Runtime, Instance>::mint {
--                id: asset_id,
+-                id: asset_id.into(),
 -                beneficiary: Runtime::Lookup::unlookup(beneficiary),
 -                amount,
 -            },
@@ -609,7 +631,7 @@
 -            handle,
 -            Some(origin).into(),
 -            pallet_assets::Call::<Runtime, Instance>::burn {
--                id: asset_id,
+-                id: asset_id.into(),
 -                who: Runtime::Lookup::unlookup(who),
 -                amount,
 -            },

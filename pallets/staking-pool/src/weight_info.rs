@@ -1,7 +1,10 @@
 use frame_support::weights::{
-  constants::{RocksDbWeight as DbWeight, WEIGHT_PER_MICROS},
+  constants::{RocksDbWeight as DbWeight, WEIGHT_REF_TIME_PER_MICROS},
   Weight,
 };
+
+const WEIGHT_PER_MICROS: Weight = Weight::from_ref_time(WEIGHT_REF_TIME_PER_MICROS);
+
 
 pub trait WeightInfo {
   fn default_weight() -> Weight {

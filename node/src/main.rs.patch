@@ -1,11 +1,5 @@
 --- node/src/main.rs.tmp
 +++ node/src/main.rs
-@@ -1,4 +1,4 @@
--//! Substrate Parachain Node Template CLI
-+//! Substrate Parachain Rio Node CLI
- 
- #![warn(missing_docs)]
- 
 @@ -9,6 +9,15 @@
  mod command;
  mod rpc;
@@ -14,12 +8,12 @@
 +
  fn main() -> sc_cli::Result<()> {
 -	command::run()
-+	let path = env::args().nth(0).unwrap();
-+	let name = path.split('/').last().unwrap();
-+	if name == "relaychain-rio" {
-+		polkadot_cli::run().unwrap();
-+		Ok(())
-+	} else {
-+		command::run()
-+	}
++    let path = env::args().nth(0).unwrap();
++    let name = path.split('/').last().unwrap();
++    if name == "polkadot" {
++        polkadot_cli::run().unwrap();
++        Ok(())
++    } else {
++        command::run()
++    }
  }

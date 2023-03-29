@@ -9,6 +9,32 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 mod weights;
 pub mod xcm_config;
 
+use sp_runtime::RuntimeAppPublic;
+
+use rp_base::CurrencyId;
+use rp_base::Amount;
+use sp_runtime::traits::ConstU128;
+use sp_runtime::traits::AccountIdConversion;
+use sp_runtime::BoundedVec;
+
+use orml_traits::parameter_type_with_key;
+
+// Frontier
+use fp_evm::weight_per_gas;
+use fp_rpc::TransactionStatus;
+use pallet_ethereum::{Call::transact, Transaction as EthereumTransaction};
+use pallet_evm::{
+	Account as EVMAccount, EnsureAddressTruncated, FeeCalculator, HashedAddressMapping, Runner,
+};
+
+use frame_support::pallet_prelude::PhantomData;
+use frame_support::traits::FindAuthor;
+use sp_core::H160;
+use sp_core::U256;
+use frame_support::ConsensusEngineId;
+//use pallet_evm::EnsureAddressTruncated;
+//use pallet_evm::HashedAddressMapping;
+
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use smallvec::smallvec;
 use sp_api::impl_runtime_apis;
@@ -55,6 +81,9 @@ use weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight};
 // XCM Imports
 use xcm::latest::prelude::BodyId;
 use xcm_executor::XcmExecutor;
+
+mod precompiles;
+use precompiles::FrontierPrecompiles;
 
 /// Import the template pallet.
 pub use pallet_template;
@@ -228,6 +257,9 @@ pub fn native_version() -> NativeVersion {
 	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
+/// We allow for 4000ms of compute with a 12 second average block time.
+pub const WEIGHT_MILLISECS_PER_BLOCK: u64 = 4000;
+
 parameter_types! {
 	pub const Version: RuntimeVersion = VERSION;
 
@@ -357,6 +389,208 @@ impl pallet_transaction_payment::Config for Runtime {
 	type OperationalFeeMultiplier = ConstU8<5>;
 }
 
+
+
+
+impl pallet_evm_chain_id::Config for Runtime {}
+
+pub struct FindAuthorTruncated<F>(PhantomData<F>);
+impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F> {
+	fn find_author<'a, I>(digests: I) -> Option<H160>
+	where
+		I: 'a + IntoIterator<Item = (ConsensusEngineId, &'a [u8])>,
+	{
+		if let Some(author_index) = F::find_author(digests) {
+			let authority_id = Aura::authorities()[author_index as usize].clone();
+			return Some(H160::from_slice(&authority_id.to_raw_vec()[4..24]));
+		}
+		None
+	}
+}
+
+const BLOCK_GAS_LIMIT: u64 = 75_000_000;
+
+parameter_types! {
+	pub BlockGasLimit: U256 = U256::from(BLOCK_GAS_LIMIT);
+	pub PrecompilesValue: FrontierPrecompiles<Runtime> = FrontierPrecompiles::<_>::new();
+	pub WeightPerGas: Weight = Weight::from_ref_time(weight_per_gas(
+		BLOCK_GAS_LIMIT, NORMAL_DISPATCH_RATIO, WEIGHT_MILLISECS_PER_BLOCK
+    ));
+}
+
+impl pallet_evm::Config for Runtime {
+	type FeeCalculator = BaseFee;
+	type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
+	type WeightPerGas = WeightPerGas;
+	type BlockHashMapping = pallet_ethereum::EthereumBlockHashMapping<Self>;
+	type CallOrigin = EnsureAddressTruncated;
+	type WithdrawOrigin = EnsureAddressTruncated;
+	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
+	type Currency = Balances;
+	type RuntimeEvent = RuntimeEvent;
+	type PrecompilesType = FrontierPrecompiles<Self>;
+	type PrecompilesValue = PrecompilesValue;
+	type ChainId = EVMChainId;
+	type BlockGasLimit = BlockGasLimit;
+	type Runner = pallet_evm::runner::stack::Runner<Self>;
+	type OnChargeTransaction = ();
+	type OnCreate = ();
+	type FindAuthor = FindAuthorTruncated<Aura>;
+}
+
+impl pallet_ethereum::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type StateRoot = pallet_ethereum::IntermediateStateRoot<Self>;
+}
+
+parameter_types! {
+	pub BoundDivision: U256 = U256::from(1024);
+}
+
+impl pallet_dynamic_fee::Config for Runtime {
+	type MinGasPriceBoundDivisor = BoundDivision;
+}
+
+parameter_types! {
+    pub DefaultBaseFeePerGas: U256 = U256::from(1_000_000_000);
+    pub DefaultElasticity: Permill = Permill::from_parts(125_000);
+}
+
+pub struct BaseFeeThreshold;
+impl pallet_base_fee::BaseFeeThreshold for BaseFeeThreshold {
+    fn lower() -> Permill {
+        Permill::zero()
+    }
+    fn ideal() -> Permill {
+        Permill::from_parts(500_000)
+    }
+    fn upper() -> Permill {
+        Permill::from_parts(1_000_000)
+    }
+}
+
+impl pallet_base_fee::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type Threshold = BaseFeeThreshold;
+    type DefaultBaseFeePerGas = DefaultBaseFeePerGas;
+    type DefaultElasticity = DefaultElasticity;
+}
+
+impl pallet_hotfix_sufficients::Config for Runtime {
+	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
+	type WeightInfo = pallet_hotfix_sufficients::weights::SubstrateWeight<Runtime>;
+}
+
+
+pub struct DustRemovalWhitelist;
+impl frame_support::traits::Contains<AccountId> for DustRemovalWhitelist {
+	fn contains(a: &AccountId) -> bool {
+		*a == DustReceiver::get()
+	}
+}
+
+parameter_type_with_key! {
+		pub ExistentialDeposits: |currency_id: CurrencyId| -> Balance {
+				#[allow(clippy::match_ref_pats)] // false positive
+				match currency_id {
+						//&BTC => 1,
+						//&DOT => 2,
+						_ => 0,
+				}
+		};
+}
+
+parameter_types! {
+		pub DustReceiver: AccountId = PalletId(*b"rioc/dst").into_account_truncating();
+		pub StringLimit: u32 = 128;
+}
+
+pub type Text = BoundedVec<u8, StringLimit>;
+pub type AssetInfo = rpallet_assets::AssetInfo<Text>;
+
+impl rpallet_assets::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = Balance;
+	type Amount = Amount;
+	type CurrencyId = CurrencyId;
+	type WeightInfo = ();
+	type ExistentialDeposits = ExistentialDeposits;
+	type OnDust = rpallet_assets::TransferDust<Runtime, DustReceiver>;
+	type OnNewTokenAccount = ();
+	type OnKilledTokenAccount = ();
+	type MaxLocks = frame_support::traits::ConstU32<2>;
+	type MaxReserves = frame_support::traits::ConstU32<2>;
+	type ReserveIdentifier = [u8; 8];
+	type DustRemovalWhitelist = DustRemovalWhitelist;
+	type StringLimit = StringLimit;
+    type ApprovalDeposit = ConstU128<0_u128>;
+    type CurrencyHooks = ();
+}
+
+// orml
+parameter_types! {
+	pub const GetNativeCurrencyId: CurrencyId = rp_protocol::RFUEL;
+	pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
+}
+
+use orml_currencies::BasicCurrencyAdapter;
+
+impl orml_currencies::Config for Runtime {
+	type MultiCurrency = RioAssets;
+	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+	type GetNativeCurrencyId = GetNativeCurrencyId;
+	type WeightInfo = ();
+}
+
+impl rpallet_gateway::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Currencies;
+	type WeightInfo = ();
+}
+
+impl rpallet_assets_ext::Config for Runtime {}
+
+use frame_support::traits::Get;
+use rp_base::Price;
+use rp_protocol::{RFUEL, STAKING_POOL_MARKER};
+use sp_runtime::traits::One;
+
+pub struct DefaultPrice;
+impl Get<Price> for DefaultPrice {
+	fn get() -> Price {
+		Price::one()
+	}
+}
+
+parameter_types! {
+	pub const MinimumStakeBalance: Balance = 10_u128;
+	pub const MaximumPerBlockReward: Balance = MinimumStakeBalance::get() * 188_u128;
+	//pub const DefaultPrice: Price = Price::one();
+	pub const Rfuel: CurrencyId = RFUEL;
+	pub const StakingPoolMarker: CurrencyId = STAKING_POOL_MARKER;
+}
+
+parameter_types! {
+				pub const RioStakingPoolPalletId: PalletId = PalletId(*b"py/riosp");
+}
+
+impl rpallet_staking_pool::Config for Runtime {
+	type DefaultPrice = DefaultPrice;
+	type RuntimeEvent = RuntimeEvent;
+	type MarkerCurrency = rpallet_assets::CurrencyAdapter<Runtime, StakingPoolMarker>;
+	type MaximumPerBlockReward = MaximumPerBlockReward;
+	type MinimumStakeBalance = MinimumStakeBalance;
+	type StakeCurrency = Balances;
+	// TO_DO: Change this.
+	type OwnerOrigin = EnsureRoot<AccountId>;
+	type PalletId = RioStakingPoolPalletId;
+	type WeightInfo = ();
+}
+
+
+
+
+
 parameter_types! {
 	pub const ReservedXcmpWeight: Weight = MAXIMUM_BLOCK_WEIGHT.saturating_div(4);
 	pub const ReservedDmpWeight: Weight = MAXIMUM_BLOCK_WEIGHT.saturating_div(4);
@@ -448,10 +682,12 @@ impl pallet_collator_selection::Config for Runtime {
 	type WeightInfo = ();
 }
 
+/*
 /// Configure the pallet template in pallets/template.
 impl pallet_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 }
+*/
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -486,9 +722,27 @@ construct_runtime!(
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 33,
 
 		// Template
-		TemplatePallet: pallet_template::{Pallet, Call, Storage, Event<T>}  = 40,
+		//TemplatePallet: pallet_template::{Pallet, Call, Storage, Event<T>}  = 40,
+
+        // Frontier.
+        Ethereum: pallet_ethereum::{Pallet, Call, Storage, Event, Config, Origin} = 40,
+        EVM: pallet_evm::{Pallet, Config, Call, Storage, Event<T>} = 41,
+        EVMChainId: pallet_evm_chain_id::{Pallet, Config, Storage} = 42,
+        DynamicFee: pallet_dynamic_fee::{Pallet, Call, Storage, Config, Inherent} = 43,
+        BaseFee: pallet_base_fee::{Pallet, Call, Storage, Config<T>, Event} = 44,
+        HotfixSufficients: pallet_hotfix_sufficients::{Pallet, Call} = 45,
+
+        // Orml
+        Currencies: orml_currencies::{Pallet, Call, Storage} = 50,
+
+        // Rio.
+        RioAssets: rpallet_assets::{Pallet, Call, Storage, Config<T>, Event<T>} = 60,
+        RioAssetsExt: rpallet_assets_ext::{Pallet, Call} = 61,
+        RioStakingPool: rpallet_staking_pool::{Pallet, Call, Storage, Event<T>} = 62,
+        RioGateway: rpallet_gateway::{Pallet, Call, Storage, Config<T>, Event<T>} = 63,
 	}
 );
+
 
 #[cfg(feature = "runtime-benchmarks")]
 #[macro_use]
@@ -729,3 +983,4 @@ cumulus_pallet_parachain_system::register_validate_block! {
 	BlockExecutor = cumulus_pallet_aura_ext::BlockExecutor::<Runtime, Executive>,
 	CheckInherents = CheckInherents,
 }
+

@@ -1,6 +1,28 @@
 --- precompiles/assets-erc20/src/tests.rs.tmp
 +++ precompiles/assets-erc20/src/tests.rs
-@@ -15,958 +15,826 @@
+@@ -1,21 +1,3 @@
+-// This file is part of Astar.
+-
+-// Copyright (C) 2019-2023 Stake Technologies Pte.Ltd.
+-// SPDX-License-Identifier: GPL-3.0-or-later
+-
+-// Astar is free software: you can redistribute it and/or modify
+-// it under the terms of the GNU General Public License as published by
+-// the Free Software Foundation, either version 3 of the License, or
+-// (at your option) any later version.
+-
+-// Astar is distributed in the hope that it will be useful,
+-// but WITHOUT ANY WARRANTY; without even the implied warranty of
+-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-// GNU General Public License for more details.
+-
+-// You should have received a copy of the GNU General Public License
+-// along with Astar. If not, see <http://www.gnu.org/licenses/>.
+-
+ // Copyright 2019-2022 PureStake Inc.
+ // Copyright 2022      Stake Technologies
+ // This file is part of AssetsERC20 package, originally developed by Purestake Inc.
+@@ -33,951 +15,826 @@
  
  // You should have received a copy of the GNU General Public License
  // along with AssetsERC20.  If not, see <http://www.gnu.org/licenses/>.
@@ -25,7 +47,7 @@
  fn selector_less_than_four_bytes() {
 -    ExtBuilder::default().build().execute_with(|| {
 -        assert_ok!(Assets::force_create(
--            Origin::root(),
+-            RuntimeOrigin::root(),
 -            0u128,
 -            Account::Alice.into(),
 -            true,
@@ -49,7 +71,7 @@
  fn no_selector_exists_but_length_is_right() {
 -    ExtBuilder::default().build().execute_with(|| {
 -        assert_ok!(Assets::force_create(
--            Origin::root(),
+-            RuntimeOrigin::root(),
 -            0u128,
 -            Account::Alice.into(),
 -            true,
@@ -128,14 +150,14 @@
 -        .build()
 -        .execute_with(|| {
 -            assert_ok!(Assets::force_create(
--                Origin::root(),
+-                RuntimeOrigin::root(),
 -                0u128,
 -                Account::Alice.into(),
 -                true,
 -                1
 -            ));
 -            assert_ok!(Assets::mint(
--                Origin::signed(Account::Alice),
+-                RuntimeOrigin::signed(Account::Alice),
 -                0u128,
 -                Account::Alice.into(),
 -                1000
@@ -182,14 +204,14 @@
 -        .build()
 -        .execute_with(|| {
 -            assert_ok!(Assets::force_create(
--                Origin::root(),
+-                RuntimeOrigin::root(),
 -                0u128,
 -                Account::Alice.into(),
 -                true,
 -                1
 -            ));
 -            assert_ok!(Assets::mint(
--                Origin::signed(Account::Alice),
+-                RuntimeOrigin::signed(Account::Alice),
 -                0u128,
 -                Account::Alice.into(),
 -                1000
@@ -240,7 +262,7 @@
 -        .build()
 -        .execute_with(|| {
 -            assert_ok!(Assets::force_create(
--                Origin::root(),
+-                RuntimeOrigin::root(),
 -                0u128,
 -                Account::Alice.into(),
 -                true,
@@ -286,14 +308,14 @@
 -        .build()
 -        .execute_with(|| {
 -            assert_ok!(Assets::force_create(
--                Origin::root(),
+-                RuntimeOrigin::root(),
 -                0u128,
 -                Account::Alice.into(),
 -                true,
 -                1
 -            ));
 -            assert_ok!(Assets::mint(
--                Origin::signed(Account::Alice),
+-                RuntimeOrigin::signed(Account::Alice),
 -                0u128,
 -                Account::Alice.into(),
 -                1000
@@ -308,7 +330,6 @@
 -                        .write(U256::from(500))
 -                        .build(),
 -                )
--                .expect_cost(31253756u64)
 -                .expect_log(LogsBuilder::new(Account::AssetId(0u128).into()).log3(
 -                    SELECTOR_LOG_APPROVAL,
 -                    Account::Alice,
@@ -356,14 +377,14 @@
 -        .build()
 -        .execute_with(|| {
 -            assert_ok!(Assets::force_create(
--                Origin::root(),
+-                RuntimeOrigin::root(),
 -                0u128,
 -                Account::Alice.into(),
 -                true,
 -                1
 -            ));
 -            assert_ok!(Assets::mint(
--                Origin::signed(Account::Alice),
+-                RuntimeOrigin::signed(Account::Alice),
 -                0u128,
 -                Account::Alice.into(),
 -                1000
@@ -378,7 +399,6 @@
 -                        .write(U256::MAX)
 -                        .build(),
 -                )
--                .expect_cost(31253756u64)
 -                .expect_log(LogsBuilder::new(Account::AssetId(0u128).into()).log3(
 -                    SELECTOR_LOG_APPROVAL,
 -                    Account::Alice,
@@ -452,14 +472,14 @@
 -        .build()
 -        .execute_with(|| {
 -            assert_ok!(Assets::force_create(
--                Origin::root(),
+-                RuntimeOrigin::root(),
 -                0u128,
 -                Account::Alice.into(),
 -                true,
 -                1
 -            ));
 -            assert_ok!(Assets::mint(
--                Origin::signed(Account::Alice),
+-                RuntimeOrigin::signed(Account::Alice),
 -                0u128,
 -                Account::Alice.into(),
 -                1000
@@ -534,7 +554,7 @@
 -        .build()
 -        .execute_with(|| {
 -            assert_ok!(Assets::force_create(
--                Origin::root(),
+-                RuntimeOrigin::root(),
 -                0u128,
 -                Account::Alice.into(),
 -                true,
@@ -582,14 +602,14 @@
 -        .build()
 -        .execute_with(|| {
 -            assert_ok!(Assets::force_create(
--                Origin::root(),
+-                RuntimeOrigin::root(),
 -                0u128,
 -                Account::Alice.into(),
 -                true,
 -                1
 -            ));
 -            assert_ok!(Assets::mint(
--                Origin::signed(Account::Alice),
+-                RuntimeOrigin::signed(Account::Alice),
 -                0u128,
 -                Account::Alice.into(),
 -                1000
@@ -604,7 +624,6 @@
 -                        .write(U256::from(400))
 -                        .build(),
 -                )
--                .expect_cost(44055756u64) // 1 weight => 1 gas in mock
 -                .expect_log(LogsBuilder::new(Account::AssetId(0u128).into()).log3(
 -                    SELECTOR_LOG_TRANSFER,
 -                    Account::Alice,
@@ -700,14 +719,14 @@
 -        .build()
 -        .execute_with(|| {
 -            assert_ok!(Assets::force_create(
--                Origin::root(),
+-                RuntimeOrigin::root(),
 -                0u128,
 -                Account::Alice.into(),
 -                true,
 -                1
 -            ));
 -            assert_ok!(Assets::mint(
--                Origin::signed(Account::Alice),
+-                RuntimeOrigin::signed(Account::Alice),
 -                0u128,
 -                Account::Alice.into(),
 -                1
@@ -766,14 +785,14 @@
 -        .build()
 -        .execute_with(|| {
 -            assert_ok!(Assets::force_create(
--                Origin::root(),
+-                RuntimeOrigin::root(),
 -                0u128,
 -                Account::Alice.into(),
 -                true,
 -                1
 -            ));
 -            assert_ok!(Assets::mint(
--                Origin::signed(Account::Alice),
+-                RuntimeOrigin::signed(Account::Alice),
 -                0u128,
 -                Account::Alice.into(),
 -                1000
@@ -811,7 +830,6 @@
 -                        .write(U256::from(400))
 -                        .build(),
 -                )
--                .expect_cost(55282756u64) // 1 weight => 1 gas in mock
 -                .expect_log(LogsBuilder::new(Account::AssetId(0u128).into()).log3(
 -                    SELECTOR_LOG_TRANSFER,
 -                    Account::Alice,
@@ -954,14 +972,14 @@
 -        .build()
 -        .execute_with(|| {
 -            assert_ok!(Assets::force_create(
--                Origin::root(),
+-                RuntimeOrigin::root(),
 -                0u128,
 -                Account::Alice.into(),
 -                true,
 -                1
 -            ));
 -            assert_ok!(Assets::mint(
--                Origin::signed(Account::Alice),
+-                RuntimeOrigin::signed(Account::Alice),
 -                0u128,
 -                Account::Alice.into(),
 -                1000
@@ -977,7 +995,6 @@
 -                        .write(U256::from(500))
 -                        .build(),
 -                )
--                .expect_cost(31253756u64)
 -                .expect_log(LogsBuilder::new(Account::AssetId(0u128).into()).log3(
 -                    SELECTOR_LOG_APPROVAL,
 -                    Account::Alice,
@@ -999,7 +1016,6 @@
 -                        .write(U256::from(300))
 -                        .build(),
 -                )
--                .expect_cost(62037756u64)
 -                .expect_log(LogsBuilder::new(Account::AssetId(0u128).into()).log3(
 -                    SELECTOR_LOG_APPROVAL,
 -                    Account::Alice,
@@ -1105,14 +1121,14 @@
 -        .build()
 -        .execute_with(|| {
 -            assert_ok!(Assets::force_create(
--                Origin::root(),
+-                RuntimeOrigin::root(),
 -                0u128,
 -                Account::Alice.into(),
 -                true,
 -                1
 -            ));
 -            assert_ok!(Assets::mint(
--                Origin::signed(Account::Alice),
+-                RuntimeOrigin::signed(Account::Alice),
 -                0u128,
 -                Account::Alice.into(),
 -                1000
@@ -1194,14 +1210,14 @@
 -        .build()
 -        .execute_with(|| {
 -            assert_ok!(Assets::force_create(
--                Origin::root(),
+-                RuntimeOrigin::root(),
 -                0u128,
 -                Account::Alice.into(),
 -                true,
 -                1
 -            ));
 -            assert_ok!(Assets::mint(
--                Origin::signed(Account::Alice),
+-                RuntimeOrigin::signed(Account::Alice),
 -                0u128,
 -                Account::Alice.into(),
 -                1000
@@ -1217,7 +1233,6 @@
 -                        .write(U256::from(400))
 -                        .build(),
 -                )
--                .expect_cost(44055756u64) // 1 weight => 1 gas in mock
 -                .expect_log(LogsBuilder::new(Account::AssetId(0u128).into()).log3(
 -                    SELECTOR_LOG_TRANSFER,
 -                    Account::Alice,
@@ -1314,14 +1329,14 @@
 -        .build()
 -        .execute_with(|| {
 -            assert_ok!(Assets::force_create(
--                Origin::root(),
+-                RuntimeOrigin::root(),
 -                0u128,
 -                Account::Alice.into(),
 -                true,
 -                1
 -            ));
 -            assert_ok!(Assets::force_set_metadata(
--                Origin::root(),
+-                RuntimeOrigin::root(),
 -                0u128,
 -                b"TestToken".to_vec(),
 -                b"Test".to_vec(),
@@ -1414,7 +1429,7 @@
 -    ExtBuilder::default().build().execute_with(|| {
 -        let expected_min_balance = 19;
 -        assert_ok!(Assets::force_create(
--            Origin::root(),
+-            RuntimeOrigin::root(),
 -            0u128,
 -            Account::Alice.into(),
 -            true,
@@ -1458,7 +1473,7 @@
 -    ExtBuilder::default().build().execute_with(|| {
 -        let asset_id = 0;
 -        assert_ok!(Assets::force_create(
--            Origin::root(),
+-            RuntimeOrigin::root(),
 -            asset_id,
 -            Account::Alice.into(),
 -            true,
@@ -1516,7 +1531,7 @@
 -    ExtBuilder::default().build().execute_with(|| {
 -        let asset_id = 0;
 -        assert_ok!(Assets::force_create(
--            Origin::root(),
+-            RuntimeOrigin::root(),
 -            asset_id,
 -            Account::Alice.into(),
 -            true,
@@ -1558,7 +1573,7 @@
 -    ExtBuilder::default().build().execute_with(|| {
 -        let asset_id = 0;
 -        assert_ok!(Assets::force_create(
--            Origin::root(),
+-            RuntimeOrigin::root(),
 -            asset_id,
 -            Account::Alice.into(),
 -            true,
@@ -1568,7 +1583,7 @@
 -        // Issue some initial assets for Bob
 -        let init_amount = 123;
 -        assert_ok!(Assets::mint(
--            Origin::signed(Account::Alice),
+-            RuntimeOrigin::signed(Account::Alice),
 -            asset_id,
 -            Account::Bob.into(),
 -            init_amount,
@@ -1633,14 +1648,14 @@
 -    ExtBuilder::default().build().execute_with(|| {
 -        let asset_id = 0;
 -        assert_ok!(Assets::force_create(
--            Origin::root(),
+-            RuntimeOrigin::root(),
 -            asset_id,
 -            Account::Alice.into(),
 -            true,
 -            1,
 -        ));
 -        assert_ok!(Assets::mint(
--            Origin::signed(Account::Alice),
+-            RuntimeOrigin::signed(Account::Alice),
 -            asset_id,
 -            Account::Bob.into(),
 -            1000000,

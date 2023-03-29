@@ -87,13 +87,13 @@ pub mod pallet {
     + pallet_timestamp::Config<Moment = Moment>
   {
     /// Because this pallet emits events, it depends on the runtime's definition of an event.
-    type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+    type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
     type StakeCurrency: FrameCurrency<Self::AccountId, Balance = Balance>;
 
     type MarkerCurrency: FrameCurrency<Self::AccountId, Balance = Balance>;
 
-    type OwnerOrigin: EnsureOrigin<Self::Origin>;
+    type OwnerOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
     /// For example: 10^12.
     #[pallet::constant]

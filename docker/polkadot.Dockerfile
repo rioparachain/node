@@ -30,10 +30,10 @@ COPY . .
 
 RUN nix-shell /shell.nix --run "./patches_cmds/subdir_apply_all.sh ."
 
-RUN nix-shell /shell.nix --run 'cargo build --release --features fast-runtime --features rio-testnet'
+RUN nix-shell /shell.nix --run 'cargo build --release --features fast-runtime
 
 # Make hardlink to use as tool, and also create combo archive.
-RUN mv target/release/parachain-rio .; rm -Rf target; rm -Rf submodules
+RUN mv target/release/parachain-rio .; rm -Rf target; rm -Rf subm
 RUN mkdir -p target/release; mv parachain-rio target/release
 RUN cd target/release; ln -f parachain-rio relaychain-rio
 

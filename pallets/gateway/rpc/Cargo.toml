@@ -10,8 +10,8 @@ jsonrpsee = { version = "0.13.0", features = ["server", "macros"] }
 hex = "0.4"
 scale-info = { version = "1.0", features = ["derive"], default-features = false }
 
-sp-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
-sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
-sp-blockchain = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
+sp-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.37", default-features = false }
+sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.37", default-features = false }
+sp-blockchain = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.37", default-features = false }
 rp-base = { path = "../../../primitives/base", default-features = false }
 rio-gateway-rpc-runtime-api = { path = "runtime-api" }

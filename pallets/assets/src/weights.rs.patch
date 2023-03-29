@@ -1,6 +1,16 @@
 --- pallets/assets/src/weights.rs.tmp
 +++ pallets/assets/src/weights.rs
-@@ -34,6 +34,14 @@
+@@ -25,7 +25,9 @@
+ #![allow(clippy::unnecessary_cast)]
+ 
+ use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
++//use frame_support::{traits::Get, weights::{constants::RocksDbWeight}};
+ use sp_std::marker::PhantomData;
++//type Weight = u64;
+ 
+ /// Weight functions needed for orml_tokens.
+ pub trait WeightInfo {
+@@ -34,33 +36,81 @@
  	fn transfer_keep_alive() -> Weight;
  	fn force_transfer() -> Weight;
  	fn set_balance() -> Weight;
@@ -15,48 +25,86 @@
  }
  
  /// Default weights.
-@@ -63,4 +71,44 @@
- 			.saturating_add(RocksDbWeight::get().reads(3 as Weight))
- 			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
- 	}
+ impl WeightInfo for () {
+-	fn transfer() -> Weight {
+-		Weight::from_ref_time(69_000_000)
++    fn transfer() -> Weight {
++        Weight::from_ref_time(69_000_000)
++            .saturating_add(RocksDbWeight::get().reads(5 as u64))
++            .saturating_add(RocksDbWeight::get().writes(4 as u64))
++    }
++    fn transfer_all() -> Weight {
++        Weight::from_ref_time(69_000_000)
++            .saturating_add(RocksDbWeight::get().reads(5 as u64))
++            .saturating_add(RocksDbWeight::get().writes(4 as u64))
++    }
++    fn transfer_keep_alive() -> Weight {
++        Weight::from_ref_time(38_000_000)
++            .saturating_add(RocksDbWeight::get().reads(3 as u64))
++            .saturating_add(RocksDbWeight::get().writes(3 as u64))
++    }
++    fn force_transfer() -> Weight {
++        Weight::from_ref_time(45_000_000)
++            .saturating_add(RocksDbWeight::get().reads(4 as u64))
++            .saturating_add(RocksDbWeight::get().writes(3 as u64))
++    }
++    fn set_balance() -> Weight {
++        Weight::from_ref_time(34_000_000)
++            .saturating_add(RocksDbWeight::get().reads(3 as u64))
++            .saturating_add(RocksDbWeight::get().writes(3 as u64))
++    }
 +	fn create() -> Weight {
-+		(69_000_000 as Weight)
-+			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
-+	}
++        Weight::from_ref_time(69_000_000)
+ 			.saturating_add(RocksDbWeight::get().reads(5 as u64))
+ 			.saturating_add(RocksDbWeight::get().writes(4 as u64))
+ 	}
+-	fn transfer_all() -> Weight {
+-		Weight::from_ref_time(69_000_000)
 +	fn update_asset_info() -> Weight {
-+		(69_000_000 as Weight)
-+			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
-+	}
++        Weight::from_ref_time(69_000_000)
+ 			.saturating_add(RocksDbWeight::get().reads(5 as u64))
+ 			.saturating_add(RocksDbWeight::get().writes(4 as u64))
+ 	}
+-	fn transfer_keep_alive() -> Weight {
+-		Weight::from_ref_time(38_000_000)
+-			.saturating_add(RocksDbWeight::get().reads(3 as u64))
+-			.saturating_add(RocksDbWeight::get().writes(3 as u64))
 +	fn update_restriction() -> Weight {
-+		(69_000_000 as Weight)
-+			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
++        Weight::from_ref_time(69_000_000)
++			.saturating_add(RocksDbWeight::get().reads(5 as u64))
++			.saturating_add(RocksDbWeight::get().writes(4 as u64))
 +	}
 +	fn offline_asset() -> Weight {
-+		(69_000_000 as Weight)
-+			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
-+	}
++        Weight::from_ref_time(69_000_000)
++			.saturating_add(RocksDbWeight::get().reads(5 as u64))
++			.saturating_add(RocksDbWeight::get().writes(4 as u64))
+ 	}
+-	fn force_transfer() -> Weight {
+-		Weight::from_ref_time(45_000_000)
+-			.saturating_add(RocksDbWeight::get().reads(4 as u64))
+-			.saturating_add(RocksDbWeight::get().writes(3 as u64))
 +	fn online_asset() -> Weight {
-+		(69_000_000 as Weight)
-+			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
-+	}
++        Weight::from_ref_time(69_000_000)
++			.saturating_add(RocksDbWeight::get().reads(5 as u64))
++			.saturating_add(RocksDbWeight::get().writes(4 as u64))
+ 	}
+-	fn set_balance() -> Weight {
+-		Weight::from_ref_time(34_000_000)
+-			.saturating_add(RocksDbWeight::get().reads(3 as u64))
+-			.saturating_add(RocksDbWeight::get().writes(3 as u64))
 +	fn cancel_approval() -> Weight {
-+		(69_000_000 as Weight)
-+			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
++        Weight::from_ref_time(69_000_000)
++			.saturating_add(RocksDbWeight::get().reads(5 as u64))
++			.saturating_add(RocksDbWeight::get().writes(4 as u64))
 +	}
 +	fn transfer_approved() -> Weight {
-+		(69_000_000 as Weight)
-+			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
++        Weight::from_ref_time(69_000_000)
++			.saturating_add(RocksDbWeight::get().reads(5 as u64))
++			.saturating_add(RocksDbWeight::get().writes(4 as u64))
 +	}
 +	fn approve_transfer() -> Weight {
-+		(69_000_000 as Weight)
-+			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
-+	}
++        Weight::from_ref_time(69_000_000)
++			.saturating_add(RocksDbWeight::get().reads(5 as u64))
++			.saturating_add(RocksDbWeight::get().writes(4 as u64))
+ 	}
  }

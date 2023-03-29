@@ -73,6 +73,35 @@ cumulus-primitives-utility = { git = "https://github.com/paritytech/cumulus.git"
 pallet-collator-selection = { git = "https://github.com/paritytech/cumulus.git", branch = "polkadot-v0.9.37", default-features = false }
 parachain-info = { git = "https://github.com/paritytech/cumulus.git", branch = "polkadot-v0.9.37", default-features = false }
 
+# Frontier
+fp-rpc = { path = "../frontier/primitives/rpc", default-features = false }
+fp-evm = { path = "../frontier/primitives/evm", default-features = false }
+fp-self-contained = { path = "../frontier/primitives/self-contained", default-features = false }
+pallet-base-fee = { path = "../frontier/frame/base-fee", default-features = false }
+pallet-dynamic-fee = { path = "../frontier/frame/dynamic-fee", default-features = false }
+pallet-ethereum = { path = "../frontier/frame/ethereum", default-features = false }
+pallet-evm = { path = "../frontier/frame/evm", default-features = false }
+pallet-evm-chain-id = { path = "../frontier/frame/evm-chain-id", default-features = false }
+pallet-evm-precompile-dispatch = { path = "../frontier/frame/evm/precompile/dispatch", default-features = false }
+pallet-evm-precompile-modexp = { path = "../frontier/frame/evm/precompile/modexp", default-features = false }
+pallet-evm-precompile-sha3fips = { path = "../frontier/frame/evm/precompile/sha3fips", default-features = false }
+pallet-evm-precompile-simple = { path = "../frontier/frame/evm/precompile/simple", default-features = false }
+pallet-hotfix-sufficients = { path = "../frontier/frame/hotfix-sufficients", default-features = false }
+pallet-evm-precompile-assets-erc20 = { path = "../precompiles/assets-erc20", default-features = false }
+
+# Orml
+orml-currencies = { path = "../subm/orml/currencies", default-features = false }
+orml-traits = { path = "../subm/orml/traits", default-features = false }
+rio-gateway-rpc-runtime-api = { path = "../pallets/gateway/rpc/runtime-api", default-features = false }
+
+# Rio
+rp-base = { path = "../primitives/base", default-features = false }
+rp-protocol = { path = "../primitives/protocol", default-features = false }
+rpallet-assets = { path = "../pallets/assets", default-features = false }
+rpallet-assets-ext = { path = "../pallets/assets-ext", default-features = false }
+rpallet-gateway = { path = "../pallets/gateway", default-features = false }
+rpallet-staking-pool = { path = "../pallets/staking-pool", default-features = false }
+
 [features]
 default = [
 	"std",
@@ -104,6 +133,7 @@ std = [
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",
 	"pallet-xcm/std",
+    "pallet-evm-chain-id/std",
 	"parachain-info/std",
 	"polkadot-parachain/std",
 	"polkadot-runtime-common/std",
@@ -121,6 +151,27 @@ std = [
 	"xcm-builder/std",
 	"xcm-executor/std",
 	"xcm/std",
+	"orml-traits/std",
+	"orml-currencies/std",
+	"rpallet-assets/std",
+	"rpallet-assets-ext/std",
+	"rpallet-staking-pool/std",
+	"rpallet-gateway/std",
+	"rio-gateway-rpc-runtime-api/std",
+	"rp-base/std",
+	"rp-protocol/std",
+	"fp-rpc/std",
+	"fp-self-contained/std",
+	"pallet-base-fee/std",
+	"pallet-dynamic-fee/std",
+	"pallet-ethereum/std",
+	"pallet-evm/std",
+	"pallet-evm-precompile-modexp/std",
+	"pallet-evm-precompile-sha3fips/std",
+	"pallet-evm-precompile-simple/std",
+	"pallet-evm-precompile-dispatch/std",
+	"pallet-hotfix-sufficients/std",
+	"pallet-evm-precompile-assets-erc20/std",
 ]
 
 runtime-benchmarks = [

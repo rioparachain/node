@@ -5,7 +5,7 @@ authors = ["Rio Team<dev@riodefi.com>"]
 edition = "2018"
 
 [dependencies]
-frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.24", default-features = false }
+frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.37", default-features = false }
 rp-base = { path = "../base", default-features = false }
 
 [features]
