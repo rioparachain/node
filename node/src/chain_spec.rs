@@ -5,6 +5,12 @@ use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
+use parachain_template_runtime::Text;
+use parachain_template_runtime::{ EVMChainIdConfig, AssetInfo, Balance, RioAssetsConfig,
+EthereumConfig, RioGatewayConfig, EVMConfig };
+use codec::alloc::collections::BTreeMap;
+
+use rp_base::CurrencyId;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec =
@@ -177,6 +183,12 @@ pub fn local_testnet_config() -> ChainSpec {
 	)
 }
 
+macro_rules! bvec {
+	($a:expr) => {
+		Text::try_from($a.to_vec()).unwrap()
+	};
+}
+
 fn testnet_genesis(
 	invulnerables: Vec<(AccountId, AuraId)>,
 	endowed_accounts: Vec<AccountId>,
@@ -217,5 +229,131 @@ fn testnet_genesis(
 		polkadot_xcm: parachain_template_runtime::PolkadotXcmConfig {
 			safe_xcm_version: Some(SAFE_XCM_VERSION),
 		},
+        evm: EVMConfig { accounts: BTreeMap::new() },
+        evm_chain_id: EVMChainIdConfig { chain_id: 42 },
+        ethereum: EthereumConfig {},
+        dynamic_fee: Default::default(),
+        base_fee: Default::default(),
+        rio_gateway: RioGatewayConfig {
+            max_deposit_index: 10000,
+            initial_supported_currencies: vec![
+                (CurrencyId::from(rp_protocol::RFUEL), 10 * 1_000_000_000_000_000_000), // 10 RFUEL
+                (CurrencyId::from(rp_protocol::OM), 10 * 1_000_000_000_000_000_000),
+                (CurrencyId::from(rp_protocol::RBTC), 5 * 100_000),  // 0.005 BTC
+                (CurrencyId::from(rp_protocol::RETH), 5 * 1_000_000_000_000_000_000),  // 0.05 ETH
+                (CurrencyId::from(rp_protocol::RUSDT), 5 * 1_000_000), // 5 USDT
+            ],
+            deposit_addr_info: vec![],
+/*
+            deposit_addr_info: vec![(
+                CurrencyId::from(rp_protocol::RBTC),
+                rpallet_gateway::DepositAddrInfo::Bip32(
+                    rpallet_gateway::Bip32 {
+                        x_pub:
+			bvec!(b"upub5DRdTWfz3NeZwd25HeQ2xMNjnYtYRfZzC6fEDjmPH2AwnxjvTrySjVApEiDufv68gqsZ7TCUcNfb1P4KLjNvZCTsPCaVb68SLedQwPKMLKR"),
+                        path: bvec!(b"m/49'/1'/0")
+                    }
+                )
+            )],
+*/
+            admins: vec![(
+                get_account_id_from_seed::<sr25519::Public>("Alice"),
+                rpallet_gateway::Auths::all(),
+            )],
+        },
+        rio_assets: RioAssetsConfig { init: assets_init(), balances: vec![] },
 	}
+}
+
+fn assets_init(
+) -> Vec<(CurrencyId, AssetInfo, rpallet_assets::Restrictions, Vec<(AccountId, Balance)>)> {
+	use rp_protocol as rp;
+	use rpallet_assets::{Chain, Restriction, Restrictions};
+	vec![
+		// asset id defined in protocol
+		(
+			CurrencyId::from(rp::LOCKED_RFUEL),
+			AssetInfo {
+				symbol: bvec!(b"LOCKED_RFUEL"),
+				name: bvec!(b"Locked Rio Fuel Token"),
+				decimals: 12,
+				desc: bvec!(b"Locked Rio Fuel Token"),
+				chain: Chain::Rio,
+			},
+			Restriction::Transferable.into(),
+			vec![],
+		),
+		(
+			CurrencyId::from(rp::OM),
+			AssetInfo {
+				symbol: bvec!(b"OM"),
+				name: bvec!(b"MANTRA DAO Token"),
+				decimals: 12,
+				desc: bvec!(b"MANTRA DAO Token"),
+				chain: Chain::Rio,
+			},
+			Restrictions::none(),
+			vec![],
+		),
+		(
+			CurrencyId::from(rp::RBTC),
+			AssetInfo {
+				symbol: bvec!(b"RBTC"),
+				name: bvec!(b"RBTC token"),
+				decimals: 8,
+				desc: bvec!(b"Bitcoin in RioChain"),
+				chain: Chain::Bitcoin,
+			},
+			Restrictions::none(),
+			vec![],
+		),
+		(
+			CurrencyId::from(rp::RLTC),
+			AssetInfo {
+				symbol: bvec!(b"RLTC"),
+				name: bvec!(b"RLTC token"),
+				decimals: 8,
+				desc: bvec!(b"Litecoin in RioChain"),
+				chain: Chain::Litecoin,
+			},
+			Restrictions::none(),
+			vec![],
+		),
+		(
+			CurrencyId::from(rp::RETH),
+			AssetInfo {
+				symbol: bvec!(b"RETH"),
+				name: bvec!(b"RETH token"),
+				decimals: 18,
+				desc: bvec!(b"Ether in RioChain"),
+				chain: Chain::Ethereum,
+			},
+			Restrictions::none(),
+			vec![],
+		),
+		(
+			CurrencyId::from(rp::RUSDT),
+			AssetInfo {
+				symbol: bvec!(b"RUSDT"),
+				name: bvec!(b"RUSDT token"),
+				decimals: 6,
+				desc: bvec!(b"USDT in RioChain"),
+				chain: Chain::Ethereum,
+			},
+			Restrictions::none(),
+			vec![],
+		),
+		(
+			CurrencyId::from(rp::STAKING_POOL_MARKER),
+			AssetInfo {
+				symbol: bvec!(b"SPM"),
+				name: bvec!(b"Staking pool marker"),
+				decimals: 12,
+				desc: bvec!(b"Staking pool marker"),
+				chain: Chain::Rio,
+			},
+			Restrictions::none(),
+			vec![],
+		),
+	]
 }

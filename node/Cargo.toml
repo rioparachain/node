@@ -83,6 +83,13 @@ fp-storage = { path = "../frontier/primitives/storage" }
 pallet-ethereum = { path = "../frontier/frame/ethereum" }
 pallet-evm = { path = "../frontier/frame/evm" }
 
+rpallet-assets = { path = "../pallets/assets", default-features = false }
+rpallet-gateway = { path = "../pallets/gateway", default-features = false }
+rp-base = { path = "../primitives/base", default-features = false }
+rp-protocol = { path = "../primitives/protocol", default-features = false }
+rp-support = { path = "../primitives/support", default-features = false }
+
+
 [build-dependencies]
 substrate-build-script-utils = { git = "https://github.com/paritytech/substrate", "branch" = "polkadot-v0.9.37" }
 

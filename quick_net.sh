@@ -7,6 +7,7 @@ cp $parabin $polkabin
 tmp=/tmp/mytmp
 tmp2=/tmp/mytmp2
 mkdir -p /tmp/mytmp
+mkdir -p /tmp/mytmp2
 rm -Rf /tmp/mytmp/*
 
 $polkabin build-spec --chain polkadot-local --disable-default-bootnode > $tmp/polkadot_plain_orig.json
@@ -41,11 +42,11 @@ EOF
 
 $polkabin build-spec --chain $tmp/polkadot_plain.json --raw --disable-default-bootnode > $tmp/polkadot_raw.json
 
-#relay01nk=`$polkabin key generate-node-key --bin --file $tmp2/relay01.nk 2>&1`
-#relay02nk=`$polkabin key generate-node-key --bin --file $tmp2/relay02.nk 2>&1`
-#relay03nk=`$polkabin key generate-node-key --bin --file $tmp2/relay03.nk 2>&1`
-#col01nk=`$polkabin key generate-node-key --bin --file $tmp2/col01.nk 2>&1`
-#col02nk=`$polkabin key generate-node-key --bin --file $tmp2/col02.nk 2>&1`
+relay01nk=`$polkabin key generate-node-key --bin --file $tmp2/relay01.nk 2>&1`
+relay02nk=`$polkabin key generate-node-key --bin --file $tmp2/relay02.nk 2>&1`
+relay03nk=`$polkabin key generate-node-key --bin --file $tmp2/relay03.nk 2>&1`
+col01nk=`$polkabin key generate-node-key --bin --file $tmp2/col01.nk 2>&1`
+col02nk=`$polkabin key generate-node-key --bin --file $tmp2/col02.nk 2>&1`
 
 relay01nk=`$polkabin key inspect-node-key --bin --file $tmp2/relay01.nk 2>&1`
 relay02nk=`$polkabin key inspect-node-key --bin --file $tmp2/relay02.nk 2>&1`
@@ -126,7 +127,7 @@ $parabin --collator --unsafe-ws-external --unsafe-rpc-external --no-prometheus -
          #--execution wasm \
 
 # > $tmp/col01.log 2>&1 &
- 
+
 wait
 
 
